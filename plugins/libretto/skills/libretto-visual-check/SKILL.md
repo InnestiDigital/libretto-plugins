@@ -21,7 +21,7 @@ The `claude-in-chrome` tools (`mcp__claude-in-chrome__*`: `tabs_context_mcp`, `t
 
 ## The addresses
 
-Take the ids from `site_context`: the site's `id`, `programId` and `domain`, and the page list with each page's `id`, `slug` and `parentId`. A page's path is its slug under its parents' slugs (`/servizi`, `/lavori/casa-tortona`); the home page (slug `home`) is `/`. Pages named `region-*`, `navbar`, `footer`, `card` and `template-*` are building blocks, not addresses.
+Use the absolute URLs `site_context` returns (admin, editor, draft preview, public site) whenever it has them, and give the user only those. When it has none, the patterns below need the address of the user's Libretto: take it from a tab the user already has open on the admin (`tabs_context_mcp`), or ask; never assume `librettocms.com`. Take the ids from `site_context`: the site's `id`, `programId` and `domain`, and the page list with each page's `id`, `slug` and `parentId`. A page's path is its slug under its parents' slugs (`/servizi`, `/lavori/casa-tortona`); the home page (slug `home`) is `/`. Pages named `region-*`, `navbar`, `footer`, `card` and `template-*` are building blocks, not addresses.
 
 | What | Address | Shows |
 |---|---|---|
@@ -59,5 +59,5 @@ For each thing the user asked: matches / does not match, with what you saw ("the
 ## Without Chrome
 
 1. Read the result back: the outline and the node (`tree/<pageId>?node=<nodeId>`), the token (`design-system?tokens=<group>`) (see [preview and verify](../../reference/recipes/preview-and-verify.md)).
-2. `render_preview` `{ pageId, device: "desktop", mode: "screenshot", crop: { nodeId: "<the section you changed>" } }` (or `area: "viewport"` for the first screen, nothing for the whole page), then `device: "mobile"`, and `device: "tablet"` with the site's second `locale` (and a `theme` the change touched): the server's own screenshots of the draft. An unknown locale or theme answers `locale_unsupported` or `theme_unknown`; an older Libretto has no tablet. If the server answers that it cannot capture (no screenshot browser, `render_timeout`), use `mode: "document"` to read what will render.
+2. `render_preview` `{ pageId, device: "desktop", mode: "screenshot", crop: { nodeId: "<the section you changed>" } }` (or `area: "viewport"` for the first screen, nothing for the whole page), then `device: "mobile"`, and `device: "tablet"` with the site's second `locale` (and a `theme` the change touched): the server's own screenshots of the draft. An unknown locale or theme answers `locale_unsupported` or `theme_unknown`; an older Libretto has no tablet. If the server cannot capture (an error, no screenshot browser, `render_timeout`), do not fall back to `mode: "document"` to check your work: it answers the whole render document, about 250 KB. Read the nodes you changed (`tree/<pageId>?node=<id>&depth=0`), tell the user you could not take a screenshot, and open a ticket if the capture keeps failing.
 3. Tell the user you could not see the page in a browser and ask them to look at it in the admin editor: give them the editor address above.

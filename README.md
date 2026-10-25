@@ -23,7 +23,7 @@ Il plugin contiene:
 
 - [Claude Code](https://code.claude.com/docs) installato.
 - Un account su Libretto con accesso al sito, come editor (anche proprietario dello spazio di lavoro) o amministratore.
-- Un token del sito. Nell'admin apri il menu utente in alto a destra, scegli **Agenti e accessi MCP**, dai un nome al token (per esempio `Claude Code, portatile`), scegli il sito e la durata (30 o 90 giorni) e copia il token: viene mostrato una volta sola.
+- Un token del sito. Nell'admin, nella barra laterale, apri **Persone e accessi** › **Agenti e accessi MCP**, dai un nome al token (per esempio `Claude Code, portatile`), scegli il sito e la durata (30 o 90 giorni) e copia il token: viene mostrato una volta sola.
 
 Il token agisce per te, su quel sito, con il tuo ruolo (mai più alto di quello che hai oggi).
 
@@ -39,7 +39,7 @@ La guida passo passo, dall'invito al primo prompt, è [Connettere Claude a Libre
    ```
    /plugin install libretto@libretti
    ```
-3. Claude Code chiede le due impostazioni del plugin. In **Libretto site token** incolla il token: viene salvato nel portachiavi del sistema, mai in un file. Lascia **Libretto address** com'è (`https://librettocms.com`), a meno che tu non usi un'installazione di prova.
+3. Claude Code chiede le due impostazioni del plugin. In **Token del sito Libretto** incolla il token: viene salvato nel portachiavi del sistema, mai in un file. Lascia **Indirizzo di Libretto** com'è (`https://librettocms.com`), a meno che tu non usi un'installazione di prova.
    Se non te le chiede, o per cambiarle dopo: `/plugin`, scegli Libretto, poi **Configure**.
 4. Riavvia Claude Code e scrivi `/mcp`: `libretto` e `libretto-files` devono risultare connessi.
 
@@ -124,7 +124,7 @@ The plugin holds:
 
 - [Claude Code](https://code.claude.com/docs) installed.
 - An account on Libretto with access to the site, as an editor (a workspace owner too) or an admin.
-- A site token. In the admin, open the user menu at the top right, choose **Agenti e accessi MCP**, name the token (for example `Claude Code, laptop`), pick the site and how long it lasts (30 or 90 days), and copy the token: it is shown once.
+- A site token. In the admin sidebar, open **Persone e accessi** (People & access) › **Agenti e accessi MCP**, name the token (for example `Claude Code, laptop`), pick the site and how long it lasts (30 or 90 days), and copy the token: it is shown once.
 
 The token acts for you, on that site, with your role (never above the role you have now).
 
@@ -140,7 +140,7 @@ The step-by-step guide, from the invite to the first prompt, is [Connect Claude 
    ```
    /plugin install libretto@libretti
    ```
-3. Claude Code asks for the plugin's two settings. In **Libretto site token**, paste the token: it is stored in the system keychain, never in a file. Leave **Libretto address** as it is (`https://librettocms.com`) unless you use a test install.
+3. Claude Code asks for the plugin's two settings. In **Token del sito Libretto / Libretto site token**, paste the token: it is stored in the system keychain, never in a file. Leave **Indirizzo di Libretto / Libretto address** as it is (`https://librettocms.com`) unless you use a test install.
    If it does not ask, or to change them later: `/plugin`, choose Libretto, then **Configure**.
 4. Restart Claude Code and type `/mcp`: `libretto` and `libretto-files` show as connected.
 

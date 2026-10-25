@@ -15,7 +15,7 @@ A whole design update (a brief, a reference, a Figma file) has its own step-by-s
 
 Read only what the change needs, through resource queries (each is a registry read you could also run through `dry_run_ops`):
 
-- `splash://site/<siteId>/design-system` (`designSystem.read`): the index, with the revision, sets, themes, every component's variant keys and each token group's size. Add a group's paths and values with `?tokens=color.palette,space`; `?components=true` adds each component's sizes, states and parts (the segments of a cell key). Never ask for `css=true` unless you need the stylesheet.
+- `splash://site/<siteId>/design-system` (`designSystem.read`): the index, with the revision, sets, themes, every component's variant keys and each token group's size. Add the paths and values of the narrowest groups the change touches, one or two at a time: `?tokens=color.text`, `?tokens=color.palette.brand`, `?tokens=space.section-y`. Broad groups are large: `?tokens=color,space,font,type` answered 32 KB on Archiplan; `?components=true` adds each component's sizes, states and parts (the segments of a cell key). Never ask for `css=true` unless you need the stylesheet.
 - `splash://site/<siteId>/component/<key>?variant=primary&state=hover&own=true` (`designSystem.readComponent`): only the cells you mean. `own=true` keeps the cells actually set; filter by `size`, `part`, `breakpoint`, `property` too. Answers page by `limit` (100) with `total` and `nextCursor`: a large component has thousands of cells, so filter first.
 - `designSystem.lint` and `designSystem.diff` (read-only, through `dry_run_ops`) answer a summary: `findingCount`, `findingsBySeverity`, `findingsByReason`, the `worst` 20 findings (errors first, then the contrast pairs furthest below what they need), `overrideCount` and the first 100 `overrides`. `full: true` gives the whole answer, stylesheet included: avoid it.
 - `access.read` answers your own level in each design-system area on this site: read it before a design update to know what you may change.
@@ -27,7 +27,7 @@ A design-system write (in `dry_run_ops` or `apply_ops`) answers its change, not 
 - `dryRun` is `true` in a dry run; `changed` says whether anything would move; `revision` is the design-system revision it reaches.
 - `changes`: the overrides it adds, changes or removes. Check they are exactly what you meant (no extra token, the right set and theme).
 - `errors`: must be empty before you apply (an AA refusal comes back as a `422` instead).
-- `warnings`: at most 20, about what you changed (an AAA pair of the cell you touched, a lint note on your token). Tell the user about them.
+- `warnings`: at most 20, about what you changed (an AAA pair of the cell you touched, a lint note on your token). Tell the user about them in plain words; the counts are for you.
 - `warningCount` and `warningsByReason`: the whole system's warnings by reason (`below-aaa`, `decorative`, `asset-missing`...). Compare the counts before and after: a jump means your change hurt pairs elsewhere.
 
 ## How it is built
@@ -67,7 +67,7 @@ A refusal names the area: `403 {"message": "Design system semantic-colours: edit
 
 Every design-system change is checked in every theme, on the end state of the batch. A text or icon colour that falls below WCAG AA on its background (4.5:1 for text, 3:1 for icons and other non-text parts) refuses the whole batch with `422` and lists each failing pair, such as `theme light components/accordion.json ...: {color.text.accent} on {color.bg.section} is 1.10:1, below 4.5:1`. AAA shortfalls come back as `warning` findings and do not block.
 
-When the gate refuses: pick another palette step, or change the palette step and the role on it together in one `designSystem.setTokens` (the gate reads only the end state). Tell the user which pairs failed. `brand.setup` accepts `acknowledgeContrast: true`; set it only when the user explicitly says to save anyway.
+When the gate refuses: pick another palette step, or change the palette step and the role on it together in one `designSystem.setTokens` (the gate reads only the end state). Tell the user which pairs failed in plain words ("il testo d'accento sullo sfondo delle sezioni ha un contrasto 3,9:1, serve almeno 4,5:1"), not token paths. `brand.setup` accepts `acknowledgeContrast: true`; set it only when the user explicitly says to save anyway.
 
 ## Never
 

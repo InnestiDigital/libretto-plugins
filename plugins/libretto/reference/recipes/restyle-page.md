@@ -39,7 +39,7 @@ Rules: tokens for every colour, size and space (`{space.4}`, not `16px`); a sect
 1. `dry_run_ops`, read `findings` for the nodes you touched (`design.detached`, `a11y.heading-order`, `structure.empty-section`, `design.contrast-aa`) and errors.
 2. `apply_ops` with a fresh `requestId`.
 3. Read the outline again; look at it ([preview and visual check](preview-and-verify.md)).
-4. Report each `requestId`. Undo with `history.undo`.
+4. Tell the user what changed, in their words; keep each `requestId` to undo with `history.undo`.
 
 ## Restructure with reuse
 

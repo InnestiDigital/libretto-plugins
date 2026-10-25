@@ -7,9 +7,10 @@ Operations: [design-system](../operations/design-system.md), [media-and-fonts](.
 ## 1. Take stock
 
 1. `site_context`, then `read_resources` on `splash://site/<siteId>/design-system`: a small index (sets, themes, each component's variant keys, each token group's size). Then read only the groups the brief touches, one query each:
-   - colours: `design-system?tokens=color.palette,color` (palette steps, then the roles);
-   - type: `design-system?tokens=font.family,type`;
-   - space and shape: `design-system?tokens=space,radius,shadow`.
+   - colours: `design-system?tokens=color.palette.brand` (the steps you will change), then `?tokens=color.text` or `?tokens=color.bg` for the roles on them;
+   - type: `design-system?tokens=font.family`, then `?tokens=type.role`;
+   - space and shape: `design-system?tokens=space.section-y` (or the one group the brief names), `?tokens=radius`.
+   The index gives each group's size: read the small groups, one or two per call. Asking for `color,space,font,type` at once answered 32 KB on Archiplan.
    Never read the whole design system (`css=true` adds a 240 KB stylesheet you do not need).
 2. `designSystem.diff` through `dry_run_ops`: a summary of what the site already changed from its blueprint (`overrideCount`, the first 100 `overrides`). `access.read`: your level in each design-system area.
 3. Write the user a short mapping from the brief to tokens before changing anything: which palette steps, which roles, which type styles, which component variants. Ask about anything the brief leaves open.
@@ -63,4 +64,4 @@ Operations: [design-system](../operations/design-system.md), [media-and-fonts](.
 
 - `designSystem.lint` (through `dry_run_ops`): errors must be zero; AAA warnings are information.
 - `render_preview` `{ "pageId", "device": "desktop" | "tablet" | "mobile", "mode": "screenshot" }` on the home page and two other key pages (`"area": "viewport"` for the first screen, `"crop": { "nodeId" }` for one section), then once more with `"theme": "dark"` (or another theme the update touched) and with the site's second locale at tablet width (`"locale": "en-US", "device": "tablet"`). Against a reference, `compare_reference` `{ pageId, device, referenceMediaId }` or `{ pageId, device, referenceUrl }` for a public https image.
-- Report each applied `requestId` with what it changed. Nothing is public until the user asks to publish (`libretto-publish`).
+- Tell the user what each change did, in their words; keep each `requestId` for undo. Nothing is public until the user asks to publish (`libretto-publish`).

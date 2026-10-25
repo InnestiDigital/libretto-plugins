@@ -20,6 +20,9 @@ Dry run first, then again without `dryRun`. The answer's `answer` holds the medi
 
 ## 2. Describe it
 
+Look at the picture once (`Read` the file) to write its alt text; do not read it again.
+
+
 `media.update` `{ mediaId, alt: { "it": "...", "en": "..." }, caption?, credit? }`. Alt text says what the picture shows for someone who cannot see it, in each site language; ask the user when the content is not obvious. A purely decorative image gets an empty alt only when the user agrees.
 
 ## 3. Place it

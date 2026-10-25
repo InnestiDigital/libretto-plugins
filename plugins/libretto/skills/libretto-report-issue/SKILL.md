@@ -23,6 +23,9 @@ Ask the user before filing when the ticket would quote their content or their cl
 
 ## What a good ticket holds
 
+Write the `title`, `body`, `steps`, `expected` and `actual` in the user's language (Italian for an Italian studio): the platform owner and the user both read them in the admin. Operation names, error codes and ids stay as they are, inside backticks.
+
+
 - `title`: one line, the operation and the symptom: "designSystem.setComponentCell refuses hover background on ds.card".
 - `body` (Markdown): what you were doing and for whom (the job, not the conversation), what blocked you, what you did instead.
 - `steps`: the minimal sequence that reproduces it, with operation names and inputs (ids are fine, secrets never).
@@ -43,7 +46,7 @@ Call the `report_issue` tool of the `libretto` server:
   "actual": "Only font.importGoogle and font.recordUpload exist" }
 ```
 
-The answer's `ticket` carries its `id` and `status` (`open`): give the user the id and one line on what you reported. A `429 ticket_rate_limited` means 20 tickets in an hour: stop and summarise the rest for the user. `422 ticket_page_unknown`: drop `pageId`.
+The answer's `ticket` carries its `id` and `status` (`open`): tell the user in one sentence, in their words, what you reported ("Ho segnalato al team di Libretto che …"); give the ticket id only if they ask. A `429 ticket_rate_limited` means 20 tickets in an hour: stop and summarise the rest for the user. `422 ticket_page_unknown`: drop `pageId`.
 
 The same is the operation `ticket.create` (alone in an `apply_ops` batch, `baseRevisions` `{}`, no dry run); `ticket.list` `{ status? }` reads your own tickets and their `closeNote` answers.
 

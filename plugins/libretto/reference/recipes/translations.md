@@ -27,11 +27,11 @@ A text is either a plain string (the same in every language) or a **locale map**
 
 ## Translate a page
 
-1. Read the outline (`outline/<pageId>`): text nodes show as `primitive:text`, `primitive:richtext`, buttons and links. Read their props section by section with `tree/<pageId>?node=<section id>&depth=4` (a section's subtree, not the whole page), and list every text prop with its node id, in the default language.
+1. Read the outline (`outline/<pageId>`): text nodes show as `primitive:text`, `primitive:richtext`, buttons and links. Read those nodes at `depth=0`, up to 16 URIs per `read_resources` call (`tree/<pageId>?node=<id>&depth=0`), and list every text prop with its node id, in the default language. Never a section's subtree at depth 3 or 4, and never `render_preview` in document mode (about 250 KB) to read texts.
 2. Translate them; show the user the list (node, original, translation) for a page of any length before writing.
 3. One `tree.commit` with a `set_props` per node; change only the language asked, keep the others.
 4. Dry run: `translation.missing` findings list texts that still lack the language. Apply, then translate the page's title and SEO fields with `page.update`, and the menu labels.
-5. Look at the page in that language at tablet and phone width: `render_preview` `{ pageId, mode: "screenshot", device: "tablet", locale: "en-US" }`, or in Chrome the address with the language prefix ([preview and visual check](preview-and-verify.md)).
+5. Look at the page in that language at tablet and phone width: `render_preview` `{ pageId, mode: "screenshot", device: "tablet", locale: "en-US", crop: { nodeId } }` for the sections you translated, or in Chrome the address with the language prefix ([preview and visual check](preview-and-verify.md)).
 
 ## Rules
 

@@ -8,18 +8,23 @@
   },
   "homepage": "https://librettocms.com",
   "license": "MIT",
-  "keywords": ["libretto", "cms", "mcp", "design-system"],
+  "keywords": [
+    "libretto",
+    "cms",
+    "mcp",
+    "design-system"
+  ],
   "userConfig": {
     "libretto_token": {
       "type": "string",
-      "title": "Libretto site token",
-      "description": "The token made in the Libretto admin (user menu > Agenti e accessi MCP). Stored in the system keychain, never in settings.json. The LIBRETTO_MCP_TOKEN environment variable overrides it.",
+      "title": "Token del sito Libretto / Libretto site token",
+      "description": "Il token creato nell'admin di Libretto: barra laterale, Persone e accessi > Agenti e accessi MCP. Resta nel portachiavi del sistema, mai in un file; LIBRETTO_MCP_TOKEN, se impostata, vale di più. / The token made in the Libretto admin: sidebar, Persone e accessi (People & access) > Agenti e accessi MCP. Kept in the system keychain, never in a file; LIBRETTO_MCP_TOKEN, when set, wins.",
       "sensitive": true
     },
     "libretto_url": {
       "type": "string",
-      "title": "Libretto address",
-      "description": "Where your Libretto runs, without a trailing slash. Change it only for a test install. The LIBRETTO_URL environment variable overrides it.",
+      "title": "Indirizzo di Libretto / Libretto address",
+      "description": "Dove gira il tuo Libretto, senza barra finale. Cambialo solo per un'installazione di prova; LIBRETTO_URL, se impostata, vale di più. / Where your Libretto runs, without a trailing slash. Change it only for a test install; LIBRETTO_URL, when set, wins.",
       "default": "https://librettocms.com"
     }
   }

@@ -13,7 +13,7 @@ Publish only when the human says so in this conversation, for this change ("sì,
 
 ## Before asking for the go
 
-1. List what this session changed: each applied `requestId`, the page and what it did.
+1. List what this session changed, in the user's words: the page and what it did (keep the `requestId`s to yourself).
 2. Call `site_context` and check page `status`: a page in `draft` stays off the live site even after publishing; say so if the user edited one (`page.update` `{ pageId, patch: { "status": "published" } }` marks it for the publish, with the go). Collection items publish only when their status is `published` (`item.setStatus`).
 3. Run `designSystem.lint` through `dry_run_ops` if the design system changed: `findingsBySeverity.error` must be 0; report the `worst` findings that concern this change.
 4. Read `splash://site/<siteId>/pending-changes` (`publication.pending`): what changed since the live version, by area (pages, design system, settings, menus, collections, fonts...), with the date of the latest edit and, for pages and collections, the changed rows. A publish ships **all** of it, other people's changes included: show the user anything that is not yours, and any changed page still in draft status (it stays out).
@@ -32,7 +32,7 @@ A batch with `publication.publish` **alone**, the `baseRevisions` of a fresh `si
 }
 ```
 
-Send it to `apply_ops` (not `dry_run_ops`, which refuses publication). If the user wants it done in the admin instead, `libretto-admin-browser` has the steps; the rule of the go is the same. The answer holds `version` (`id`, `status`, `isActive`). Report the version id and the note. A `409 stale_revision` means the draft moved: read `site_context` again, tell the user what else changed, and ask again.
+Send it to `apply_ops` (not `dry_run_ops`, which refuses publication). If the user wants it done in the admin instead, `libretto-admin-browser` has the steps; the rule of the go is the same. The answer holds `version` (`id`, `status`, `isActive`). Tell the user it is online, with the time and the note; keep the version id for yourself (it is how you roll back). A `409 stale_revision` means the draft moved: read `site_context` again, tell the user what else changed, and ask again.
 
 ## Roll back
 

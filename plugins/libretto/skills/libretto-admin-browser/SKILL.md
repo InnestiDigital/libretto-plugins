@@ -26,7 +26,7 @@ The MCP server is the way to change a Libretto site: checked, audited, undoable.
 
 ## Addresses
 
-Take the ids from `site_context` (the site's `id` and `programId`) or from the admin URL the user is on; never guess them.
+Use the absolute URLs `site_context` returns whenever it has them. Otherwise take the address and the ids from the admin tab the user is signed in on (`tabs_context_mcp`) or from `site_context` (the site's `id` and `programId`); never guess them and never assume `librettocms.com`.
 
 - Site admin: `<LIBRETTO_URL>/admin/p/<programId>/s/<siteId>/…`
 - Typography: `…/design-system/typography`
