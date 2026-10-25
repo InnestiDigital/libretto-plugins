@@ -10,7 +10,7 @@
 
 Set the site's brand from three colours, a type pairing, a type ratio and base size, a spacing unit and a corner style: the server derives every token write of the brand (the brand, accent and neutral palette ramps, the light and dark colour roles as aliases of palette steps, the font sizes and families, the main type presets, the space steps and the radii) and lands them as one designSystem.setTokens change, gated once for AA contrast on the end state, so one undo restores the lot. A brand with pairs below AA is refused unless the input carries `acknowledgeContrast: true`, the designer's explicit "save anyway", which the stored batch keeps; then the failing pairs come back as error findings. The admin's Brand setup screen runs this same operation.
 
-- permission `designSystem.operation` (admin, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
+- permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
@@ -153,7 +153,7 @@ brand.createTemplate with brand validation and transactional history.
 | `height` | integer ≥16 ≤4096 | yes |
 | `layoutId` | string (min 1) |  |
 
-Output: { id: string (min 1), name: string, pageId: string (min 1), snapshot: { canvas: { width: integer ≥16 ≤4096, height: integer ≥16 ≤4096 }, frame: string (min 1), frameOverrides: Record<string, any> \| null, tree: { format: "splash.tree", v: 2, revision: integer ≥0, root: { meta?: …, styles?: …, variant?: …, theme?: …, vis… (full schema: discover_operations)
+Output: { id: string (min 1), name: string, pageId: string (min 1), snapshot: { canvas: { width: integer ≥16 ≤4096, height: integer ≥16 ≤4096 }, frame: string (min 1), frameOverrides: Record<string, any> \| null, tree: { format: "splash.tree", v: 3, revision: integer ≥0, root: { meta?: …, styles?: …, variant?: …, theme?: …, vis… (full schema: discover_operations)
 
 Example input:
 
@@ -176,7 +176,7 @@ brand.updateTemplate with brand validation and transactional history.
 | `patch.customerSettings` | Record<string, string (min 1)[] (≤128)> \| null |  |
 | `patch.expectedDraftRevision` | string |  |
 
-Output: { id: string (min 1), name: string, pageId: string (min 1), snapshot: { canvas: { width: integer ≥16 ≤4096, height: integer ≥16 ≤4096 }, frame: string (min 1), frameOverrides: Record<string, any> \| null, tree: { format: "splash.tree", v: 2, revision: integer ≥0, root: { meta?: …, styles?: …, variant?: …, theme?: …, vis… (full schema: discover_operations)
+Output: { id: string (min 1), name: string, pageId: string (min 1), snapshot: { canvas: { width: integer ≥16 ≤4096, height: integer ≥16 ≤4096 }, frame: string (min 1), frameOverrides: Record<string, any> \| null, tree: { format: "splash.tree", v: 3, revision: integer ≥0, root: { meta?: …, styles?: …, variant?: …, theme?: …, vis… (full schema: discover_operations)
 
 Example input:
 
@@ -212,7 +212,7 @@ brand.rebuildTemplate with brand validation and transactional history.
 |---|---|---|
 | `templateId` | string (min 1) | yes |
 
-Output: { id: string (min 1), name: string, pageId: string (min 1), snapshot: { canvas: { width: integer ≥16 ≤4096, height: integer ≥16 ≤4096 }, frame: string (min 1), frameOverrides: Record<string, any> \| null, tree: { format: "splash.tree", v: 2, revision: integer ≥0, root: { meta?: …, styles?: …, variant?: …, theme?: …, vis… (full schema: discover_operations)
+Output: { id: string (min 1), name: string, pageId: string (min 1), snapshot: { canvas: { width: integer ≥16 ≤4096, height: integer ≥16 ≤4096 }, frame: string (min 1), frameOverrides: Record<string, any> \| null, tree: { format: "splash.tree", v: 3, revision: integer ≥0, root: { meta?: …, styles?: …, variant?: …, theme?: …, vis… (full schema: discover_operations)
 
 Example input:
 

@@ -19,7 +19,7 @@
     {
       "name": "discover_operations",
       "group": "core",
-      "description": "Lazily discover operations by name or by a word of their description: schemas, one worked example input each, permissions, written documents and confirmation requirements. Use the schemas and examples to build apply_ops batches.",
+      "description": "Lazily discover operations by name or by a word of their description: schemas, one worked example input each, permissions, written documents and confirmation requirements. Use the schemas and examples to build apply_ops batches. Only the operations this token may run are listed (its role, its workspace owner's grant and its design-system levels count); one listed may still refuse a particular input, such as a token in an area you only view: access.read answers your levels.",
       "annotations": {
         "readOnlyHint": true
       },
@@ -643,7 +643,7 @@
     {
       "path": "tree/<pageId>",
       "template": true,
-      "description": "The splash.tree/2 document of one page."
+      "description": "The splash.tree/3 document of one page."
     },
     {
       "path": "outline/<pageId>",

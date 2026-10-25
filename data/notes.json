@@ -111,7 +111,7 @@
       "Restores one page of the draft from a version; publish afterwards (with the human's go) to serve it."
     ],
     "page.create": [
-      "Needs `site.admin`: an editor or workspace owner token gets 403, and the admin refuses them too. Ask the user to have a platform admin create the page, then fill it here."
+      "Needs `site.structure`: a platform admin, or the workspace owner on the sites of their workspace; another editor gets 403 and asks the owner. The admin follows the same rule."
     ],
     "motion.applyRecipe": [
       "Read the recipes and their knobs first (`motion.listRecipes` or the `motion` resource). After applying, the answer's `motion.*` findings name scene problems (hidden-at-rest, overlap...): fix them before finishing."

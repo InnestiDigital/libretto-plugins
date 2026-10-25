@@ -37,10 +37,10 @@ Never put a token, a password, or a whole tree or design-system dump in a ticket
 Call the `report_issue` tool of the `libretto` server:
 
 ```json
-{ "title": "page.create refused for a workspace owner", "category": "refusal", "severity": "high",
-  "body": "Daniele (workspace owner of Superficial Studio) asked for a new page *Progetti*. `page.create` needs `site.admin`, so his token gets 403; the admin refuses him too. He cannot add a page without a platform admin.",
-  "steps": "1. apply_ops with page.create { slug: 'progetti', title: 'Progetti' }", "expected": "The workspace owner can add a page to his own site",
-  "actual": "403 operation_forbidden: needs site.admin", "requestId": "<uuid of the failing batch>" }
+{ "title": "No way to upload a font file over MCP", "category": "missing-capability", "severity": "high",
+  "body": "Daniele (workspace owner of Superficial Studio) is moving Archiplan to the studio's licensed face *Sul Sans*. `font.importGoogle` covers only Google Fonts and `font.recordUpload` needs bytes staged by the admin, so the type step of his design update stops here.",
+  "steps": "1. discover_operations { query: 'font' }\n2. no operation takes font bytes", "expected": "An operation that uploads a font file, like media.upload does for images",
+  "actual": "Only font.importGoogle and font.recordUpload exist" }
 ```
 
 The answer's `ticket` carries its `id` and `status` (`open`): give the user the id and one line on what you reported. A `429 ticket_rate_limited` means 20 tickets in an hour: stop and summarise the rest for the user. `422 ticket_page_unknown`: drop `pageId`.

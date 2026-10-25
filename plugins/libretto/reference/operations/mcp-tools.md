@@ -10,7 +10,7 @@ Hints: readOnlyHint: true.
 
 ## `discover_operations`
 
-Lazily discover operations by name or by a word of their description: schemas, one worked example input each, permissions, written documents and confirmation requirements. Use the schemas and examples to build apply_ops batches.
+Lazily discover operations by name or by a word of their description: schemas, one worked example input each, permissions, written documents and confirmation requirements. Use the schemas and examples to build apply_ops batches. Only the operations this token may run are listed (its role, its workspace owner's grant and its design-system levels count); one listed may still refuse a particular input, such as a token in an area you only view: access.read answers your levels.
 
 Hints: readOnlyHint: true.
 
@@ -157,7 +157,7 @@ Each URI is `splash://site/<siteId>/<path>`; `site_context.resources` lists the 
 | `presets` | The presets this site can insert (preset.list). |
 | `motion` | The scene recipes with their knobs, and the diagnosis codes. |
 | `regions` | The header and footer trees, whose node ids a scene names with `region`. |
-| `tree/<pageId>` | The splash.tree/2 document of one page. |
+| `tree/<pageId>` | The splash.tree/3 document of one page. |
 | `outline/<pageId>` | The compact outline of one page's tree. |
 | `motion/<pageId>` | One page's scenes and their findings. |
 | `component/<key>` | The cells of one design-system component, such as `button`. |

@@ -13,7 +13,7 @@ site.read with validated settings and revisioned undo.
 - permission `site.read` (admin, editor); class `read`; writes nothing.
 - Input: `{}`.
 
-Output: { site: { id: string, slug: string, name: string, theme: string, blueprintId: string, schemaVersion?: string, programId?: string, parentSiteId?: string \| null, mountPath?: string \| null, domain?: string, createdAt: string, updatedAt: string } }
+Output: { site: { id: string, slug: string, name: string, theme: string, blueprintId: string, programId?: string, parentSiteId?: string \| null, mountPath?: string \| null, domain?: string, createdAt: string, updatedAt: string } }
 
 Example input:
 
@@ -34,7 +34,7 @@ site.update with validated settings and revisioned undo.
 | `parentSiteId` | string (min 1, max 36) \| null |  |
 | `mountPath` | string (max 255) \| null |  |
 
-Output: { site: { id: string, slug: string, name: string, theme: string, blueprintId: string, schemaVersion?: string, programId?: string, parentSiteId?: string \| null, mountPath?: string \| null, domain?: string, createdAt: string, updatedAt: string } }
+Output: { site: { id: string, slug: string, name: string, theme: string, blueprintId: string, programId?: string, parentSiteId?: string \| null, mountPath?: string \| null, domain?: string, createdAt: string, updatedAt: string } }
 
 Example input:
 
@@ -44,9 +44,9 @@ Example input:
 
 ## access.read
 
-access.read with validated settings and revisioned undo.
+Read your own design-system levels on this site: the level of each area (palette, components, variants, themes, ...) and the role overrides that set them. A designSystem.* operation is refused unless your level in its area allows it.
 
-- permission `site.admin` (admin); class `read`; writes nothing.
+- permission `site.read` (admin, editor); class `read`; writes nothing.
 - Input: `{}`.
 
 Output: { role: "admin" \| "editor" \| "viewer" \| "client" \| "content", levels: Record<string, "none" \| "view" \| "edit" \| "pick" \| "switch-default" \| "export" \| "own-areas">, overrides: ({ role: "editor" \| "client", area: "palette" \| "semantic-colours" \| "font-families" \| "type-presets" \| "space" \| "radius" \| "borders" \| "shadow… (full schema: discover_operations)
@@ -111,7 +111,7 @@ Example input:
 
 breakpoints.update with validated settings and revisioned undo.
 
-- permission `breakpoints.edit` (admin, editor (as the access settings allow)); class `transaction`; writes `settings`; undoable with `history.undo`.
+- permission `breakpoints.edit` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `settings`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
@@ -130,7 +130,7 @@ Example input:
 
 layout.update with validated settings and revisioned undo.
 
-- permission `site.admin` (admin); class `transaction`; writes `settings`; undoable with `history.undo`.
+- permission `site.structure` (admin, workspace owner); class `transaction`; writes `settings`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
@@ -247,7 +247,7 @@ Create a new site in the program of this token's site, seeded from a blueprint (
 | `brand.radius` | "sharp" \| "soft" \| "round" \| "pill" | yes |
 | `defaultLocale` | locale |  |
 
-Output: { site: { id: string, slug: string, name: string, theme: string, blueprintId: string, schemaVersion?: string, programId?: string, parentSiteId?: string \| null, mountPath?: string \| null, domain?: string, createdAt: string, updatedAt: string } }
+Output: { site: { id: string, slug: string, name: string, theme: string, blueprintId: string, programId?: string, parentSiteId?: string \| null, mountPath?: string \| null, domain?: string, createdAt: string, updatedAt: string } }
 
 Example input:
 
@@ -355,7 +355,7 @@ maintenance.migrate in one transaction; recovery uses an explicit backup restore
 - permission `site.admin` (admin); class `transaction`; writes `pages`, `site`; needs `"confirmed": ["destructive"]`; **not undoable**: alone in its batch.
 - Input: `{}`.
 
-Output: { manual: Record<string, string \| number \| boolean \| null \| (string \| number \| boolean \| null \| …[] \| Record<string, …>)[] \| Record<string, string \| number \| boolean \| null \| …[] \| Record<string, …>>>, auto: Record<string, string \| number \| boolean \| null \| (… \| … \| … \| … \| … \| …)[] \| Record<string, … \| … \| … \| … \| … \|… (full schema: discover_operations)
+Output: { auto: Record<string, string \| number \| boolean \| null \| (… \| … \| … \| … \| … \| …)[] \| Record<string, … \| … \| … \| … \| … \| …>> \| null }
 
 Example input:
 

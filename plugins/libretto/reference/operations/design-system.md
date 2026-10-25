@@ -10,7 +10,7 @@ Tokens in sets, themes that stack sets, component variants and their cells, mixi
 
 Promote authored component overrides to a reusable variant and reattach the node.
 
-- permission `designSystem.promote` (admin, editor (as the access settings allow)); class `transaction`; writes `designSystem`, `tree:{pageId}`; undoable with `history.undo`.
+- permission `designSystem.promote` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`, `tree:{pageId}`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
@@ -31,7 +31,7 @@ Example input:
 
 Design-system setToken, using the same validation and access gates as the editor.
 
-- permission `designSystem.operation` (admin, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
+- permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
@@ -56,7 +56,7 @@ Example input:
 
 Design-system setTokens, using the same validation and access gates as the editor.
 
-- permission `designSystem.operation` (admin, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
+- permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
@@ -76,7 +76,7 @@ Example input:
 
 Design-system setComponentCell, using the same validation and access gates as the editor.
 
-- permission `designSystem.operation` (admin, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
+- permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
@@ -96,7 +96,7 @@ Example input:
 
 Design-system createVariant, using the same validation and access gates as the editor.
 
-- permission `designSystem.operation` (admin, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
+- permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
@@ -118,7 +118,7 @@ Example input:
 
 Design-system createTheme, using the same validation and access gates as the editor.
 
-- permission `designSystem.operation` (admin, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
+- permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
@@ -143,7 +143,7 @@ Example input:
 
 Design-system activateSet, using the same validation and access gates as the editor.
 
-- permission `designSystem.operation` (admin, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
+- permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
@@ -163,7 +163,7 @@ Example input:
 
 Design-system setScheme, using the same validation and access gates as the editor.
 
-- permission `designSystem.operation` (admin, editor (as the access settings allow)); class `transaction`; writes `tree:{pageId}`; undoable with `history.undo`.
+- permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `tree:{pageId}`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
@@ -183,7 +183,7 @@ Example input:
 
 Design-system resetToBlueprint, using the same validation and access gates as the editor.
 
-- permission `designSystem.operation` (admin, editor (as the access settings allow)); class `transaction`; writes `designSystem`; needs `"confirmed": ["destructive"]`; undoable with `history.undo`.
+- permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; needs `"confirmed": ["destructive"]`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
@@ -204,7 +204,7 @@ Example input:
 
 Design-system importTokens, using the same validation and access gates as the editor.
 
-- permission `designSystem.operation` (admin, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
+- permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
@@ -225,7 +225,7 @@ Example input:
 
 Design-system diff, using the same validation and access gates as the editor.
 
-- permission `designSystem.operation` (admin, editor (as the access settings allow)); class `read`; writes nothing.
+- permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `read`; writes nothing.
 
 | Input | Type | Required |
 |---|---|---|
@@ -245,7 +245,7 @@ Example input:
 
 Design-system lint, using the same validation and access gates as the editor.
 
-- permission `designSystem.operation` (admin, editor (as the access settings allow)); class `read`; writes nothing.
+- permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `read`; writes nothing.
 
 | Input | Type | Required |
 |---|---|---|
@@ -265,7 +265,7 @@ Example input:
 
 Design-system createSet, using the same validation and access gates as the editor.
 
-- permission `designSystem.operation` (admin, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
+- permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
@@ -286,7 +286,7 @@ Example input:
 
 Design-system updateTheme, using the same validation and access gates as the editor.
 
-- permission `designSystem.operation` (admin, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
+- permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
@@ -313,7 +313,7 @@ Example input:
 
 Design-system updateVariant, using the same validation and access gates as the editor.
 
-- permission `designSystem.operation` (admin, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
+- permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
@@ -335,7 +335,7 @@ Example input:
 
 Design-system deleteVariant, using the same validation and access gates as the editor.
 
-- permission `designSystem.operation` (admin, editor (as the access settings allow)); class `transaction`; writes `designSystem`; needs `"confirmed": ["destructive"]`; undoable with `history.undo`.
+- permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; needs `"confirmed": ["destructive"]`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
@@ -357,7 +357,7 @@ Example input:
 
 Design-system setMixin, using the same validation and access gates as the editor.
 
-- permission `designSystem.operation` (admin, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
+- permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
@@ -378,7 +378,7 @@ Example input:
 
 Design-system deleteMixin, using the same validation and access gates as the editor.
 
-- permission `designSystem.operation` (admin, editor (as the access settings allow)); class `transaction`; writes `designSystem`; needs `"confirmed": ["destructive"]`; undoable with `history.undo`.
+- permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; needs `"confirmed": ["destructive"]`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|

@@ -276,6 +276,7 @@ async function main() {
   if (args[0] === '--live') await compareLive()
   else {
     const problems = coverageProblems()
+    if (problems.length) fail(problems.join('\n'))
     const files = renderAll()
     if (args[0] === '--check') {
       for (const [file, text] of files) {
@@ -288,7 +289,6 @@ async function main() {
       if (problems.length) fail(problems.join('\n'))
       console.log(`reference up to date: ${operations.length} operations in ${files.size - 2} domains${pending.size ? `; pending (not in data/registry.json yet): ${[...pending].join(', ')}` : ''}`)
     } else {
-      if (problems.length) fail(problems.join('\n'))
       mkdirSync(outDir, { recursive: true })
       for (const [file, text] of files) writeFileSync(join(outDir, file), text)
       console.log(`wrote ${files.size} files for ${operations.length} operations`)

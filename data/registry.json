@@ -17102,7 +17102,7 @@
               },
               "v": {
                 "type": "number",
-                "const": 2
+                "const": 3
               },
               "revision": {
                 "type": "integer",
@@ -18480,7 +18480,7 @@
           },
           "v": {
             "type": "number",
-            "const": 2
+            "const": 3
           },
           "revision": {
             "type": "integer",
@@ -28313,7 +28313,7 @@
                   },
                   "v": {
                     "type": "number",
-                    "const": 2
+                    "const": 3
                   },
                   "revision": {
                     "type": "integer",
@@ -30195,7 +30195,7 @@
                   },
                   "v": {
                     "type": "number",
-                    "const": 2
+                    "const": 3
                   },
                   "revision": {
                     "type": "integer",
@@ -31618,7 +31618,7 @@
       "writes": [
         "pages"
       ],
-      "permission": "site.admin",
+      "permission": "site.structure",
       "mutationClass": "transaction",
       "confirm": "none",
       "conflictPolicy": "revision",
@@ -32080,7 +32080,7 @@
                   },
                   "v": {
                     "type": "number",
-                    "const": 2
+                    "const": 3
                   },
                   "revision": {
                     "type": "integer",
@@ -33549,7 +33549,7 @@
       "writes": [
         "pages"
       ],
-      "permission": "site.admin",
+      "permission": "site.structure",
       "mutationClass": "transaction",
       "confirm": "destructive",
       "conflictPolicy": "revision",
@@ -33755,7 +33755,7 @@
                   },
                   "v": {
                     "type": "number",
-                    "const": 2
+                    "const": 3
                   },
                   "revision": {
                     "type": "integer",
@@ -35178,7 +35178,7 @@
       "writes": [
         "pages"
       ],
-      "permission": "site.admin",
+      "permission": "site.structure",
       "mutationClass": "transaction",
       "confirm": "none",
       "conflictPolicy": "revision",
@@ -35398,7 +35398,7 @@
                   },
                   "v": {
                     "type": "number",
-                    "const": 2
+                    "const": 3
                   },
                   "revision": {
                     "type": "integer",
@@ -40763,9 +40763,6 @@
               "blueprintId": {
                 "type": "string"
               },
-              "schemaVersion": {
-                "type": "string"
-              },
               "programId": {
                 "type": "string"
               },
@@ -40908,9 +40905,6 @@
               "blueprintId": {
                 "type": "string"
               },
-              "schemaVersion": {
-                "type": "string"
-              },
               "programId": {
                 "type": "string"
               },
@@ -40975,7 +40969,7 @@
     },
     {
       "name": "access.read",
-      "description": "access.read with validated settings and revisioned undo.",
+      "description": "Read your own design-system levels on this site: the level of each area (palette, components, variants, themes, ...) and the role overrides that set them. A designSystem.* operation is refused unless your level in its area allows it.",
       "example": {},
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -41119,7 +41113,7 @@
         "access"
       ],
       "writes": [],
-      "permission": "site.admin",
+      "permission": "site.read",
       "mutationClass": "read",
       "confirm": "none",
       "conflictPolicy": "none",
@@ -43164,7 +43158,7 @@
       "writes": [
         "settings"
       ],
-      "permission": "site.admin",
+      "permission": "site.structure",
       "mutationClass": "transaction",
       "confirm": "none",
       "conflictPolicy": "revision",
@@ -44015,9 +44009,6 @@
                 "type": "string"
               },
               "blueprintId": {
-                "type": "string"
-              },
-              "schemaVersion": {
                 "type": "string"
               },
               "programId": {
@@ -61319,7 +61310,7 @@
                             },
                             "v": {
                               "type": "number",
-                              "const": 2
+                              "const": 3
                             },
                             "revision": {
                               "type": "integer",
@@ -63270,7 +63261,7 @@
                       },
                       "v": {
                         "type": "number",
-                        "const": 2
+                        "const": 3
                       },
                       "revision": {
                         "type": "integer",
@@ -64845,7 +64836,7 @@
                       },
                       "v": {
                         "type": "number",
-                        "const": 2
+                        "const": 3
                       },
                       "revision": {
                         "type": "integer",
@@ -66410,7 +66401,7 @@
                       },
                       "v": {
                         "type": "number",
-                        "const": 2
+                        "const": 3
                       },
                       "revision": {
                         "type": "integer",
@@ -68996,15 +68987,6 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
-          "manual": {
-            "type": "object",
-            "propertyNames": {
-              "type": "string"
-            },
-            "additionalProperties": {
-              "$ref": "#/$defs/__schema0"
-            }
-          },
           "auto": {
             "anyOf": [
               {
@@ -69013,7 +68995,7 @@
                   "type": "string"
                 },
                 "additionalProperties": {
-                  "$ref": "#/$defs/__schema1"
+                  "$ref": "#/$defs/__schema0"
                 }
               },
               {
@@ -69023,7 +69005,6 @@
           }
         },
         "required": [
-          "manual",
           "auto"
         ],
         "additionalProperties": false,
@@ -69055,37 +69036,6 @@
                 },
                 "additionalProperties": {
                   "$ref": "#/$defs/__schema0"
-                }
-              }
-            ]
-          },
-          "__schema1": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              },
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              },
-              {
-                "type": "array",
-                "items": {
-                  "$ref": "#/$defs/__schema1"
-                }
-              },
-              {
-                "type": "object",
-                "propertyNames": {
-                  "type": "string"
-                },
-                "additionalProperties": {
-                  "$ref": "#/$defs/__schema1"
                 }
               }
             ]

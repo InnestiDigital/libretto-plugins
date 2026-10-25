@@ -31,7 +31,7 @@ Read a site region and its editable page identity.
 |---|---|---|
 | `region` | "header" \| "footer" \| "above" \| "below" | yes |
 
-Output: { region: "header" \| "footer" \| "above" \| "below", pageId: string (min 1), tree: { format: "splash.tree", v: 2, revision: integer ≥0, root: { meta?: { canvas?: boolean, attributes?: Record<string, …>, reveal?: … \| …, showOn?: "list" \| "item" }, styles?: { mixins: …[], sheet: Record<string, …> }, variant?: string[], the… (full schema: discover_operations)
+Output: { region: "header" \| "footer" \| "above" \| "below", pageId: string (min 1), tree: { format: "splash.tree", v: 3, revision: integer ≥0, root: { meta?: { canvas?: boolean, attributes?: Record<string, …>, reveal?: … \| …, showOn?: "list" \| "item" }, styles?: { mixins: …[], sheet: Record<string, …> }, variant?: string[], the… (full schema: discover_operations)
 
 Example input:
 
@@ -49,7 +49,7 @@ Read a draft page tree and its revision.
 |---|---|---|
 | `pageId` | string (min 1) | yes |
 
-Output: { format: "splash.tree", v: 2, revision: integer ≥0, root: { meta?: { canvas?: boolean, attributes?: Record<string, string>, reveal?: { effect: …, distance?: …, mode?: …, once: …, threshold: …, durationMs?: …, staggerChildren: …, stagger?: … } \| { effect: …, distance?: …, mode: …, start: …, length: …, easing: …, fromOp… (full schema: discover_operations)
+Output: { format: "splash.tree", v: 3, revision: integer ≥0, root: { meta?: { canvas?: boolean, attributes?: Record<string, string>, reveal?: { effect: …, distance?: …, mode?: …, once: …, threshold: …, durationMs?: …, staggerChildren: …, stagger?: … } \| { effect: …, distance?: …, mode: …, start: …, length: …, easing: …, fromOp… (full schema: discover_operations)
 
 Example input:
 
@@ -131,7 +131,7 @@ Example input:
 
 Create a page with an empty tree. `status` defaults to draft; a draft page stays out of the site publish, so pass `status: "published"` for a page the next publication.publish should serve. Fill the tree with tree.commit in the same batch: read the new root id with tree.read through a $ref to this operation's page.id. A section's anchor is the node field `anchor` in that tree, not a page field, `meta.anchor` or `props.anchor`. A `pageType: "dynamic"` page names a collection in `collectionKey` and is the detail page of its items: it answers `/<slug>/<item slug>` in each locale, and its tree binds the item. Page validation and ownership checks apply.
 
-- permission `site.admin` (admin); class `transaction`; writes `pages`; undoable with `history.undo`.
+- permission `site.structure` (admin, workspace owner); class `transaction`; writes `pages`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
@@ -167,7 +167,7 @@ Example input:
 {"slug":"studio","title":{"en-US":"Studio"},"status":"published"}
 ```
 
-> Needs `site.admin`: an editor or workspace owner token gets 403, and the admin refuses them too. Ask the user to have a platform admin create the page, then fill it here.
+> Needs `site.structure`: a platform admin, or the workspace owner on the sites of their workspace; another editor gets 403 and asks the owner. The admin follows the same rule.
 
 ## page.update
 
@@ -192,7 +192,7 @@ Example input:
 
 Delete a page and its tree. Page validation and ownership checks apply.
 
-- permission `site.admin` (admin); class `transaction`; writes `pages`; needs `"confirmed": ["destructive"]`; undoable with `history.undo`.
+- permission `site.structure` (admin, workspace owner); class `transaction`; writes `pages`; needs `"confirmed": ["destructive"]`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
@@ -210,7 +210,7 @@ Example input:
 
 Fork a theme template into an editable site page row. Page validation and ownership checks apply.
 
-- permission `site.admin` (admin); class `transaction`; writes `pages`; undoable with `history.undo`.
+- permission `site.structure` (admin, workspace owner); class `transaction`; writes `pages`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|

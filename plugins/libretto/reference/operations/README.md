@@ -31,7 +31,7 @@
 
 ## Permissions
 
-A token acts with the lower of the role it was made with and its maker's current role. Only editors and platform admins can make tokens. A workspace owner is an editor who owns the workspace: on its sites it also gets content.publish and versions.activate. Design-system classes are also gated by the site's design-system access settings.
+A token acts with the lower of the role it was made with and its maker's current role. Only editors and platform admins can make tokens. A workspace owner is an editor who owns the workspace: on its sites it also gets content.publish, versions.activate and site.structure, and the designer column of the design-system access settings (every area at edit). Other editors get the client column, as the site's access settings allow.
 
 | Class | Means | Token roles that hold it |
 |---|---|---|
@@ -40,12 +40,13 @@ A token acts with the lower of the role it was made with and its maker's current
 | `content.edit` | edit content | admin, editor |
 | `content.publish` | publish | admin, editor, workspace owner |
 | `versions.activate` | put an earlier version live | admin, workspace owner |
+| `site.structure` | create and delete pages, edit layouts | admin, workspace owner |
 | `site.admin` | administer the site | admin |
 | `members.manage` | manage members | admin, editor |
 | `history.operation` | undo and read history | admin, editor |
-| `designSystem.operation` | design system | admin, editor (as the access settings allow) |
-| `designSystem.promote` | promote overrides to a variant | admin, editor (as the access settings allow) |
-| `breakpoints.edit` | breakpoints | admin, editor (as the access settings allow) |
+| `designSystem.operation` | design system | admin, workspace owner, editor (as the access settings allow) |
+| `designSystem.promote` | promote overrides to a variant | admin, workspace owner, editor (as the access settings allow) |
+| `breakpoints.edit` | breakpoints | admin, workspace owner, editor (as the access settings allow) |
 | `brand.generate` | render brand images | admin |
 
 ## Errors
