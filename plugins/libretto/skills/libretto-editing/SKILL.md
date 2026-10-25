@@ -5,9 +5,9 @@ description: Edit a Libretto site through the libretto MCP server - texts, style
 
 # Editing a Libretto site
 
-You work on one site: the one the token in `LIBRETTO_MCP_TOKEN` was made for. Every write goes through the same operation registry the admin uses, so it is validated, audited and undoable. Your changes land in the **draft**; nothing is public until someone publishes (see the `libretto-publish` skill).
+You work on one site: the one the token was made for (the plugin's **Libretto site token** setting, or `LIBRETTO_MCP_TOKEN`, which wins). Every write goes through the same operation registry the admin uses, so it is validated, audited and undoable. Your changes land in the **draft**; nothing is public until someone publishes (see the `libretto-publish` skill).
 
-Tools of the `libretto` MCP server: `site_context`, `discover_operations`, `read_resources`, `dry_run_ops`, `apply_ops`, `render_preview`, `compare_reference`, `report_issue` (and `job_next_step` / `job_report_step` when you were handed an assistant job id). The plugin's local `libretto-files` server adds `upload_media_file`. If the tools are missing, the server is not connected: tell the user to run `/mcp`, and to set the token with `/plugin` (Libretto > Configure) or `LIBRETTO_MCP_TOKEN`.
+Tools of the `libretto` MCP server: `site_context`, `discover_operations`, `read_resources`, `dry_run_ops`, `apply_ops`, `render_preview`, `compare_reference`, `report_issue` (and `job_next_step` / `job_report_step` when you were handed an assistant job id). The plugin's local `libretto-files` server adds `upload_media_file`. If the tools are missing, the server is not connected: tell the user to run `/mcp`, and to set the token with `/plugin configure libretto@libretti` (or in `LIBRETTO_MCP_TOKEN`), then restart Claude Code.
 
 ## Jobs and where their steps are
 
@@ -68,7 +68,7 @@ Every operation, its input, permission and typical errors: [operations reference
 - `409 stale_revision`: someone (or the admin) changed the document. Call `site_context` again, re-read the node, rebuild the batch.
 - `422`: the input or a gate refused it (for example the contrast gate). The `detail` says what and where; fix the cause, do not work around it.
 - `403`: the token's role may not run that operation. Tell the user; do not try another route. If the role should allow it, open a ticket.
-- `401`: the token is expired, revoked or wrong. The user makes a new one in the admin (Agenti e accessi MCP) and sets it with `/plugin` (Libretto > Configure).
+- `401`: the token is expired, revoked or wrong. The user makes a new one in the admin (Agenti e accessi MCP) and sets it with `/plugin configure libretto@libretti`, then restarts Claude Code.
 
 All codes with their fixes: [operations reference](../../reference/operations/README.md#errors).
 

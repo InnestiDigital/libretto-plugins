@@ -51,7 +51,7 @@ const TOOLS = [
 function endpoint() {
   const base = (process.env.LIBRETTO_URL || 'https://librettocms.com').replace(/\/+$/, '')
   const token = process.env.LIBRETTO_MCP_TOKEN
-  if (!token) throw new LibrettoError('No Libretto token: set it with /plugin (libretto, Libretto site token) or in LIBRETTO_MCP_TOKEN, then restart Claude Code.')
+  if (!token) throw new LibrettoError('No Libretto token: set it with /plugin configure libretto@libretti (Libretto site token) or in LIBRETTO_MCP_TOKEN, then restart Claude Code.')
   return { url: `${base}/api/mcp`, token }
 }
 
