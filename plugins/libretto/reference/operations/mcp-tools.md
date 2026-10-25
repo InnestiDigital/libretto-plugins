@@ -16,7 +16,7 @@ Hints: readOnlyHint: true.
 
 ## `read_resources`
 
-Read a bounded set of Splash resource URIs from this site (at most 16 per call), each the full `splash://site/<siteId>/<path>` with this site's id (`splash://site/<siteId>/pages`, never `splash://site/pages`). The paths are `context`, `pages`, `catalog`, `design-system` (the design system's index; `?tokens=<group>,<group>` for token values), `presets`, `motion` (scene recipes and diagnosis codes), `regions` (header and footer trees), `versions` (published versions), `pending-changes` (what the next publish ships), `tree/<pageId>` (a page's tree, or one node with `?node=<id>&depth=<n>`), `outline/<pageId>` (the compact tree), `motion/<pageId>` (a page's scenes and findings), `component/<key>` (the cells of a design-system component such as `button`, `?variant=&state=&own=true` to filter), `catalog/<type>` (one node type, such as `catalog/ds.button`), `preset/<presetId>` (one preset's tree, `?kind=<kind>`) and `versions/<versionId>` (a version's pages); site_context.resources lists the ones this site has. A path may end with a query, such as `component/button?variant=primary&state=hover&own=true`, `design-system?tokens=color.palette` or `tree/<pageId>?node=<nodeId>&depth=1`: each resource that takes one runs the registry read it names, with the same parameters. No network URLs are fetched.
+Read a bounded set of Splash resource URIs from this site (at most 16 per call), each the full `splash://site/<siteId>/<path>` with this site's id (`splash://site/<siteId>/pages`, never `splash://site/pages`). The paths are `context`, `pages`, `catalog`, `design-system` (the design system's index; `?tokens=<group>,<group>` for token values), `presets`, `motion` (scene recipes and diagnosis codes), `tickets` (your reported problems), `regions` (header and footer trees), `versions` (published versions), `pending-changes` (what the next publish ships), `tree/<pageId>` (a page's tree, or one node with `?node=<id>&depth=<n>`), `outline/<pageId>` (the compact tree), `motion/<pageId>` (a page's scenes and findings), `component/<key>` (the cells of a design-system component such as `button`, `?variant=&state=&own=true` to filter), `catalog/<type>` (one node type, such as `catalog/ds.button`), `preset/<presetId>` (one preset's tree, `?kind=<kind>`) and `versions/<versionId>` (a version's pages); site_context.resources lists the ones this site has. A path may end with a query, such as `component/button?variant=primary&state=hover&own=true`, `design-system?tokens=color.palette` or `tree/<pageId>?node=<nodeId>&depth=1`: each resource that takes one runs the registry read it names, with the same parameters. No network URLs are fetched.
 
 Hints: readOnlyHint: true.
 
@@ -145,6 +145,23 @@ Hints: readOnlyHint: true.
 }
 ```
 
+## `report_issue`
+
+Report a problem to the platform owner when Splash stops you or the person you work for: a bug, a missing capability, a refusal that looks wrong (category "refusal"), a docs gap (category "docs"), or anything else. Give a one-line title and a Markdown body (what you were doing, for whom, what blocked you); add steps, expected and actual (paste the error code and message), the requestId of the failing batch and the pageId when you have them. severity "blocking" means the person cannot go on. It is ticket.create in one call, without a batch: it changes nothing on the site. The answer is the ticket; read your tickets and the owner's close notes later at the `tickets` resource. At most 20 tickets an hour per person (ticket_rate_limited); a pageId that is not a page of this site is ticket_page_unknown.
+
+Hints: readOnlyHint: false, destructiveHint: false, idempotentHint: false.
+
+```json
+{
+  "title": "apply_ops refuses a hover colour on a button label",
+  "body": "Setting the hover colour of a `ds.button` label through `p:label|s::hover` is refused, although the inspector sets it.",
+  "category": "refusal",
+  "severity": "high",
+  "actual": "422 tree_invalid I8",
+  "requestId": "0b7c6d5e-4f3a-4b2c-8d1e-9f0a1b2c3d4e"
+}
+```
+
 ## Resources
 
 Each URI is `splash://site/<siteId>/<path>`; `site_context.resources` lists the ones the site has.
@@ -157,6 +174,7 @@ Each URI is `splash://site/<siteId>/<path>`; `site_context.resources` lists the 
 | `design-system` | The draft design system's index (designSystem.read): sets, themes, component variant keys and token group sizes. Query parameters add parts: `?tokens=color.palette,space`, `components=true`, `css=true`, `embeds=true`. |
 | `presets` | The presets this site can insert, without their trees (preset.index); `?kind=section` or `?source=site` narrows them. |
 | `motion` | The scene recipes with their knobs, and the diagnosis codes. |
+| `tickets` | The tickets you reported on this site, with their status and the platform owner's close note (ticket.list). |
 | `regions` | The header and footer trees, whose node ids a scene names with `region`. |
 | `versions` | The published versions, newest first (publication.versions); `?limit=50`. |
 | `pending-changes` | What changed since the live version, by area (publication.pending). |

@@ -2,7 +2,7 @@
 
 # Pages, trees and regions
 
-A page is a row (slug, title, status, frame, SEO) plus a tree (`splash.tree/2`) of nodes. Header, footer, above and below are regions: their trees live on pages named `region-*`, and `region.read` gives their root ids. Every node edit is a `tree.commit` of `splash.ops/2` ops.
+A page is a row (slug, title, status, frame, SEO) plus a tree (`splash.tree/3`) of nodes. Header, footer, above and below are regions: their trees live on pages named `region-*`, and `region.read` gives their root ids. Every node edit is a `tree.commit` of `splash.ops/2` ops.
 
 [`catalog.read`](#catalogread) · [`region.read`](#regionread) · [`tree.read`](#treeread) · [`tree.commit`](#treecommit) · [`content.importMarkdown`](#contentimportmarkdown) · [`page.read`](#pageread) · [`page.create`](#pagecreate) · [`page.update`](#pageupdate) · [`page.delete`](#pagedelete) · [`page.forkTemplate`](#pageforktemplate) · [`page.setPassword`](#pagesetpassword) · [`tree.node`](#treenode) · [`catalog.index`](#catalogindex) · [`catalog.entry`](#catalogentry)
 

@@ -47,4 +47,6 @@ The answer's `ticket` carries its `id` and `status` (`open`): give the user the 
 
 The same is the operation `ticket.create` (alone in an `apply_ops` batch, `baseRevisions` `{}`, no dry run); `ticket.list` `{ status? }` reads your own tickets and their `closeNote` answers.
 
+Every field and error: [tickets reference](../../reference/operations/tickets.md) and the `report_issue` entry in [MCP tools](../../reference/operations/mcp-tools.md).
+
 If the server has no `report_issue` tool yet (an older Libretto: it is missing from the tool list), write the ticket out for the user in the shape above so they can send it to the Libretto team.

@@ -51,7 +51,7 @@ function coverageProblems() {
   return problems
 }
 
-const pending = new Set(notes.pending?.operations ?? [])
+const pending = new Set(notes.pending?.operations ?? [])  // names a skill may use before --sync brings them in (data/notes.json `pending`)
 
 /**
  * Operation names written in the hand-written skills and recipes must exist in the registry (or be listed as

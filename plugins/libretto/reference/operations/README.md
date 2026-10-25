@@ -2,7 +2,7 @@
 
 # Libretto operations
 
-159 operations, from Libretto's operation registry. Each runs inside a `splash.batch` sent to `dry_run_ops` or `apply_ops` (see [mcp-tools.md](mcp-tools.md)). `discover_operations` with the name gives the live schema; this reference is the same registry, written for reading.
+161 operations, from Libretto's operation registry. Each runs inside a `splash.batch` sent to `dry_run_ops` or `apply_ops` (see [mcp-tools.md](mcp-tools.md)). `discover_operations` with the name gives the live schema; this reference is the same registry, written for reading.
 
 | Domain | Operations |
 |---|---|
@@ -18,6 +18,7 @@
 | [Motion and scenes](motion.md) | `motion.read`, `motion.replace`, `motion.delete`, `motion.listRecipes`, `motion.applyRecipe`, `motion.saveRecipe`, `motion.diagnose` |
 | [Site, settings, languages, access and domains](site-and-settings.md) | `site.read`, `site.update`, `access.read`, `access.update`, `settings.read`, `settings.update`, `breakpoints.update`, `layout.update`, `apiConfig.read`, `apiConfig.update`, `environment.read`, `environment.update`, `site.create`, `site.updateLanguages`, `domain.add`, `domain.primary`, `domain.verify`, `domain.delete`, `maintenance.migrate`, `maintenance.restoreBackup` |
 | [Publication, versions and history](publication-and-history.md) | `history.read`, `history.undo`, `publication.publish`, `publication.activate`, `publication.rollbackPage`, `external.status`, `external.close`, `publication.versions`, `publication.versionPages`, `publication.pending` |
+| [Tickets](tickets.md) | `ticket.create`, `ticket.list` |
 
 ## Batches
 
@@ -48,6 +49,7 @@ A token acts with the lower of the role it was made with and its maker's current
 | `designSystem.promote` | promote overrides to a variant | admin, workspace owner, editor (as the access settings allow) |
 | `breakpoints.edit` | breakpoints | admin, workspace owner, editor (as the access settings allow) |
 | `brand.generate` | render brand images | admin |
+| `ticket.report` | report a problem to the platform owner | admin, editor, content |
 
 ## Errors
 

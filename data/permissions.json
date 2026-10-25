@@ -94,6 +94,14 @@
       "roles": [
         "admin"
       ]
+    },
+    "ticket.report": {
+      "label": "report a problem to the platform owner",
+      "roles": [
+        "admin",
+        "editor",
+        "content"
+      ]
     }
   }
 }

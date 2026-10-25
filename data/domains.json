@@ -1,62 +1,115 @@
 {
   "pages-and-trees": {
     "title": "Pages, trees and regions",
-    "prefixes": ["tree", "page", "content", "region", "catalog"],
-    "intro": "A page is a row (slug, title, status, frame, SEO) plus a tree (`splash.tree/2`) of nodes. Header, footer, above and below are regions: their trees live on pages named `region-*`, and `region.read` gives their root ids. Every node edit is a `tree.commit` of `splash.ops/2` ops."
+    "prefixes": [
+      "tree",
+      "page",
+      "content",
+      "region",
+      "catalog"
+    ],
+    "intro": "A page is a row (slug, title, status, frame, SEO) plus a tree (`splash.tree/3`) of nodes. Header, footer, above and below are regions: their trees live on pages named `region-*`, and `region.read` gives their root ids. Every node edit is a `tree.commit` of `splash.ops/2` ops."
   },
   "components-and-presets": {
     "title": "Site components, presets and effects",
-    "prefixes": ["component", "preset", "effect"],
+    "prefixes": [
+      "component",
+      "preset",
+      "effect"
+    ],
     "intro": "Presets are insertable copies (theme presets and the site's own library). Site components are reusable subtrees with exposed props: every instance follows the component. Effects are saved visual effects nodes can use."
   },
   "design-system": {
     "title": "Design system",
-    "prefixes": ["designSystem"],
+    "prefixes": [
+      "designSystem"
+    ],
     "intro": "Tokens in sets, themes that stack sets, component variants and their cells, mixins. Every write passes the AA contrast gate in every theme on the batch's end state."
   },
   "brand": {
     "title": "Brand setup, identity and brand formats",
-    "prefixes": ["brand"],
+    "prefixes": [
+      "brand"
+    ],
     "intro": "`brand.setup` derives the whole token set of a brand (palettes, roles, type, space, radii) from a few inputs, as the admin's Brand setup screen does. The other `brand.*` operations manage the brand identity, format presets and templates, and render brand images."
   },
   "navigation": {
     "title": "Menus",
-    "prefixes": ["navigation"],
+    "prefixes": [
+      "navigation"
+    ],
     "intro": "Menus are keyed lists of items that target a page, an anchor on a page, or a URL. Navbar and footer components show a menu by its key."
   },
   "blogs-and-articles": {
     "title": "Blogs and articles",
-    "prefixes": ["blog", "article"],
+    "prefixes": [
+      "blog",
+      "article"
+    ],
     "intro": "A blog is an index page with its articles; an article is a page with its own publish state."
   },
   "collections": {
     "title": "Collections and items",
-    "prefixes": ["collection", "item"],
+    "prefixes": [
+      "collection",
+      "item"
+    ],
     "intro": "Collections are typed content lists (fields, items, statuses). Repeaters on pages read them (`source=` in the outline)."
   },
   "forms-and-members": {
     "title": "Forms, submissions and members",
-    "prefixes": ["form", "submission", "member", "memberRole"],
+    "prefixes": [
+      "form",
+      "submission",
+      "member",
+      "memberRole"
+    ],
     "intro": "Forms collect submissions; members are the site's signed-in visitors with roles that gate content (`visibleTo`)."
   },
   "media-and-fonts": {
     "title": "Media library and fonts",
-    "prefixes": ["media", "font"],
+    "prefixes": [
+      "media",
+      "font"
+    ],
     "intro": "Images and files live in the media library; nodes reference them as `{ \"$media\": \"<id>\" }`. Fonts are site font faces (uploaded or imported from Google Fonts) that font-family tokens name."
   },
   "motion": {
     "title": "Motion and scenes",
-    "prefixes": ["motion"],
+    "prefixes": [
+      "motion"
+    ],
     "intro": "Scenes animate nodes on scroll, on load or on interaction. Prefer recipes (`motion.listRecipes`, `motion.applyRecipe`) to hand-written scenes, and read `motion.diagnose` findings after every change."
   },
   "site-and-settings": {
     "title": "Site, settings, languages, access and domains",
-    "prefixes": ["site", "settings", "access", "breakpoints", "layout", "apiConfig", "environment", "domain", "maintenance"],
+    "prefixes": [
+      "site",
+      "settings",
+      "access",
+      "breakpoints",
+      "layout",
+      "apiConfig",
+      "environment",
+      "domain",
+      "maintenance"
+    ],
     "intro": "Site-wide configuration. Most writes here need `site.admin` (platform admin only): an editor or workspace owner token gets 403."
   },
   "publication-and-history": {
     "title": "Publication, versions and history",
-    "prefixes": ["publication", "history", "external"],
+    "prefixes": [
+      "publication",
+      "history",
+      "external"
+    ],
     "intro": "Publishing snapshots the draft into a live version. History records every committed batch with its inverse, so `history.undo` reverses a batch. Provider operations (domains, publication effects) leave an external request that `external.status` / `external.close` inspect."
+  },
+  "tickets": {
+    "title": "Tickets",
+    "prefixes": [
+      "ticket"
+    ],
+    "intro": "A ticket reports a problem to the platform owner: a bug, a missing capability, a refusal that looks wrong, a docs gap. The `report_issue` tool files one in a single call (it wraps `ticket.create`); `ticket.list` and the `tickets` resource read your own tickets on this site with their status and the owner's close note. Nothing on the site changes. See the `libretto-report-issue` skill for when to file one."
   }
 }
