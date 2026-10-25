@@ -62,7 +62,7 @@ Example input:
 {"note":"Opening section and team page"}
 ```
 
-> Publish only on the human's explicit go in the conversation. Alone in its batch, with `history` in `baseRevisions` (from a fresh `site_context`) and `"confirmed": ["publish"]`. The answer's `version.id` is the version to roll back to later.
+> Publish only on the human's explicit go in the conversation. Alone in its batch with `"confirmed": ["publish"]` and, as `baseRevisions`, the `publishBaseRevisions` that `publication.pending` (or the `pending-changes` resource) answered: publish what you showed the human. A later draft edit refuses it as stale: read the pending changes again and ask again. Name the new version to the human by its `shortId`.
 
 ## publication.activate
 
@@ -159,7 +159,7 @@ Example input:
 {"limit":10}
 ```
 
-> The ids `publication.activate` and `publication.rollbackPage` need, with dates, notes and which version is live. Read it before any rollback.
+> The ids `publication.activate` and `publication.rollbackPage` need, with `shortId` (the 8 characters Pubblicazione e versioni shows: use it with the human), dates, notes and which version is live. Read it before any rollback.
 
 ## publication.versionPages
 
@@ -194,4 +194,4 @@ Example input:
 {}
 ```
 
-> What a publish would ship, by area, everyone's changes included. Read it before asking the human for the go; a changed page still in draft status stays out.
+> What a publish would ship, by area, everyone's changes included, and `publishBaseRevisions`, the base revisions of the publish batch. Read it before asking the human for the go; a changed page still in draft status stays out.

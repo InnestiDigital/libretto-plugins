@@ -16,27 +16,27 @@ Publish only when the human says so in this conversation, for this change ("sì,
 1. List what this session changed, in the user's words: the page and what it did (keep the `requestId`s to yourself).
 2. Call `site_context` and check page `status`: a page in `draft` stays off the live site even after publishing; say so if the user edited one (`page.update` `{ pageId, patch: { "status": "published" } }` marks it for the publish, with the go). Collection items publish only when their status is `published` (`item.setStatus`).
 3. Run `designSystem.lint` through `dry_run_ops` if the design system changed: `findingsBySeverity.error` must be 0; report the `worst` findings that concern this change.
-4. Read `splash://site/<siteId>/pending-changes` (`publication.pending`): what changed since the live version, by area (pages, design system, settings, menus, collections, fonts...), with the date of the latest edit and, for pages and collections, the changed rows. A publish ships **all** of it, other people's changes included: show the user anything that is not yours, and any changed page still in draft status (it stays out).
+4. Read `splash://site/<siteId>/pending-changes` (`publication.pending`): what changed since the live version, by area (pages, design system, settings, menus, collections, fonts...), with the date of the latest edit and, for pages and collections, the changed rows. A publish ships **all** of it, other people's changes included: show the user anything that is not yours, and any changed page still in draft status (it stays out). Keep its `publishBaseRevisions`: they are the publish batch's base revisions.
 5. Ask: "Publish these changes now?" and wait.
 
 ## Publish
 
-A batch with `publication.publish` **alone**, the `baseRevisions` of a fresh `site_context` (with `history`), and `"confirmed": ["publish"]`:
+A batch with `publication.publish` **alone**, as `baseRevisions` exactly the `publishBaseRevisions` that `pending-changes` answered (step 4 above: publish what you showed the user), and `"confirmed": ["publish"]`. An older Libretto without `publishBaseRevisions`: the `baseRevisions` of a fresh `site_context`, `history` included.
 
 ```json
 {
   "format": "splash.batch", "v": 1, "requestId": "<fresh UUID>",
-  "baseRevisions": { "...": "fresh site_context.baseRevisions" },
+  "baseRevisions": { "...": "pending-changes' publishBaseRevisions, unchanged" },
   "confirmed": ["publish"],
   "operations": [{ "name": "publication.publish", "input": { "note": "Servizi: new heading" } }]
 }
 ```
 
-Send it to `apply_ops` (not `dry_run_ops`, which refuses publication). If the user wants it done in the admin instead, `libretto-admin-browser` has the steps; the rule of the go is the same. The answer holds `version` (`id`, `status`, `isActive`). Tell the user it is online, with the time and the note; keep the version id for yourself (it is how you roll back). A `409 stale_revision` means the draft moved: read `site_context` again, tell the user what else changed, and ask again.
+Send it to `apply_ops` (not `dry_run_ops`, which refuses publication). If the user wants it done in the admin instead, `libretto-admin-browser` has the steps; the rule of the go is the same. The answer holds `version` (`id`, `shortId`, `status`, `isActive`). Tell the user it is online, with the time and the note, and name the version by its `shortId` (the 8 characters **Pubblicazione e versioni** shows); keep the full `id` for yourself (it is how you roll back). A `409 stale_revision` means the draft moved after you read the pending changes: read `pending-changes` again, tell the user what else changed, and ask again. A refusal for a missing base revision means the batch did not carry `publishBaseRevisions`: read `pending-changes` and use them. Never publish a second time to make sure: read `versions` instead.
 
 ## Roll back
 
-First read `splash://site/<siteId>/versions` (`publication.versions`): the published versions, newest first, each with its `id`, date (`timestamp`), note and `isActive` (the live one). For one page, `versions/<versionId>` (`publication.versionPages`) lists that version's pages with their id in the version and what a rollback of each would change in the draft. Show the user the candidate version (date and note) before anything else.
+First read `splash://site/<siteId>/versions` (`publication.versions`): the published versions, newest first, each with its `id`, `shortId`, date (`timestamp`), note and `isActive` (the live one). Name versions to the user by `shortId`, date and note, as **Pubblicazione e versioni** shows them. For one page, `versions/<versionId>` (`publication.versionPages`) lists that version's pages with their id in the version and what a rollback of each would change in the draft. Show the user the candidate version (date and note) before anything else.
 
 Pick the smallest tool that fixes it, and get the human's explicit go for each:
 
