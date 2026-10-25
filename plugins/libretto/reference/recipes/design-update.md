@@ -62,5 +62,5 @@ Operations: [design-system](../operations/design-system.md), [media-and-fonts](.
 ## 8. Check and report
 
 - `designSystem.lint` (through `dry_run_ops`): errors must be zero; AAA warnings are information.
-- `render_preview` `{ "pageId", "device": "desktop" | "tablet" | "mobile", "mode": "screenshot" }` on the home page and two other key pages, then once more with `"theme": "dark"` (or another theme the update touched) and with the site's second locale at tablet width (`"locale": "en-US", "device": "tablet"`). Against a reference, `compare_reference` `{ pageId, device, referenceMediaId }` or `{ pageId, device, referenceUrl }` for a public https image.
+- `render_preview` `{ "pageId", "device": "desktop" | "tablet" | "mobile", "mode": "screenshot" }` on the home page and two other key pages (`"area": "viewport"` for the first screen, `"crop": { "nodeId" }` for one section), then once more with `"theme": "dark"` (or another theme the update touched) and with the site's second locale at tablet width (`"locale": "en-US", "device": "tablet"`). Against a reference, `compare_reference` `{ pageId, device, referenceMediaId }` or `{ pageId, device, referenceUrl }` for a public https image.
 - Report each applied `requestId` with what it changed. Nothing is public until the user asks to publish (`libretto-publish`).
