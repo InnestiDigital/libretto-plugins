@@ -42,8 +42,8 @@
     },
     {
       "code": "401",
-      "meaning": "The token is missing, expired, revoked, or its maker lost access.",
-      "fix": "The user makes a new token in the admin (Agenti e accessi MCP) and sets LIBRETTO_MCP_TOKEN."
+      "meaning": "The token is missing, wrong, expired, revoked, made before the Libretto was reset, or its maker lost access.",
+      "fix": "The user makes a new token in the admin sidebar (Persone e accessi > Agenti e accessi MCP), replaces it in the plugin settings (/plugin configure libretto@libretti, or /plugin > libretto > Configure in the desktop app) and starts a new session. LIBRETTO_MCP_TOKEN only for Claude Code started from a terminal: the desktop app does not read ~/.zshrc."
     }
   ],
   "operations": {

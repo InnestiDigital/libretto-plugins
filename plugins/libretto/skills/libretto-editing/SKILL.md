@@ -7,7 +7,7 @@ description: Edit a Libretto site through the libretto MCP server - texts, style
 
 You work on one site: the one the token was made for (the plugin's **Token del sito Libretto** setting, or `LIBRETTO_MCP_TOKEN`, which wins). Every write goes through the same operation registry the admin uses, so it is validated, audited and undoable. Your changes land in the **draft**; nothing is public until someone publishes (see the `libretto-publish` skill).
 
-Tools of the `libretto` MCP server: `site_context`, `discover_operations`, `read_resources`, `dry_run_ops`, `apply_ops`, `render_preview`, `compare_reference`, `report_issue` (and `job_next_step` / `job_report_step` when you were handed an assistant job id). The plugin's local `libretto-files` server adds `upload_media_file`. If the tools are missing, the server is not connected: tell the user to run `/mcp`, and to set the token with `/plugin configure libretto@libretti` (or in `LIBRETTO_MCP_TOKEN`), then restart Claude Code.
+Tools of the `libretto` MCP server: `site_context`, `discover_operations`, `read_resources`, `dry_run_ops`, `apply_ops`, `render_preview`, `compare_reference`, `report_issue` (and `job_next_step` / `job_report_step` when you were handed an assistant job id). The plugin's local `libretto-files` server adds `upload_media_file`. If the tools are missing, the server is not connected: tell the user to run `/mcp`, and to set the token in the plugin settings (`/plugin configure libretto@libretti`, or in the Claude desktop app `/plugin` › **libretto** › **Configure**), then start a new session. Never suggest `export LIBRETTO_MCP_TOKEN` in `~/.zshrc` or `~/.bashrc` to someone using the desktop app: an app opened from the Dock, Finder or Start menu does not read them. The variable is only for Claude Code started from a terminal.
 
 ## Jobs and where their steps are
 
@@ -79,7 +79,7 @@ The person you work for is a designer, not a developer. They read your answers, 
 - `409 stale_revision`: someone (or the admin) changed the document. Call `site_context` again, re-read the node, rebuild the batch.
 - `422`: the input or a gate refused it (for example the contrast gate). The `detail` says what and where; fix the cause, do not work around it.
 - `403`: the token's role may not run that operation. Tell the user; do not try another route. If the role should allow it, open a ticket.
-- `401`: the token is expired, revoked or wrong. The user makes a new one in the admin (Agenti e accessi MCP) and sets it with `/plugin configure libretto@libretti`, then restarts Claude Code.
+- `401`: Libretto refused the token. Tell the user in plain words: it is wrong, expired, revoked, or was made before their Libretto was reset. They make a new one in the admin sidebar, **Persone e accessi** › **Agenti e accessi MCP**, replace it in the plugin settings (`/plugin configure libretto@libretti`, or `/plugin` › **libretto** › **Configure** in the desktop app) and start a new session. Only if they run Claude Code from a terminal with `LIBRETTO_MCP_TOKEN` set, the new token goes there (it wins). No `~/.zshrc` advice for the desktop app.
 
 All codes with their fixes: [operations reference](../../reference/operations/README.md#errors).
 

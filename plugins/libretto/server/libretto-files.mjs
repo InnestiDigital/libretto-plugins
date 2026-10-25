@@ -93,7 +93,7 @@ async function remoteSession() {
     const session = response.headers.get('mcp-session-id')
     if (session) headers.set('mcp-session-id', session)
     const text = await response.text()
-    if (response.status === 401) throw new LibrettoError('Libretto refused the token (401): it is expired, revoked or wrong. Make a new one in the admin (Agenti e accessi MCP).')
+    if (response.status === 401) throw new LibrettoError('Libretto refused the token (401): it is wrong, expired, revoked, or made before the Libretto was reset. Make a new one in the admin (Persone e accessi > Agenti e accessi MCP), set it with /plugin configure libretto@libretti and start a new session.')
     if (!response.ok) throw new LibrettoError(`Libretto answered ${response.status} at ${url}`, text.slice(0, 500))
     if (!text) return null
     const type = response.headers.get('content-type') ?? ''

@@ -70,6 +70,14 @@ echo 'export LIBRETTO_MCP_TOKEN="$(security find-generic-password -s libretto-mc
 
 Un'installazione di prova: `export LIBRETTO_URL="http://localhost:3000"`.
 
+### Nell'app desktop di Claude
+
+L'app desktop legge il token solo dalle impostazioni del plugin. Una variabile in `~/.zshrc` o `~/.bashrc` non arriva a un'app aperta dal Dock, dal Finder o dal menu Start: serve solo per Claude Code avviato da un terminale. Nell'app scrivi `/plugin`, scegli **libretto**, poi **Configure**, e incolla il token; oppure, in un terminale, `claude plugin configure libretto@libretti --values-stdin` con `{"libretto_token":"<token>"}`. Poi apri una nuova sessione.
+
+### Se la connessione dà 401
+
+Il token è sbagliato, scaduto, revocato o creato prima che il tuo Libretto venisse azzerato. Creane uno nuovo nella barra laterale dell'admin, **Persone e accessi** › **Agenti e accessi MCP**, sostituiscilo nelle impostazioni del plugin (`/plugin configure libretto@libretti`, o `/plugin` › **libretto** › **Configure** nell'app desktop) e apri una nuova sessione. Se usi `LIBRETTO_MCP_TOKEN` in un terminale, sostituiscilo lì: vale di più.
+
 ### Un primo prompt
 
 ```
@@ -170,6 +178,14 @@ echo 'export LIBRETTO_MCP_TOKEN="$(security find-generic-password -s libretto-mc
 **Windows (PowerShell).** `[Environment]::SetEnvironmentVariable("LIBRETTO_MCP_TOKEN", "<token>", "User")`, then reopen PowerShell.
 
 A test install: `export LIBRETTO_URL="http://localhost:3000"`.
+
+### In the Claude desktop app
+
+The desktop app reads the token only from the plugin settings. A variable in `~/.zshrc` or `~/.bashrc` does not reach an app opened from the Dock, Finder or the Start menu: it is only for Claude Code started from a terminal. In the app, type `/plugin`, choose **libretto**, then **Configure**, and paste the token; or, in a terminal, `claude plugin configure libretto@libretti --values-stdin` with `{"libretto_token":"<token>"}`. Then start a new session.
+
+### If the connection answers 401
+
+The token is wrong, expired, revoked, or was made before your Libretto was reset. Make a new one in the admin sidebar, **Persone e accessi** (People & access) › **Agenti e accessi MCP**, replace it in the plugin settings (`/plugin configure libretto@libretti`, or `/plugin` › **libretto** › **Configure** in the desktop app) and start a new session. If you use `LIBRETTO_MCP_TOKEN` in a terminal, replace it there: it wins.
 
 ### A first prompt
 
