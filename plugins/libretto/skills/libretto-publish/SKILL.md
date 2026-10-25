@@ -32,7 +32,7 @@ A batch with `publication.publish` **alone**, the `baseRevisions` of a fresh `si
 }
 ```
 
-Send it to `apply_ops` (not `dry_run_ops`, which refuses publication). The answer holds `version` (`id`, `status`, `isActive`). Report the version id and the note. A `409 stale_revision` means the draft moved: read `site_context` again, tell the user what else changed, and ask again.
+Send it to `apply_ops` (not `dry_run_ops`, which refuses publication). If the user wants it done in the admin instead, `libretto-admin-browser` has the steps; the rule of the go is the same. The answer holds `version` (`id`, `status`, `isActive`). Report the version id and the note. A `409 stale_revision` means the draft moved: read `site_context` again, tell the user what else changed, and ask again.
 
 ## Roll back
 

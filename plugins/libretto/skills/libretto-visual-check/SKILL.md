@@ -14,7 +14,7 @@ The `claude-in-chrome` tools (`mcp__claude-in-chrome__*`: `tabs_context_mcp`, `t
 ## Rules (never bend them)
 
 1. **The user signs in, not you.** The admin must already be open and signed in in that Chrome, on the same address as the Libretto server (`LIBRETTO_URL`, default `https://librettocms.com`). If you land on `/admin/login`, stop and ask the user to sign in in that Chrome; never type an email or a password, never use a password manager prompt, never read cookies.
-2. **Look, do not touch.** Navigate, scroll, resize, take screenshots, read text. Never click Publish (Pubblica), Delete (Elimina), Revoke (Revoca), Restore, Undo (Annulla) or any save button; never drag in the editor canvas; never type into the editor. All changes go through the MCP server, where they are checked and undoable.
+2. **Look, do not touch.** Navigate, scroll, resize, take screenshots, read text. Never click Publish (Pubblica), Delete (Elimina), Revoke (Revoca), Restore, Undo (Annulla) or any save button; never drag in the editor canvas; never type into the editor. Changes go through the MCP server, where they are checked and undoable; the few jobs MCP cannot do in the admin are `libretto-admin-browser`, with its own rules.
 3. **Never accept a dialog.** A confirm, alert, "leave page?" or permission prompt: dismiss it or stop, and tell the user.
 4. **Your own tab.** Open a new tab for the check (`tabs_create_mcp`); do not take over the tab the user is working in, and close yours at the end.
 5. **Nothing leaves the machine.** Screenshots stay in the conversation; do not upload them anywhere unless the user asks (for `compare_reference` they go to the site's media library, see [images](../../reference/recipes/images.md)).

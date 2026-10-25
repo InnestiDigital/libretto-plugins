@@ -10,13 +10,14 @@ Il plugin contiene:
 
 - il server MCP `libretto`, che si collega a `https://librettocms.com/api/mcp` con il tuo token;
 - il piccolo server locale `libretto-files`, che carica nella libreria Media le immagini che hai sul computer (serve Node 18 o successivo);
-- cinque skill che insegnano a Claude come lavorare su Libretto:
+- sei skill che insegnano a Claude come lavorare su Libretto:
   - `libretto-editing`: testi, stili, sezioni da preset, varianti, immagini, header e footer, menu, collezioni, traduzioni, animazioni, sempre con un dry run prima di applicare;
   - `libretto-design-system`: token, varianti, mixin e temi, con il controllo del contrasto AA;
   - `libretto-visual-check`: guarda la pagina prima e dopo, in Chrome, su desktop e telefono;
+  - `libretto-admin-browser`: fa nell'admin, con Chrome, le poche cose che il server MCP non sa fare (caricare file di font, pubblicare dall'admin quando lo chiedi) e controlla il sito pubblico;
   - `libretto-publish`: pubblicare o tornare a una versione precedente, solo quando lo dici tu;
   - `libretto-report-issue`: apre una segnalazione per il team di Libretto quando qualcosa manca o non funziona;
-- le ricette passo passo (`plugins/libretto/reference/recipes/`) e il riferimento di tutte le 148 operazioni (`plugins/libretto/reference/operations/`).
+- le ricette passo passo (`plugins/libretto/reference/recipes/`) e il riferimento di tutte le 158 operazioni (`plugins/libretto/reference/operations/`).
 
 ### Cosa serve
 
@@ -80,7 +81,7 @@ Claude legge la pagina, prepara la modifica, la prova, la applica, la guarda e t
 
 ### Vedere il risultato in Chrome
 
-Con l'estensione Claude in Chrome collegata, Claude apre l'anteprima della bozza e l'editor dell'admin nel tuo Chrome, fa gli screenshot prima e dopo (desktop e telefono) e ti dice cosa non corrisponde. Prima entra nell'admin in quel Chrome: Claude non scrive mai password, non preme Pubblica né pulsanti che cancellano, non accetta finestre di conferma. Senza Chrome usa gli screenshot del server o rilegge la pagina.
+Con l'estensione Claude in Chrome collegata, Claude apre l'anteprima della bozza e l'editor dell'admin nel tuo Chrome, fa gli screenshot prima e dopo (desktop e telefono) e ti dice cosa non corrisponde. Prima entra nell'admin in quel Chrome: Claude non scrive mai password e non accetta finestre di conferma del browser. Per guardare non tocca niente; agisce nell'admin solo per quello che il server MCP non sa fare (per esempio caricare i file di un font), e pubblica o cancella solo quando glielo dici. Senza Chrome usa gli screenshot del server o rilegge la pagina.
 
 ### Immagini
 
@@ -110,13 +111,14 @@ The plugin holds:
 
 - the `libretto` MCP server, which connects to `https://librettocms.com/api/mcp` with your token;
 - the small local `libretto-files` server, which uploads images from your computer into the Media library (needs Node 18 or later);
-- five skills that teach Claude how to work on Libretto:
+- six skills that teach Claude how to work on Libretto:
   - `libretto-editing`: texts, styles, sections from presets, variants, images, header and footer, menus, collections, translations, motion, always with a dry run before applying;
   - `libretto-design-system`: tokens, variants, mixins and themes, under the AA contrast gate;
   - `libretto-visual-check`: looks at the page before and after, in Chrome, at desktop and phone width;
+  - `libretto-admin-browser`: does in the admin, with Chrome, the few things the MCP server cannot (uploading font files, publishing from the admin when you ask) and checks the public site;
   - `libretto-publish`: publishing or going back to an earlier version, only when you say so;
   - `libretto-report-issue`: opens a ticket for the Libretto team when something is missing or broken;
-- step-by-step recipes (`plugins/libretto/reference/recipes/`) and a reference of all 148 operations (`plugins/libretto/reference/operations/`).
+- step-by-step recipes (`plugins/libretto/reference/recipes/`) and a reference of all 158 operations (`plugins/libretto/reference/operations/`).
 
 ### Prerequisites
 
@@ -180,7 +182,7 @@ Claude reads the page, builds the change, tries it, applies it, looks at it and 
 
 ### Seeing the result in Chrome
 
-With the Claude in Chrome extension connected, Claude opens the draft preview and the admin editor in your Chrome, takes screenshots before and after (desktop and phone) and tells you what does not match. Sign in to the admin in that Chrome first: Claude never types passwords, never presses Publish or anything that deletes, never accepts a confirmation dialog. Without Chrome it uses the server's screenshots or re-reads the page.
+With the Claude in Chrome extension connected, Claude opens the draft preview and the admin editor in your Chrome, takes screenshots before and after (desktop and phone) and tells you what does not match. Sign in to the admin in that Chrome first: Claude never types passwords and never accepts a browser confirmation dialog. To look it touches nothing; it acts in the admin only for what the MCP server cannot do (uploading a font's files, for example), and publishes or deletes only when you say so. Without Chrome it uses the server's screenshots or re-reads the page.
 
 ### Images
 
@@ -214,7 +216,7 @@ The layout follows the Claude Code documentation (checked 2026-10-25):
 plugins/libretto/.claude-plugin/plugin.json  manifest and userConfig (libretto_token, sensitive; libretto_url)
 plugins/libretto/.mcp.json                 libretto (HTTP) and libretto-files (stdio)
 plugins/libretto/server/libretto-files.mjs the local upload server, no dependencies
-plugins/libretto/skills/*/SKILL.md         the five skills
+plugins/libretto/skills/*/SKILL.md         the six skills
 plugins/libretto/reference/recipes/        hand-written recipes, one per job
 plugins/libretto/reference/operations/     GENERATED from data/ by scripts/build-reference.mjs
 data/                                      Libretto's registry.json and mcp-tools.json, plus the notes the generator adds

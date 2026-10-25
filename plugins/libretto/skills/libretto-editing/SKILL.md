@@ -23,6 +23,7 @@ Tools of the `libretto` MCP server: `site_context`, `discover_operations`, `read
 | Pictures | [images](../../reference/recipes/images.md) |
 | "Is it readable / accessible" | [contrast and accessibility](../../reference/recipes/contrast-and-a11y.md) |
 | To see the result | the `libretto-visual-check` skill, [preview and verify](../../reference/recipes/preview-and-verify.md) |
+| Something no operation does (a font file without `upload_font_file`), or the live site as a visitor sees it | the `libretto-admin-browser` skill: the admin in the user's Chrome |
 | To publish or go back | the `libretto-publish` skill |
 | Libretto cannot do it, or refuses something that looks right | the `libretto-report-issue` skill |
 
@@ -38,8 +39,9 @@ Every operation, its input, permission and typical errors: [operations reference
 6. **Small batches.** One intent per batch (a heading, a section, a variant). Easier to check and to undo.
 7. **Never publish on your own.** Publishing makes changes public: only on the human's explicit go.
 8. **Images go through the media library.** A file on this computer: `upload_media_file` with its path (dry run first), then use the media id; see [images](../../reference/recipes/images.md). Never paste a photo's base64 into `media.upload` yourself.
-9. **Look at the result** before saying it is done (`libretto-visual-check`).
-10. **Blocked?** Tell the user, do what you can, and open a ticket when Libretto is at fault (`libretto-report-issue`). Never work around a refusal.
+9. **MCP first.** Use an operation whenever one exists. The admin in Chrome (`libretto-admin-browser`) is only for what MCP lacks and for checking the public site.
+10. **Look at the result** before saying it is done (`libretto-visual-check`).
+11. **Blocked?** Tell the user, do what you can, and open a ticket when Libretto is at fault (`libretto-report-issue`). Never work around a refusal.
 
 ## The loop
 

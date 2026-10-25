@@ -54,7 +54,7 @@ A design-system write (in `dry_run_ops` or `apply_ops`) answers its change, not 
 | Back to the blueprint | `designSystem.resetToBlueprint` | destructive: the user's explicit yes |
 | Breakpoints | `breakpoints.update` | the whole list; as the access settings allow |
 | Google font | `font.importGoogle` | `{ "family": "DM Sans", "weights": [400, 700], "styles": ["normal"] }` |
-| Font file (WOFF2) | `upload_font_file` of `libretto-files` (it sends `font.upload`) | licence first; one face per call: `{ "path", "name", "weight", "style", "licence" }`; then a `fontFamily` token |
+| Font file (WOFF2) | `upload_font_file` of `libretto-files` (it sends `font.upload`) | licence first; one face per call: `{ "path", "name", "weight", "style", "licence" }`; then a `fontFamily` token. Without `font.upload` (`unknown_operation`) or without the file tool: the Typography page in the admin, `libretto-admin-browser` |
 
 ## Who may change what (access settings)
 
