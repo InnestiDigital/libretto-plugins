@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// libretto-files: a local MCP server (stdio) that hands files on this computer to Libretto.
+// libretto-files: a local MCP server (stdio) that hands files on this computer to Libretto:
+// images and other media through media.upload, font faces through font.upload.
 //
 // The remote Libretto MCP server takes an upload as base64 inside the tool call
 // (media.upload). Written by the model, a photo would cost hundreds of thousands
@@ -15,6 +16,8 @@ import { createInterface } from 'node:readline'
 
 const SERVER = { name: 'libretto-files', version: '0.2.0' }
 const MAX_BYTES = 5 * 1024 * 1024
+/** font.upload's `data` holds at most 16 MiB of base64 characters; the server's FONT_MAX_FILE_MB may be lower. */
+const MAX_FONT_BASE64 = 16 * 1024 * 1024
 const CONTENT_TYPES = new Map([
   ['.jpg', 'image/jpeg'], ['.jpeg', 'image/jpeg'], ['.png', 'image/png'], ['.webp', 'image/webp'],
   ['.gif', 'image/gif'], ['.svg', 'image/svg+xml'], ['.pdf', 'application/pdf'],
@@ -42,6 +45,27 @@ const TOOLS = [
         dryRun: { type: 'boolean', description: 'Check the upload without storing it.' },
       },
       required: ['path'],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+  },
+  {
+    name: 'upload_font_file',
+    description: 'Upload a font face from a WOFF2 file on this computer into the Libretto site\'s font library through font.upload, without putting its bytes in the conversation. One file is one face: give the family name, weight and style. Check the licence first and record it in `licence` (the foundry\'s terms or the licence file\'s name): the library shows it with the face. WOFF, TTF and OTF are refused: convert to WOFF2 first, if the licence allows it. A face the library already holds is refused (409 font_face_exists) unless replace is true. dryRun: true runs every check and stores nothing. Then point a font-family token at the family (designSystem.setToken, type fontFamily). Needs a Libretto with font.upload: an older one answers unknown_operation.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        path: { type: 'string', minLength: 1, description: 'The .woff2 file to upload.' },
+        name: { type: 'string', minLength: 1, maxLength: 100, description: 'The family name, as tokens will name it (for example "Sul Sans").' },
+        weight: { type: 'integer', minimum: 1, maximum: 1000, description: 'The face\'s weight, 400 for regular, 700 for bold.' },
+        style: { type: 'string', enum: ['normal', 'italic'] },
+        display: { type: 'string', enum: ['swap', 'block', 'fallback', 'optional'], description: 'font-display; swap when absent.' },
+        fallbackStack: { type: ['string', 'null'], maxLength: 255, description: 'The fonts used until it loads, for example "system-ui, sans-serif".' },
+        licence: { type: ['string', 'null'], minLength: 1, maxLength: 2000, description: 'The licence the face is used under.' },
+        replace: { type: 'boolean', description: 'Replace a face the library already holds with this name, weight and style.' },
+        dryRun: { type: 'boolean', description: 'Check the upload without storing it.' },
+      },
+      required: ['path', 'name', 'weight', 'style'],
       additionalProperties: false,
     },
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
@@ -102,15 +126,17 @@ function parseText(result) {
   }
 }
 
-async function uploadMediaFile({ path, folderId = null, dryRun = false }) {
+/** The absolute path and size of the file at `path`, or a refusal naming it. */
+async function localFile(path) {
   if (typeof path !== 'string' || !path) throw new LibrettoError('path is required')
   const file = isAbsolute(path) ? path : resolve(process.cwd(), path)
   const info = await stat(file).catch(() => null)
   if (!info?.isFile()) throw new LibrettoError(`No file at ${file}`)
-  if (info.size > MAX_BYTES) throw new LibrettoError(`${basename(file)} is ${(info.size / 1048576).toFixed(1)} MB; Libretto takes images up to 5 MB. Shrink it first (macOS: sips -Z 2400 "${file}" --out smaller.jpg).`)
-  const contentType = CONTENT_TYPES.get(extname(file).toLowerCase())
-  if (!contentType) throw new LibrettoError(`Unknown file type ${extname(file) || '(none)'}; Libretto takes ${[...CONTENT_TYPES.keys()].join(' ')}`)
-  const data = (await readFile(file)).toString('base64')
+  return { file, bytes: info.size }
+}
+
+/** One operation alone in a batch, on the current revision of the document it writes, dry-run or applied. */
+async function sendOperation(name, input, revisionKey, dryRun) {
   const remote = await remoteSession()
   const context = await remote.call('site_context', {})
   const requestId = randomUUID()
@@ -118,12 +144,40 @@ async function uploadMediaFile({ path, folderId = null, dryRun = false }) {
     format: 'splash.batch',
     v: 1,
     requestId,
-    baseRevisions: { media: context.baseRevisions.media },
-    operations: [{ name: 'media.upload', input: { filename: basename(file), contentType, data, folderId } }],
+    baseRevisions: { [revisionKey]: context.baseRevisions[revisionKey] },
+    operations: [{ name, input }],
   }
   const answer = await remote.call(dryRun ? 'dry_run_ops' : 'apply_ops', batch)
-  return { dryRun, requestId, file, bytes: info.size, contentType, answer }
+  return { requestId, answer }
 }
+
+async function uploadMediaFile({ path, folderId = null, dryRun = false }) {
+  const { file, bytes } = await localFile(path)
+  if (bytes > MAX_BYTES) throw new LibrettoError(`${basename(file)} is ${(bytes / 1048576).toFixed(1)} MB; Libretto takes images up to 5 MB. Shrink it first (macOS: sips -Z 2400 "${file}" --out smaller.jpg).`)
+  const contentType = CONTENT_TYPES.get(extname(file).toLowerCase())
+  if (!contentType) throw new LibrettoError(`Unknown file type ${extname(file) || '(none)'}; Libretto takes ${[...CONTENT_TYPES.keys()].join(' ')}`)
+  const data = (await readFile(file)).toString('base64')
+  const { requestId, answer } = await sendOperation('media.upload', { filename: basename(file), contentType, data, folderId }, 'media', dryRun)
+  return { dryRun, requestId, file, bytes, contentType, answer }
+}
+
+async function uploadFontFile({ path, name, weight, style, display, fallbackStack, licence, replace, dryRun = false }) {
+  const { file, bytes } = await localFile(path)
+  if (extname(file).toLowerCase() !== '.woff2') throw new LibrettoError(`${basename(file)} is not a .woff2 file; Libretto takes WOFF2 faces only. Convert it first, if its licence allows it.`)
+  const data = (await readFile(file)).toString('base64')
+  if (data.length > MAX_FONT_BASE64) throw new LibrettoError(`${basename(file)} is ${(bytes / 1048576).toFixed(1)} MB, more than font.upload carries.`)
+  const input = {
+    fileName: basename(file), name, weight, style, data,
+    ...(display === undefined ? {} : { display }),
+    ...(fallbackStack === undefined ? {} : { fallbackStack }),
+    ...(licence === undefined ? {} : { licence }),
+    ...(replace === undefined ? {} : { replace }),
+  }
+  const { requestId, answer } = await sendOperation('font.upload', input, 'fonts', dryRun)
+  return { dryRun, requestId, file, bytes, answer }
+}
+
+const TOOL_HANDLERS = { upload_media_file: uploadMediaFile, upload_font_file: uploadFontFile }
 
 const handlers = {
   initialize: params => ({
@@ -134,9 +188,10 @@ const handlers = {
   ping: () => ({}),
   'tools/list': () => ({ tools: TOOLS }),
   'tools/call': async (params) => {
-    if (params?.name !== 'upload_media_file') throw Object.assign(new Error(`Unknown tool ${params?.name}`), { code: -32602 })
+    const handler = Object.hasOwn(TOOL_HANDLERS, params?.name) ? TOOL_HANDLERS[params.name] : null
+    if (!handler) throw Object.assign(new Error(`Unknown tool ${params?.name}`), { code: -32602 })
     try {
-      const value = await uploadMediaFile(params.arguments ?? {})
+      const value = await handler(params.arguments ?? {})
       return { content: [{ type: 'text', text: JSON.stringify(value) }], structuredContent: value }
     } catch (error) {
       if (!(error instanceof LibrettoError)) throw error

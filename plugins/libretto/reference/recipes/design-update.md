@@ -24,7 +24,10 @@ Operations: [design-system](../operations/design-system.md), [media-and-fonts](.
 
 ## 3. Type
 
-1. Fonts: a Google family is `font.importGoogle` `{ "family", "weights", "styles" }` (409 `font_face_exists` if already there). A font file (a foundry licence) must be uploaded in the admin (Fonts); MCP cannot stage font bytes.
+1. Fonts: a Google family is `font.importGoogle` `{ "family", "weights", "styles" }` (409 `font_face_exists` if already there). A font file (a foundry's face):
+   1. Licence first: ask the user under which licence the studio holds the face and whether it covers web use on this site; do not upload without it.
+   2. Upload each face (one file per weight and style, WOFF2 only) with `upload_font_file` of the `libretto-files` server: `{ "path", "name": "Sul Sans", "weight": 400, "style": "normal", "licence": "<the licence>", "dryRun": true }`, then without `dryRun`. It sends `font.upload`; 409 `font_face_exists` means the face is there already (`replace: true` only on the user's word).
+   3. Point a family token at it (step 2). A Libretto without `font.upload` answers `unknown_operation`: then the user uploads the files in the admin (Font).
 2. Families: `font.family.display`, `font.family.heading`, `font.family.body`, `font.family.ui`... in set `core`, type `fontFamily`, value an array (`["DM Sans", "sans-serif"]`).
 3. Type styles: `type.<style>` tokens (`type.section-title`, `type.body`) are composites. `setToken` needs the **whole** value: copy `sets.core` of the token, change what the brief asks, write it back with `"type": "typography"`:
    ```json
@@ -59,5 +62,5 @@ Operations: [design-system](../operations/design-system.md), [media-and-fonts](.
 ## 8. Check and report
 
 - `designSystem.lint` (through `dry_run_ops`): errors must be zero; AAA warnings are information.
-- `render_preview` `{ "pageId", "device": "desktop" | "mobile", "mode": "screenshot" }` on the home page and two other key pages. If the reference is an image in the media library, `compare_reference` `{ pageId, device, referenceMediaId }`.
+- `render_preview` `{ "pageId", "device": "desktop" | "tablet" | "mobile", "mode": "screenshot" }` on the home page and two other key pages, then once more with `"theme": "dark"` (or another theme the update touched) and with the site's second locale at tablet width (`"locale": "en-US", "device": "tablet"`). Against a reference, `compare_reference` `{ pageId, device, referenceMediaId }` or `{ pageId, device, referenceUrl }` for a public https image.
 - Report each applied `requestId` with what it changed. Nothing is public until the user asks to publish (`libretto-publish`).

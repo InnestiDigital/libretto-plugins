@@ -121,10 +121,11 @@
     ]
   },
   "pending": {
-    "note": "Names the skills already use that the registry in data/ does not hold yet (a Libretto branch not merged). --check accepts them and lists them; remove an entry once --sync brings it in.",
+    "note": "Names the skills already use that the registry in data/ does not hold yet (Libretto branches not merged: feat/agent-tickets for ticket.*, feat/mcp-fonts-preview for font.upload). --check accepts them and lists them; remove an entry once --sync brings it in.",
     "operations": [
       "ticket.create",
-      "ticket.list"
+      "ticket.list",
+      "font.upload"
     ]
   }
 }

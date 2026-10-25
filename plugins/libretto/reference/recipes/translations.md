@@ -31,7 +31,7 @@ A text is either a plain string (the same in every language) or a **locale map**
 2. Translate them; show the user the list (node, original, translation) for a page of any length before writing.
 3. One `tree.commit` with a `set_props` per node; change only the language asked, keep the others.
 4. Dry run: `translation.missing` findings list texts that still lack the language. Apply, then translate the page's title and SEO fields with `page.update`, and the menu labels.
-5. Look at the page in that language ([preview and visual check](preview-and-verify.md)): the language prefix of the public URL, such as `/en/...`, or the language switcher.
+5. Look at the page in that language at tablet and phone width: `render_preview` `{ pageId, mode: "screenshot", device: "tablet", locale: "en-US" }`, or in Chrome the address with the language prefix ([preview and visual check](preview-and-verify.md)).
 
 ## Rules
 

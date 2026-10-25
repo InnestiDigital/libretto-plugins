@@ -43,7 +43,8 @@ A whole design update (a brief, a reference, a Figma file) has its own step-by-s
 | What differs from the blueprint; problems | `designSystem.diff`, `designSystem.lint` | read-only, through `dry_run_ops` |
 | Back to the blueprint | `designSystem.resetToBlueprint` | destructive: the user's explicit yes |
 | Breakpoints | `breakpoints.update` | the whole list; as the access settings allow |
-| Google font | `font.importGoogle` | `{ "family": "DM Sans", "weights": [400, 700], "styles": ["normal"] }`; font files are uploaded in the admin (Font) |
+| Google font | `font.importGoogle` | `{ "family": "DM Sans", "weights": [400, 700], "styles": ["normal"] }` |
+| Font file (WOFF2) | `upload_font_file` of `libretto-files` (it sends `font.upload`) | licence first; one face per call: `{ "path", "name", "weight", "style", "licence" }`; then a `fontFamily` token |
 
 ## Who may change what (access settings)
 

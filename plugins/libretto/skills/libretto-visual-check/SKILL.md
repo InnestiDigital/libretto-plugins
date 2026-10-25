@@ -36,7 +36,7 @@ Take the ids from `site_context`: the site's `id`, `programId` and `domain`, and
 
 ## Before and after
 
-1. **Before** you apply: open the draft preview of the page in a new tab. Desktop: `resize_window` to 1440 x 900, screenshot the area you will change (scroll to it; full page if the change is site-wide). Phone: `resize_window` to 390 x 844, reload, screenshot the same area.
+1. **Before** you apply: open the draft preview of the page in a new tab. Desktop: `resize_window` to 1440 x 900, screenshot the area you will change (scroll to it; full page if the change is site-wide). Phone: `resize_window` to 390 x 844, reload, screenshot the same area. For a text or translation change also check the other language at tablet width (820 x 1180): the same address with the language prefix, in lower case, such as `/en-us/servizi?site=<siteId>` for `en-US` (the language switcher shows the prefix).
 2. Apply your change through MCP (`libretto-editing`, `libretto-design-system`).
 3. **After**: reload the same tab, the same two widths, the same scroll position. Screenshot.
 4. For a node change, open the editor with `&nodeId=<nodeId>`: the node is selected in the canvas and in Layers, and the inspector (right) shows it under Impostazioni / Stili / Movimento. The inspector shows a variant's **label**, not its key (the `secondary` button variant reads "Contorno" on Archiplan; labels are in the `design-system` resource). Read; do not edit there.
@@ -59,5 +59,5 @@ For each thing the user asked: matches / does not match, with what you saw ("the
 ## Without Chrome
 
 1. Read the result back: the outline and the node in the tree, the token in the `design-system` resource (see [preview and verify](../../reference/recipes/preview-and-verify.md)).
-2. `render_preview` `{ pageId, device: "desktop", mode: "screenshot" }`, then `device: "mobile"`: the server's own screenshot of the draft. If the server answers that it cannot capture (no screenshot browser, `render_timeout`), use `mode: "document"` to read what will render.
+2. `render_preview` `{ pageId, device: "desktop", mode: "screenshot" }`, then `device: "mobile"`, and `device: "tablet"` with the site's second `locale` (and a `theme` the change touched): the server's own screenshots of the draft. An unknown locale or theme answers `locale_unsupported` or `theme_unknown`; an older Libretto has no tablet. If the server answers that it cannot capture (no screenshot browser, `render_timeout`), use `mode: "document"` to read what will render.
 3. Tell the user you could not see the page in a browser and ask them to look at it in the admin editor: give them the editor address above.
