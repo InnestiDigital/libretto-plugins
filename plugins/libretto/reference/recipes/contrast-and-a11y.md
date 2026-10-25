@@ -20,7 +20,7 @@ Findings cover the whole page: filter by the `nodeId`s you touched, and mention 
 
 ## Run a check on demand
 
-1. `designSystem.lint` through `dry_run_ops`: errors must be zero. Its answer also carries the compiled CSS; read only `findings`.
+1. `designSystem.lint` through `dry_run_ops`: a summary, `findingsBySeverity.error` must be 0; `worst` lists the 20 pairs furthest below what they need.
 2. For one page: there is no page lint operation; the page-wide findings come with every `tree.commit` dry run. Dry-run the batch you are about to apply and read its findings (a dry run changes nothing).
 3. Look at the result ([preview and visual check](preview-and-verify.md)): contrast over images and gradients is not computed by the gate; judge it on the screenshot and say so.
 

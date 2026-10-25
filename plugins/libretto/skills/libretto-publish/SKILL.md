@@ -15,7 +15,7 @@ Publish only when the human says so in this conversation, for this change ("sì,
 
 1. List what this session changed: each applied `requestId`, the page and what it did.
 2. Call `site_context` and check page `status`: a page in `draft` stays off the live site even after publishing; say so if the user edited one (`page.update` `{ pageId, patch: { "status": "published" } }` marks it for the publish, with the go). Collection items publish only when their status is `published` (`item.setStatus`).
-3. Run `designSystem.lint` through `dry_run_ops` if the design system changed, and report errors.
+3. Run `designSystem.lint` through `dry_run_ops` if the design system changed: `findingsBySeverity.error` must be 0; report the `worst` findings that concern this change.
 4. Read `splash://site/<siteId>/pending-changes` (`publication.pending`): what changed since the live version, by area (pages, design system, settings, menus, collections, fonts...), with the date of the latest edit and, for pages and collections, the changed rows. A publish ships **all** of it, other people's changes included: show the user anything that is not yours, and any changed page still in draft status (it stays out).
 5. Ask: "Publish these changes now?" and wait.
 

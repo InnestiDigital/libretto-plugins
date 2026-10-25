@@ -11,7 +11,7 @@ Operations: [design-system](../operations/design-system.md), [media-and-fonts](.
    - type: `design-system?tokens=font.family,type`;
    - space and shape: `design-system?tokens=space,radius,shadow`.
    Never read the whole design system (`css=true` adds a 240 KB stylesheet you do not need).
-2. `designSystem.diff` through `dry_run_ops`: what the site already changed from its blueprint (read `diff`, ignore `css`).
+2. `designSystem.diff` through `dry_run_ops`: a summary of what the site already changed from its blueprint (`overrideCount`, the first 100 `overrides`). `access.read`: your level in each design-system area.
 3. Write the user a short mapping from the brief to tokens before changing anything: which palette steps, which roles, which type styles, which component variants. Ask about anything the brief leaves open.
 
 ## 2. Colours
@@ -57,7 +57,7 @@ Operations: [design-system](../operations/design-system.md), [media-and-fonts](.
 - `tree.commit` answers carry `design.detached` findings: nodes whose local declarations override the system. Read those nodes; replace raw values with tokens (`set_style` with `{token.path}`), or remove the declaration (`null`) so the variant shows.
 - Text with a hand-set size: apply a type role on its five properties (see [restyle a page](restyle-page.md)).
 - Hand-set sizes that differ a lot from the token (a display heading at `clamp(…, 8.55rem)` where `type.section-title` stops at 2rem): re-pointing them at the token would shrink them. List them for the user with today's size and the size the token would give, and propose new size tokens per family of headings (`font.size.section-title-display`) to re-point them at, rather than collapsing them onto one token or scaling raw values. Ask before choosing.
-- Before the type and colour steps, dry-run one write per area: a `403` with `data.kind: "access"` means the site keeps that design-system area closed to editors ([design-system skill](../../skills/libretto-design-system/SKILL.md), Who may change what). Tell the user at the start, not half-way through the update.
+- Before the type and colour steps, read `access.read`: an area at `view` refuses writes with `403` and `data.kind: "access"` ([design-system skill](../../skills/libretto-design-system/SKILL.md), Who may change what). Tell the user at the start, not half-way through the update.
 
 ## 8. Check and report
 

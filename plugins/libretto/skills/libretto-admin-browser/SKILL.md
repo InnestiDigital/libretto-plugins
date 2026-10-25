@@ -35,7 +35,7 @@ Take the ids from `site_context` (the site's `id` and `programId`) or from the a
 
 ## Upload font files (Typography)
 
-Use it until the server has `font.upload`, and always for a user without the plugin's `upload_font_file`. Check the licence with the user first, as for any font.
+First choice is MCP: `upload_font_file` of `libretto-files` sends `font.upload`. Use this page when that answers `unknown_operation` (an older Libretto), when the plugin's file tool is not there, or when the user asks to see it done in the admin. Check the licence with the user first, as for any font.
 
 1. Open `…/design-system/typography`. In the card **Caratteri**, choose the tab **Carica**.
 2. For each face (one WOFF2 file per weight and style):

@@ -4,7 +4,7 @@
 
 Images and files live in the media library; nodes reference them as `{ "$media": "<id>" }`. Fonts are site font faces (uploaded or imported from Google Fonts) that font-family tokens name.
 
-[`media.list`](#medialist) · [`media.usage`](#mediausage) · [`media.recordUpload`](#mediarecordupload) · [`media.upload`](#mediaupload) · [`media.replace`](#mediareplace) · [`media.delete`](#mediadelete) · [`media.update`](#mediaupdate) · [`media.move`](#mediamove) · [`media.createFolder`](#mediacreatefolder) · [`media.renameFolder`](#mediarenamefolder) · [`media.deleteFolder`](#mediadeletefolder) · [`font.list`](#fontlist) · [`font.recordUpload`](#fontrecordupload) · [`font.delete`](#fontdelete) · [`font.importGoogle`](#fontimportgoogle)
+[`media.list`](#medialist) · [`media.usage`](#mediausage) · [`media.recordUpload`](#mediarecordupload) · [`media.upload`](#mediaupload) · [`media.replace`](#mediareplace) · [`media.delete`](#mediadelete) · [`media.update`](#mediaupdate) · [`media.move`](#mediamove) · [`media.createFolder`](#mediacreatefolder) · [`media.renameFolder`](#mediarenamefolder) · [`media.deleteFolder`](#mediadeletefolder) · [`font.list`](#fontlist) · [`font.recordUpload`](#fontrecordupload) · [`font.upload`](#fontupload) · [`font.delete`](#fontdelete) · [`font.importGoogle`](#fontimportgoogle)
 
 ## media.list
 
@@ -275,6 +275,34 @@ Example input:
 ```
 
 > Records a font file already staged by the admin's upload route, which an MCP token cannot reach: upload font files in the admin, or use `font.importGoogle`.
+
+## font.upload
+
+Upload a font face from its base64 bytes: a WOFF2 file (the bytes decide, by their signature), checked like the admin upload (file size, the site's font quota, the family name) and stored with its family name, weight, style, display, fallback stack and licence note. Record the licence the face is used under in `licence` (for example the foundry's terms or the licence file's name); the library shows it with the face. A face the library already holds is refused (409 `font_face_exists`) unless `replace` is set. The face is in the draft at once; the public site draws it after the next publish.
+
+- permission `site.edit` (admin, editor); class `transaction`; writes `fonts`; undoable with `history.undo`.
+
+| Input | Type | Required |
+|---|---|---|
+| `fileName` | string (min 1, max 255) | yes |
+| `name` | string (min 1, max 100) | yes |
+| `weight` | integer ≥1 ≤1000 | yes |
+| `style` | "normal" \| "italic" | yes |
+| `display` | "swap" \| "block" \| "fallback" \| "optional" |  |
+| `fallbackStack` | string (max 255) \| null |  |
+| `licence` | string (min 1, max 2000) \| null |  |
+| `replace` | boolean |  |
+| `data` | string (min 1, max 16777216) | yes |
+
+Output: { id: uuid, fileName: string (min 1, max 255), mimeType: "font/woff2", name: string (min 1, max 100), weight: integer ≥1 ≤1000, style: "normal" \| "italic", display: "swap" \| "block" \| "fallback" \| "optional", fallbackStack: string (max 255) \| null, siteId: string, familyKey: string, fileSize: integer ≥0, url: string, s… (full schema: discover_operations)
+
+Example input:
+
+```json
+{"fileName":"inter-400.woff2","name":"Inter","weight":400,"style":"normal","display":"swap","fallbackStack":"system-ui, sans-serif","licence":"SIL Open Font License 1.1","data":"d09GMgABAAAAAAQ4AA0AAAAACKgAAAPhAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"}
+```
+
+> From a file on the user's computer use `upload_font_file` of the plugin's `libretto-files` server: it sends this operation without the bytes passing through the conversation. Check the licence first and record it in `licence`. WOFF2 only.
 
 ## font.delete
 

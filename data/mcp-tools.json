@@ -19,7 +19,7 @@
     {
       "name": "discover_operations",
       "group": "core",
-      "description": "Lazily discover operations by name or by a word of their description: schemas, one worked example input each, permissions, written documents and confirmation requirements. Use the schemas and examples to build apply_ops batches; output schemas come only with `outputSchemas: true`. Only the operations this token may run are listed (its role, its workspace owner's grant and its design-system levels count); one listed may still refuse a particular input, such as a token in an area you only view: access.read answers your levels.",
+      "description": "Lazily discover operations by name or by a word of their description. Each comes in one line by default: its name, its first sentence, its permission, how it changes the site, the confirmation it needs and whether dry_run_ops can run it; `cursor` pages through them (`nextCursor`). Name operations in `names` (or pass `schemas: true`) for their input schema, one worked example input and the documents they read and write, and `outputSchemas: true` for their output schema. Use the schemas and examples to build apply_ops batches. Only the operations this token may run are listed (its role, its workspace owner's grant and its design-system levels count); one listed may still refuse a particular input, such as a token in an area you only view: access.read answers your levels.",
       "annotations": {
         "readOnlyHint": true
       },
@@ -31,6 +31,23 @@
             "default": "",
             "type": "string"
           },
+          "names": {
+            "minItems": 1,
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "schemas": {
+            "default": false,
+            "type": "boolean"
+          },
+          "outputSchemas": {
+            "default": false,
+            "type": "boolean"
+          },
           "cursor": {
             "default": 0,
             "type": "integer",
@@ -38,14 +55,10 @@
             "maximum": 9007199254740991
           },
           "limit": {
-            "default": 20,
+            "default": 50,
             "type": "integer",
             "minimum": 1,
             "maximum": 100
-          },
-          "outputSchemas": {
-            "default": false,
-            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -80,7 +93,7 @@
     {
       "name": "apply_ops",
       "group": "core",
-      "description": "Apply one confirmed, revision-checked operation batch to this token’s site; returns inverses, findings and structured conflicts. A batch with a motion.* operation also reports the scene problems of each touched page as motion.<code> findings; run motion.diagnose { pageId } to read them on their own, and prefer motion.applyRecipe (recipes and knobs from motion.listRecipes or the motion resource) to hand-written scenes. A design-system write answers its change, not the whole draft: the overrides it adds, changes or removes (`changes`), every error, the warnings about what it changed and the count of every warning by reason; read the stylesheet with render_preview and the rest with designSystem.read. The arguments are the batch itself, at the top level (not wrapped in a `batch` or `file` key): `format: \"splash.batch\"`, `v: 1`, `requestId` (a fresh UUID; resending the same batch with it replays the stored answer), `baseRevisions` (copy site_context.baseRevisions; every document an operation writes must be named) and `operations` (1 to 100 `{ name, input, ref? }`), with optional `dryRun` and `confirmed` ([\"destructive\"], [\"publish\"]). discover_operations gives each operation's input schema and a worked example input.",
+      "description": "Apply one confirmed, revision-checked operation batch to this token’s site; returns inverses, findings and structured conflicts. A batch with a motion.* operation also reports the scene problems of each touched page as motion.<code> findings; run motion.diagnose { pageId } to read them on their own, and prefer motion.applyRecipe (recipes and knobs from motion.listRecipes or the motion resource) to hand-written scenes. A design-system write answers its change, not the whole draft: the overrides it adds, changes or removes (`changes`), every error, the warnings about what it changed and the count of every warning by reason; read the stylesheet with render_preview and the rest with designSystem.read. designSystem.lint and designSystem.diff answer a summary unless their input has `full: true`. The arguments are the batch itself, at the top level (not wrapped in a `batch` or `file` key): `format: \"splash.batch\"`, `v: 1`, `requestId` (a fresh UUID; resending the same batch with it replays the stored answer), `baseRevisions` (copy site_context.baseRevisions; every document an operation writes must be named) and `operations` (1 to 100 `{ name, input, ref? }`), with optional `dryRun` and `confirmed` ([\"destructive\"], [\"publish\"]). discover_operations gives each operation's input schema and a worked example input.",
       "example": {
         "format": "splash.batch",
         "v": 1,
@@ -220,7 +233,7 @@
     {
       "name": "dry_run_ops",
       "group": "core",
-      "description": "Validate a complete operation batch with transaction rollback; publication and provider effects are refused. A dry run reports each touched page's scene problems as motion.<code> findings (the reasons of motion.diagnose: target-missing, target-ambiguous, stateful-target, overlap, empty-range, hidden-at-rest, never-matches). A design-system write answers its change, not the whole draft: the overrides it adds, changes or removes (`changes`), every error, the warnings about what it changed and the count of every warning by reason; read the stylesheet with render_preview and the rest with designSystem.read. The arguments are the batch itself, at the top level (not wrapped in a `batch` or `file` key): `format: \"splash.batch\"`, `v: 1`, `requestId` (a fresh UUID; resending the same batch with it replays the stored answer), `baseRevisions` (copy site_context.baseRevisions; every document an operation writes must be named) and `operations` (1 to 100 `{ name, input, ref? }`), with optional `dryRun` and `confirmed` ([\"destructive\"], [\"publish\"]). discover_operations gives each operation's input schema and a worked example input.",
+      "description": "Validate a complete operation batch with transaction rollback; publication and provider effects are refused. A dry run reports each touched page's scene problems as motion.<code> findings (the reasons of motion.diagnose: target-missing, target-ambiguous, stateful-target, overlap, empty-range, hidden-at-rest, never-matches). A design-system write answers its change, not the whole draft: the overrides it adds, changes or removes (`changes`), every error, the warnings about what it changed and the count of every warning by reason; read the stylesheet with render_preview and the rest with designSystem.read. designSystem.lint and designSystem.diff answer a summary unless their input has `full: true`. The arguments are the batch itself, at the top level (not wrapped in a `batch` or `file` key): `format: \"splash.batch\"`, `v: 1`, `requestId` (a fresh UUID; resending the same batch with it replays the stored answer), `baseRevisions` (copy site_context.baseRevisions; every document an operation writes must be named) and `operations` (1 to 100 `{ name, input, ref? }`), with optional `dryRun` and `confirmed` ([\"destructive\"], [\"publish\"]). discover_operations gives each operation's input schema and a worked example input.",
       "example": {
         "format": "splash.batch",
         "v": 1,
@@ -519,11 +532,12 @@
     {
       "name": "render_preview",
       "group": "render",
-      "description": "See a draft page of this site. mode \"document\" (default) answers its splash.render/1 document and the compiled design-system CSS; mode \"screenshot\" a full-page JPEG for one device. With jobId (document mode only) the job's proposal runs as a dry run and the page is rendered as the proposal would leave it; the draft is not changed. Bounded by 30000 ms: past it the answer is the error code render_timeout.",
+      "description": "See a draft page of this site. mode \"document\" (default) answers its splash.render/1 document and the compiled design-system CSS; mode \"screenshot\" a JPEG for one device (desktop 1440 px, tablet 820 px or mobile 390 px wide), with every image loaded: the whole page by default, the first screen with area \"viewport\", or the box of one node with crop { nodeId } (an id from the outline; node_not_drawn when the node is absent or has no size at that width). The answer's text gives width, height, regionHeight and truncated: a region over 24 million pixels (about 16,600 px tall on desktop, 29,200 on tablet, 61,500 on mobile) comes back as its top part with truncated true; crop a lower node to see the rest. locale shows the page in another of the site's locales (site_context lists them; absent: the default locale), theme under one of its design-system themes (absent: the theme the site's rules pick) and colorScheme as a light or dark browser (screenshot only); an unknown locale or theme is refused (locale_unsupported, theme_unknown). With jobId (document mode only) the job's proposal runs as a dry run and the page is rendered as the proposal would leave it; the draft is not changed. Bounded by 30000 ms: past it the answer is the error code render_timeout.",
       "example": {
         "pageId": "<page id from site_context>",
-        "mode": "document",
-        "jobId": "<job id>"
+        "mode": "screenshot",
+        "device": "tablet",
+        "locale": "en-US"
       },
       "annotations": {
         "readOnlyHint": true
@@ -541,6 +555,7 @@
             "type": "string",
             "enum": [
               "desktop",
+              "tablet",
               "mobile"
             ]
           },
@@ -556,6 +571,44 @@
             "type": "string",
             "format": "uuid",
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "locale": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 35
+          },
+          "theme": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "colorScheme": {
+            "type": "string",
+            "enum": [
+              "light",
+              "dark"
+            ]
+          },
+          "area": {
+            "type": "string",
+            "enum": [
+              "page",
+              "viewport"
+            ]
+          },
+          "crop": {
+            "type": "object",
+            "properties": {
+              "nodeId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              }
+            },
+            "required": [
+              "nodeId"
+            ],
+            "additionalProperties": false
           }
         },
         "required": [
@@ -567,11 +620,11 @@
     {
       "name": "compare_reference",
       "group": "render",
-      "description": "Compare a full-page screenshot of a draft page with a reference image of this site's media library (referenceMediaId, a media id; no URLs). The reference is resized to the capture's width and compared with the visual review's metric: ratio (share of differing pixels, a pixel differs when a channel differs by more than the channel tolerance), heightMismatch (capture minus reference height, in pixels) and the verdict words (\"identical\" at or below the identical ratio, else \"differs (ratio 0.123)\"). Bounded by 30000 ms.",
+      "description": "Compare a full-page screenshot of a draft page with a reference image: one of this site's media library (referenceMediaId) or an image at a public https URL (referenceUrl: fetched once, not stored, no redirects, an image content type, at most 20 MB; a refused URL answers reference_url_refused). Name exactly one. The page is captured like render_preview's screenshot, with the same device, locale, theme, colorScheme, area and crop (compare one section with crop { nodeId }); truncated tells whether the capture was cut. The reference is resized to the capture's width and compared with the visual review's metric: ratio (share of differing pixels, a pixel differs when a channel differs by more than the channel tolerance), heightMismatch (capture minus reference height, in pixels) and the verdict words (\"identical\" at or below the identical ratio, else \"differs (ratio 0.123)\"). Bounded by 30000 ms.",
       "example": {
         "pageId": "<page id>",
         "device": "desktop",
-        "referenceMediaId": "<media id>"
+        "referenceUrl": "https://example.com/reference/home-desktop.png"
       },
       "annotations": {
         "readOnlyHint": true
@@ -589,6 +642,7 @@
             "type": "string",
             "enum": [
               "desktop",
+              "tablet",
               "mobile"
             ]
           },
@@ -596,11 +650,53 @@
             "type": "string",
             "format": "uuid",
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "referenceUrl": {
+            "type": "string",
+            "maxLength": 2048,
+            "format": "uri"
+          },
+          "locale": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 35
+          },
+          "theme": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "colorScheme": {
+            "type": "string",
+            "enum": [
+              "light",
+              "dark"
+            ]
+          },
+          "area": {
+            "type": "string",
+            "enum": [
+              "page",
+              "viewport"
+            ]
+          },
+          "crop": {
+            "type": "object",
+            "properties": {
+              "nodeId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              }
+            },
+            "required": [
+              "nodeId"
+            ],
+            "additionalProperties": false
           }
         },
         "required": [
-          "pageId",
-          "referenceMediaId"
+          "pageId"
         ],
         "additionalProperties": false
       }

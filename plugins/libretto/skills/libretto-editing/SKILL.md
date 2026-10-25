@@ -48,7 +48,7 @@ Every operation, its input, permission and typical errors: [operations reference
 1. **Context.** Call `site_context`. Keep the site id, the page list (id, slug, title, status) and `baseRevisions`.
 2. **Outline.** `read_resources` with `splash://site/<siteId>/outline/<pageId>`: one line per node, `id kind:type "name"`, plus variant, theme and `ref=` for component instances. Find your node by its name and place.
 3. **Node.** `read_resources` with `splash://site/<siteId>/tree/<pageId>?node=<nodeId>&depth=1` (the operation `tree.node`): the node's props, styles, meta, variant and theme, its children one level down, its ancestors in `path`, and in `cut` the children left out. Its `revision` is the `tree:<pageId>` base revision. `depth=0` for the node alone. Read the whole `tree/<pageId>` only when you must copy a large subtree.
-4. **Schema.** `discover_operations` with the operation name (`tree.commit`, `preset.insert`) gives its input schema and a worked example. Take names and shapes from there, not from memory.
+4. **Schema.** `discover_operations` `{ "names": ["tree.commit", "preset.insert"] }` gives each operation's input schema, a worked example and the documents it writes. Without `names` it answers one line per operation (use `query` to search, `schemas: true` for the schemas of the matches). Take names and shapes from there, not from memory.
 5. **Batch.**
    ```json
    {

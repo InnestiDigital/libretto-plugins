@@ -51213,6 +51213,277 @@
       "undoable": true
     },
     {
+      "name": "font.upload",
+      "description": "Upload a font face from its base64 bytes: a WOFF2 file (the bytes decide, by their signature), checked like the admin upload (file size, the site's font quota, the family name) and stored with its family name, weight, style, display, fallback stack and licence note. Record the licence the face is used under in `licence` (for example the foundry's terms or the licence file's name); the library shows it with the face. A face the library already holds is refused (409 `font_face_exists`) unless `replace` is set. The face is in the draft at once; the public site draws it after the next publish.",
+      "example": {
+        "fileName": "inter-400.woff2",
+        "name": "Inter",
+        "weight": 400,
+        "style": "normal",
+        "display": "swap",
+        "fallbackStack": "system-ui, sans-serif",
+        "licence": "SIL Open Font License 1.1",
+        "data": "d09GMgABAAAAAAQ4AA0AAAAACKgAAAPhAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "weight": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "style": {
+            "type": "string",
+            "enum": [
+              "normal",
+              "italic"
+            ]
+          },
+          "display": {
+            "default": "swap",
+            "type": "string",
+            "enum": [
+              "swap",
+              "block",
+              "fallback",
+              "optional"
+            ]
+          },
+          "fallbackStack": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "licence": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "replace": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 16777216
+          }
+        },
+        "required": [
+          "fileName",
+          "name",
+          "weight",
+          "style",
+          "data"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "fileName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "mimeType": {
+            "type": "string",
+            "const": "font/woff2"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "weight": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          "style": {
+            "type": "string",
+            "enum": [
+              "normal",
+              "italic"
+            ]
+          },
+          "display": {
+            "type": "string",
+            "enum": [
+              "swap",
+              "block",
+              "fallback",
+              "optional"
+            ]
+          },
+          "fallbackStack": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "siteId": {
+            "type": "string"
+          },
+          "familyKey": {
+            "type": "string"
+          },
+          "fileSize": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "url": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "upload",
+              "google",
+              "blueprint"
+            ]
+          },
+          "licence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "unicodeRange": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "isVariableFont": {
+            "type": "boolean"
+          },
+          "axesJson": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "refCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "fileName",
+          "mimeType",
+          "name",
+          "weight",
+          "style",
+          "display",
+          "fallbackStack",
+          "siteId",
+          "familyKey",
+          "fileSize",
+          "url",
+          "source",
+          "licence",
+          "unicodeRange",
+          "isVariableFont",
+          "refCount",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "reads": [
+        "fonts"
+      ],
+      "writes": [
+        "fonts"
+      ],
+      "permission": "site.edit",
+      "mutationClass": "transaction",
+      "confirm": "none",
+      "conflictPolicy": "revision",
+      "undoable": true
+    },
+    {
       "name": "font.delete",
       "description": "font.delete with verified bytes and retained undo assets.",
       "example": {
@@ -92900,7 +93171,7 @@
     },
     {
       "name": "designSystem.diff",
-      "description": "Design-system diff, using the same validation and access gates as the editor.",
+      "description": "Read every override the draft holds over its blueprint (tokens, cells, variants, themes, sets, mixins). Over MCP it answers a summary (their count and names, the stylesheet's size); pass `full: true` for every override with its blueprint and site values, and the stylesheet.",
       "example": {},
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -92908,6 +93179,9 @@
         "properties": {
           "layer": {
             "$ref": "#/$defs/__schema0"
+          },
+          "full": {
+            "$ref": "#/$defs/__schema1"
           }
         },
         "additionalProperties": false,
@@ -92918,6 +93192,9 @@
               "site",
               "blueprint"
             ]
+          },
+          "__schema1": {
+            "type": "boolean"
           }
         }
       },
@@ -95457,7 +95734,7 @@
     },
     {
       "name": "designSystem.lint",
-      "description": "Design-system lint, using the same validation and access gates as the editor.",
+      "description": "Check the draft design system: every contrast pair below AA or AAA, the pairs that cannot be judged, the missing media assets and the lint rules' findings, with the draft's overrides. Over MCP it answers a summary (counts by severity and reason, the worst findings first, the override names, the stylesheet's size); pass `full: true` for every finding, every override and the stylesheet.",
       "example": {},
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -95465,6 +95742,9 @@
         "properties": {
           "layer": {
             "$ref": "#/$defs/__schema0"
+          },
+          "full": {
+            "$ref": "#/$defs/__schema1"
           }
         },
         "additionalProperties": false,
@@ -95475,6 +95755,9 @@
               "site",
               "blueprint"
             ]
+          },
+          "__schema1": {
+            "type": "boolean"
           }
         }
       },

@@ -225,13 +225,14 @@ Example input:
 
 ## designSystem.diff
 
-Design-system diff, using the same validation and access gates as the editor.
+Read every override the draft holds over its blueprint (tokens, cells, variants, themes, sets, mixins). Over MCP it answers a summary (their count and names, the stylesheet's size); pass `full: true` for every override with its blueprint and site values, and the stylesheet.
 
 - permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `read`; writes nothing.
 
 | Input | Type | Required |
 |---|---|---|
 | `layer` | "site" \| "blueprint" |  |
+| `full` | boolean |  |
 
 Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: … \| … \| … \| … \| … \| … \| … } \| { op: "remove", id: nodeId } \| { op: "move", id: nodeId, parentId: nodeId, slot?: string, index: integer ≥0 } \| { op: "set_props", id: nodeId… (full schema: discover_operations)
 
@@ -241,17 +242,18 @@ Example input:
 {}
 ```
 
-> Read-only; run it through `dry_run_ops`. The answer also carries the compiled CSS: read `diff` and `findings`.
+> Over MCP it answers a summary: `overrideCount` and the first 100 `overrides`, with the findings counts. `full: true` gives everything; avoid it.
 
 ## designSystem.lint
 
-Design-system lint, using the same validation and access gates as the editor.
+Check the draft design system: every contrast pair below AA or AAA, the pairs that cannot be judged, the missing media assets and the lint rules' findings, with the draft's overrides. Over MCP it answers a summary (counts by severity and reason, the worst findings first, the override names, the stylesheet's size); pass `full: true` for every finding, every override and the stylesheet.
 
 - permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `read`; writes nothing.
 
 | Input | Type | Required |
 |---|---|---|
 | `layer` | "site" \| "blueprint" |  |
+| `full` | boolean |  |
 
 Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: … \| … \| … \| … \| … \| … \| … } \| { op: "remove", id: nodeId } \| { op: "move", id: nodeId, parentId: nodeId, slot?: string, index: integer ≥0 } \| { op: "set_props", id: nodeId… (full schema: discover_operations)
 
@@ -261,7 +263,7 @@ Example input:
 {}
 ```
 
-> Read-only; run it through `dry_run_ops`. The answer also carries the whole compiled CSS: read `findings`.
+> Over MCP it answers a summary: counts by severity and reason, the `worst` 20 findings, the override names, the stylesheet's size. `full: true` gives everything; avoid it.
 
 ## designSystem.createSet
 

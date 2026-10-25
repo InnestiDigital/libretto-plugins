@@ -70,10 +70,10 @@
       "The answer is the change: `changes` (the overrides added, changed or removed), `errors`, at most 20 `warnings` about what changed, and `warningCount` / `warningsByReason` for the whole system. A dry run says `dryRun: true`."
     ],
     "designSystem.lint": [
-      "Read-only; run it through `dry_run_ops`. The answer also carries the whole compiled CSS: read `findings`."
+      "Over MCP it answers a summary: counts by severity and reason, the `worst` 20 findings, the override names, the stylesheet's size. `full: true` gives everything; avoid it."
     ],
     "designSystem.diff": [
-      "Read-only; run it through `dry_run_ops`. The answer also carries the compiled CSS: read `diff` and `findings`."
+      "Over MCP it answers a summary: `overrideCount` and the first 100 `overrides`, with the findings counts. `full: true` gives everything; avoid it."
     ],
     "designSystem.resetToBlueprint": [
       "Destructive: ask the user before running it, and say what scope it resets."
@@ -137,14 +137,16 @@
     ],
     "publication.pending": [
       "What a publish would ship, by area, everyone's changes included. Read it before asking the human for the go; a changed page still in draft status stays out."
+    ],
+    "font.upload": [
+      "From a file on the user's computer use `upload_font_file` of the plugin's `libretto-files` server: it sends this operation without the bytes passing through the conversation. Check the licence first and record it in `licence`. WOFF2 only."
     ]
   },
   "pending": {
-    "note": "Names the skills already use that the registry in data/ does not hold yet (Libretto branches not merged: feat/agent-tickets for ticket.*, feat/mcp-fonts-preview for font.upload). --check accepts them and lists them; remove an entry once --sync brings it in.",
+    "note": "Names the skills already use that the registry in data/ does not hold yet (feat/agent-tickets for ticket.*). --check accepts them and lists them; remove an entry once --sync brings it in.",
     "operations": [
       "ticket.create",
-      "ticket.list",
-      "font.upload"
+      "ticket.list"
     ]
   }
 }

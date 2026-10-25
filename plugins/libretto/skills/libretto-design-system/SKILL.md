@@ -17,7 +17,8 @@ Read only what the change needs, through resource queries (each is a registry re
 
 - `splash://site/<siteId>/design-system` (`designSystem.read`): the index, with the revision, sets, themes, every component's variant keys and each token group's size. Add a group's paths and values with `?tokens=color.palette,space`; `?components=true` adds each component's sizes, states and parts (the segments of a cell key). Never ask for `css=true` unless you need the stylesheet.
 - `splash://site/<siteId>/component/<key>?variant=primary&state=hover&own=true` (`designSystem.readComponent`): only the cells you mean. `own=true` keeps the cells actually set; filter by `size`, `part`, `breakpoint`, `property` too. Answers page by `limit` (100) with `total` and `nextCursor`: a large component has thousands of cells, so filter first.
-- `designSystem.lint` and `designSystem.diff` (read-only, through `dry_run_ops`) report problems and what differs from the blueprint. Their answers still carry the compiled CSS: when Claude Code saves one to a file, read its `findings` and `diff` only.
+- `designSystem.lint` and `designSystem.diff` (read-only, through `dry_run_ops`) answer a summary: `findingCount`, `findingsBySeverity`, `findingsByReason`, the `worst` 20 findings (errors first, then the contrast pairs furthest below what they need), `overrideCount` and the first 100 `overrides`. `full: true` gives the whole answer, stylesheet included: avoid it.
+- `access.read` answers your own level in each design-system area on this site: read it before a design update to know what you may change.
 
 ## Check the answer of a write
 
@@ -60,7 +61,7 @@ A design-system write (in `dry_run_ops` or `apply_ops`) answers its change, not 
 
 Each site decides which design-system areas an editor may change: `palette`, `semantic-colours`, `font-families`, `type-presets`, `space`, `radius`, `borders`, `shadow`, `motion`, `grid`, `assets`, `components`, `variants` (`pick` = only choose a variant on a node), `themes` (`switch-default`), `import-export`, `reset`. A platform admin, and the workspace owner on the sites of their own workspace, may edit every area. Any other editor gets what the site's access settings give editors: by default only the palette, and only view the rest.
 
-A refusal names the area: `403 {"message": "Design system semantic-colours: edit permission required; role has view", "data": {"kind": "access", "area": "semantic-colours", "granted": "view", "needed": "edit"}}`. It is not the token: a new token gets the same answer. Tell the user which areas the job needs: the workspace owner can make the change (or ask their own Claude), and only a platform admin changes what editors may do. Then wait; do not route around it (no hard-coded values on the nodes instead of the token). A workspace owner refused on a site of their own workspace is a bug: open a ticket (`libretto-report-issue`, category `refusal`). `access.read` needs `site.admin`, so you cannot read the settings yourself; dry-run your batch to find out.
+A refusal names the area: `403 {"message": "Design system semantic-colours: edit permission required; role has view", "data": {"kind": "access", "area": "semantic-colours", "granted": "view", "needed": "edit"}}`. It is not the token: a new token gets the same answer. Tell the user which areas the job needs: the workspace owner can make the change (or ask their own Claude), and only a platform admin changes what editors may do. Then wait; do not route around it (no hard-coded values on the nodes instead of the token). A workspace owner refused on a site of their own workspace is a bug: open a ticket (`libretto-report-issue`, category `refusal`). `access.read` answers your levels before you try.
 
 ## The AA contrast gate
 
