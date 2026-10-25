@@ -10,19 +10,19 @@ Hints: readOnlyHint: true.
 
 ## `discover_operations`
 
-Lazily discover operations by name or by a word of their description: schemas, one worked example input each, permissions, written documents and confirmation requirements. Use the schemas and examples to build apply_ops batches. Only the operations this token may run are listed (its role, its workspace owner's grant and its design-system levels count); one listed may still refuse a particular input, such as a token in an area you only view: access.read answers your levels.
+Lazily discover operations by name or by a word of their description: schemas, one worked example input each, permissions, written documents and confirmation requirements. Use the schemas and examples to build apply_ops batches; output schemas come only with `outputSchemas: true`. Only the operations this token may run are listed (its role, its workspace owner's grant and its design-system levels count); one listed may still refuse a particular input, such as a token in an area you only view: access.read answers your levels.
 
 Hints: readOnlyHint: true.
 
 ## `read_resources`
 
-Read a bounded set of Splash resource URIs from this site (at most 16 per call), each the full `splash://site/<siteId>/<path>` with this site's id (`splash://site/<siteId>/pages`, never `splash://site/pages`). The paths are `context`, `pages`, `catalog`, `design-system`, `presets`, `motion` (scene recipes and diagnosis codes), `regions` (header and footer trees), `tree/<pageId>`, `outline/<pageId>` (the compact tree), `motion/<pageId>` (a page's scenes and findings) and `component/<key>` (the cells of a design-system component such as `button`); site_context.resources lists the ones this site has. No network URLs are fetched.
+Read a bounded set of Splash resource URIs from this site (at most 16 per call), each the full `splash://site/<siteId>/<path>` with this site's id (`splash://site/<siteId>/pages`, never `splash://site/pages`). The paths are `context`, `pages`, `catalog`, `design-system` (the design system's index; `?tokens=<group>,<group>` for token values), `presets`, `motion` (scene recipes and diagnosis codes), `regions` (header and footer trees), `versions` (published versions), `pending-changes` (what the next publish ships), `tree/<pageId>` (a page's tree, or one node with `?node=<id>&depth=<n>`), `outline/<pageId>` (the compact tree), `motion/<pageId>` (a page's scenes and findings), `component/<key>` (the cells of a design-system component such as `button`, `?variant=&state=&own=true` to filter), `catalog/<type>` (one node type, such as `catalog/ds.button`), `preset/<presetId>` (one preset's tree, `?kind=<kind>`) and `versions/<versionId>` (a version's pages); site_context.resources lists the ones this site has. A path may end with a query, such as `component/button?variant=primary&state=hover&own=true`, `design-system?tokens=color.palette` or `tree/<pageId>?node=<nodeId>&depth=1`: each resource that takes one runs the registry read it names, with the same parameters. No network URLs are fetched.
 
 Hints: readOnlyHint: true.
 
 ## `apply_ops`
 
-Apply one confirmed, revision-checked operation batch to this token’s site; returns inverses, findings and structured conflicts. A batch with a motion.* operation also reports the scene problems of each touched page as motion.<code> findings; run motion.diagnose { pageId } to read them on their own, and prefer motion.applyRecipe (recipes and knobs from motion.listRecipes or the motion resource) to hand-written scenes. The arguments are the batch itself, at the top level (not wrapped in a `batch` or `file` key): `format: "splash.batch"`, `v: 1`, `requestId` (a fresh UUID; resending the same batch with it replays the stored answer), `baseRevisions` (copy site_context.baseRevisions; every document an operation writes must be named) and `operations` (1 to 100 `{ name, input, ref? }`), with optional `dryRun` and `confirmed` (["destructive"], ["publish"]). discover_operations gives each operation's input schema and a worked example input.
+Apply one confirmed, revision-checked operation batch to this token’s site; returns inverses, findings and structured conflicts. A batch with a motion.* operation also reports the scene problems of each touched page as motion.<code> findings; run motion.diagnose { pageId } to read them on their own, and prefer motion.applyRecipe (recipes and knobs from motion.listRecipes or the motion resource) to hand-written scenes. A design-system write answers its change, not the whole draft: the overrides it adds, changes or removes (`changes`), every error, the warnings about what it changed and the count of every warning by reason; read the stylesheet with render_preview and the rest with designSystem.read. The arguments are the batch itself, at the top level (not wrapped in a `batch` or `file` key): `format: "splash.batch"`, `v: 1`, `requestId` (a fresh UUID; resending the same batch with it replays the stored answer), `baseRevisions` (copy site_context.baseRevisions; every document an operation writes must be named) and `operations` (1 to 100 `{ name, input, ref? }`), with optional `dryRun` and `confirmed` (["destructive"], ["publish"]). discover_operations gives each operation's input schema and a worked example input.
 
 Hints: readOnlyHint: false, destructiveHint: true, idempotentHint: true.
 
@@ -48,7 +48,7 @@ Hints: readOnlyHint: false, destructiveHint: true, idempotentHint: true.
 
 ## `dry_run_ops`
 
-Validate a complete operation batch with transaction rollback; publication and provider effects are refused. A dry run reports each touched page's scene problems as motion.<code> findings (the reasons of motion.diagnose: target-missing, target-ambiguous, stateful-target, overlap, empty-range, hidden-at-rest, never-matches). The arguments are the batch itself, at the top level (not wrapped in a `batch` or `file` key): `format: "splash.batch"`, `v: 1`, `requestId` (a fresh UUID; resending the same batch with it replays the stored answer), `baseRevisions` (copy site_context.baseRevisions; every document an operation writes must be named) and `operations` (1 to 100 `{ name, input, ref? }`), with optional `dryRun` and `confirmed` (["destructive"], ["publish"]). discover_operations gives each operation's input schema and a worked example input.
+Validate a complete operation batch with transaction rollback; publication and provider effects are refused. A dry run reports each touched page's scene problems as motion.<code> findings (the reasons of motion.diagnose: target-missing, target-ambiguous, stateful-target, overlap, empty-range, hidden-at-rest, never-matches). A design-system write answers its change, not the whole draft: the overrides it adds, changes or removes (`changes`), every error, the warnings about what it changed and the count of every warning by reason; read the stylesheet with render_preview and the rest with designSystem.read. The arguments are the batch itself, at the top level (not wrapped in a `batch` or `file` key): `format: "splash.batch"`, `v: 1`, `requestId` (a fresh UUID; resending the same batch with it replays the stored answer), `baseRevisions` (copy site_context.baseRevisions; every document an operation writes must be named) and `operations` (1 to 100 `{ name, input, ref? }`), with optional `dryRun` and `confirmed` (["destructive"], ["publish"]). discover_operations gives each operation's input schema and a worked example input.
 
 Hints: readOnlyHint: true, destructiveHint: false, idempotentHint: false.
 
@@ -152,12 +152,17 @@ Each URI is `splash://site/<siteId>/<path>`; `site_context.resources` lists the 
 |---|---|
 | `context` | The site, compact page summaries, its resources and baseRevisions: what site_context answers. |
 | `pages` | The pages of the site, as site_context summarises them. |
-| `catalog` | The catalogue of node types this site can place (catalog.read). |
-| `design-system` | A summary of the draft design system: tokens, themes and components. |
-| `presets` | The presets this site can insert (preset.list). |
+| `catalog` | Every node type this site can place, one line each (catalog.index): id, kind, label, parts, states, slots and what it accepts. |
+| `design-system` | The draft design system's index (designSystem.read): sets, themes, component variant keys and token group sizes. Query parameters add parts: `?tokens=color.palette,space`, `components=true`, `css=true`, `embeds=true`. |
+| `presets` | The presets this site can insert, without their trees (preset.index); `?kind=section` or `?source=site` narrows them. |
 | `motion` | The scene recipes with their knobs, and the diagnosis codes. |
 | `regions` | The header and footer trees, whose node ids a scene names with `region`. |
-| `tree/<pageId>` | The splash.tree/3 document of one page. |
+| `versions` | The published versions, newest first (publication.versions); `?limit=50`. |
+| `pending-changes` | What changed since the live version, by area (publication.pending). |
+| `tree/<pageId>` | The splash.tree/3 document of one page; with `?node=<nodeId>&depth=1`, that node and its subtree only (tree.node). |
 | `outline/<pageId>` | The compact outline of one page's tree. |
 | `motion/<pageId>` | One page's scenes and their findings. |
-| `component/<key>` | The cells of one design-system component, such as `button`. |
+| `component/<key>` | The cells of one design-system component, such as `button`, filtered and paged (designSystem.readComponent): `?variant=primary&state=hover&own=true`, plus `size`, `part`, `breakpoint`, `property`, `resolved=true`, `css=true`, `limit` and `cursor`. |
+| `catalog/<type>` | One node type's whole registry entry, props schema included (catalog.entry), such as `catalog/ds.button`. |
+| `preset/<presetId>` | One preset with its tree (preset.read): `?kind=section` is required, `source=site` for the site library. |
+| `versions/<versionId>` | The pages of one published version, with what a rollback of each would change (publication.versionPages). |

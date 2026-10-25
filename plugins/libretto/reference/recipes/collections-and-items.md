@@ -39,7 +39,7 @@ A repeater node clones its child for each item:
 
 - Bind a prop to a field with `{ "$bind": "item.<field>" }`; `item.$url` is the item's page address, `item.$index` its position; `{ "$bind": "item.date", "template": "Dal {value}" }` wraps the value.
 - `filter` (up to 8) and `sort` (up to 3) narrow and order; `limit` caps; `offset` skips.
-- Prefer a preset that already holds a repeater (a projects grid, a team list) and change its `source` with `set_props`/the node's source, rather than building the card by hand. Read an existing repeater in the tree first and copy its shape: `jq '.. | objects | select(.kind? == "repeater")' FILE`.
+- Prefer a preset that already holds a repeater (a projects grid, a team list) and change its `source` with `set_props`/the node's source, rather than building the card by hand. Read an existing repeater first and copy its shape: find a `repeater` line in the outline, then `tree/<pageId>?node=<repeater id>&depth=2`.
 - A dynamic page (one page per item) is a page set up by a platform admin; check `site_context` pages for one bound to the collection.
 
 ## Check

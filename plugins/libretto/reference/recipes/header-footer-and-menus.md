@@ -12,8 +12,8 @@ Operations: [pages and trees](../operations/pages-and-trees.md) (`region.read`, 
 
 ## Change the header or footer
 
-1. `region.read` `{ "region": "header" }` through `dry_run_ops`: the answer's `pageId` and `tree` (root id, nodes). Or `read_resources` `splash://site/<siteId>/regions` for every region at once.
-2. Find the node (search the saved answer with `jq '.. | objects | select(.name? == "Logo")'`).
+1. Find the region's page in `site_context`: the pages named `region-header`, `region-footer`, `region-above`, `region-below`. Read its outline (`outline/<region pageId>`): the first line is the region root.
+2. Read the node you change: `tree/<region pageId>?node=<nodeId>&depth=1`. (`region.read` `{ "region": "header" }` and the `regions` resource answer whole region trees: use them only to copy a large subtree.)
 3. A `tree.commit` on the region's `pageId`, exactly like a page: `set_props`, `set_style`, `set_variant`, `insert`, `move`, `remove`. The base revision is `tree:<region pageId>` (in `site_context.baseRevisions`).
 4. New section in a region: `preset.insert` with the region's `pageId` and the region root as `parentId` ([sections from presets](sections-from-presets.md)).
 5. Dry run, apply, look at two pages (every page shows the change): [preview and visual check](preview-and-verify.md).

@@ -54,19 +54,20 @@
       "Findings in the answer cover the whole page: look at the ones whose `nodeId` you touched."
     ],
     "tree.read": [
-      "The `tree/<pageId>` resource returns the same document. Trees are often longer than Claude Code shows inline: search the saved file with `jq '.. | objects | select(.id? == \"<nodeId>\")'`."
+      "The whole tree, often too large for the conversation. Read the outline resource first, then one node with `tree.node` (or `tree/<pageId>?node=<nodeId>&depth=1`)."
     ],
     "preset.insert": [
       "A section preset goes under a tree root: the page root, or a region root from `region.read`. A section inside a region is refused as `I5.section_placement`. The answer's `nodeId` is the new node."
     ],
     "preset.list": [
-      "The answer carries each preset's whole tree and is large; pass `kind` (and `source`) to narrow it, and search the saved file with `jq '.[] | {id, kind, label}'`."
+      "Answers every preset with its whole tree: use `preset.index` (or the `presets` resource) to choose, then `preset.read` for one."
     ],
     "designSystem.setToken": [
       "A path that does not exist is created as a new token. Check the path in the `design-system` resource first; add tokens only on purpose."
     ],
     "designSystem.setTokens": [
-      "The contrast gate reads the end state of the whole batch: change a palette step and the role that sits on it together."
+      "The contrast gate reads the end state of the whole batch: change a palette step and the role that sits on it together.",
+      "The answer is the change: `changes` (the overrides added, changed or removed), `errors`, at most 20 `warnings` about what changed, and `warningCount` / `warningsByReason` for the whole system. A dry run says `dryRun: true`."
     ],
     "designSystem.lint": [
       "Read-only; run it through `dry_run_ops`. The answer also carries the whole compiled CSS: read `findings`."
@@ -105,7 +106,7 @@
       "Publish only on the human's explicit go in the conversation. Alone in its batch, with `history` in `baseRevisions` (from a fresh `site_context`) and `\"confirmed\": [\"publish\"]`. The answer's `version.id` is the version to roll back to later."
     ],
     "publication.activate": [
-      "Needs `versions.activate`: a platform admin, or the workspace owner of the site's workspace. Needs a version id: from a publish answer, or from `item.history` on a collection item; the admin's Publish & versions page shows no ids (its Make live button does the same). It replaces the draft as well: unpublished changes are lost."
+      "Needs `versions.activate`: a platform admin, or the workspace owner of the site's workspace. Take the version id from `publication.versions`. It replaces the draft as well: unpublished changes are lost."
     ],
     "publication.rollbackPage": [
       "Restores one page of the draft from a version; publish afterwards (with the human's go) to serve it."
@@ -118,6 +119,24 @@
     ],
     "site.updateLanguages": [
       "Needs `site.admin`: only a platform admin's token. An editor or workspace owner asks a platform admin to add or remove a language."
+    ],
+    "tree.node": [
+      "The read to use before any node edit: props, styles, meta, variant and theme of one node, its children to `depth`. Its `revision` is the `tree:<pageId>` base revision. `cut` names the children left out: read them with another `tree.node` if you need them."
+    ],
+    "catalog.read": [
+      "The whole registry at once. Use `catalog.index` (or the `catalog` resource) to choose a type, then `catalog.entry` (`catalog/<type>`) for its props."
+    ],
+    "designSystem.read": [
+      "Small by default: an index of sets, themes, component variant keys and token group sizes. Ask for one group's values with `tokens` (`design-system?tokens=space`); `css: true` only when you need the stylesheet."
+    ],
+    "designSystem.readComponent": [
+      "Filter before reading: `variant` and `state` first, `own: true` for the cells actually set. Page with `cursor` while `nextCursor` is set; `total` says how many match."
+    ],
+    "publication.versions": [
+      "The ids `publication.activate` and `publication.rollbackPage` need, with dates, notes and which version is live. Read it before any rollback."
+    ],
+    "publication.pending": [
+      "What a publish would ship, by area, everyone's changes included. Read it before asking the human for the go; a changed page still in draft status stays out."
     ]
   },
   "pending": {

@@ -11,13 +11,23 @@ Use the editing loop of the `libretto-editing` skill: `site_context`, read, `dis
 
 A whole design update (a brief, a reference, a Figma file) has its own step-by-step recipe: [design update](../../reference/recipes/design-update.md). Contrast and accessibility: [contrast and a11y](../../reference/recipes/contrast-and-a11y.md). Every design-system operation: [design-system reference](../../reference/operations/design-system.md); brand-wide setup: [brand](../../reference/operations/brand.md).
 
-## Read first
+## Read first, small
 
-- `splash://site/<siteId>/design-system`: `sets`, `themes`, `tokens` (by group, each with its value per set and resolved per theme) and `components` (variants, sizes, states, parts).
-- `splash://site/<siteId>/component/<key>` (such as `button`): every cell of the component, its value, its blueprint value and what it resolves to.
-- Both are large. When Claude Code saves them to a file, search with `jq`, for example `jq '.tokens[] | select(.group=="color") | .tokens[] | {path, sets}'`.
-- `designSystem.lint` and `designSystem.diff` (read-only, run them through `dry_run_ops`) report problems and what differs from the blueprint.
-- Every design-system dry run and apply answers about 1 MB: one `warning` finding per AAA contrast pair (over a thousand on Archiplan) plus the compiled CSS. Claude Code saves it to a file; read only what matters: `jq -c '{requestId, changed, revisions, errors: [.findings[] | select(.severity == "error")], aaa: ([.findings[] | select(.severity == "warning")] | length)}' FILE`.
+Read only what the change needs, through resource queries (each is a registry read you could also run through `dry_run_ops`):
+
+- `splash://site/<siteId>/design-system` (`designSystem.read`): the index, with the revision, sets, themes, every component's variant keys and each token group's size. Add a group's paths and values with `?tokens=color.palette,space`; `?components=true` adds each component's sizes, states and parts (the segments of a cell key). Never ask for `css=true` unless you need the stylesheet.
+- `splash://site/<siteId>/component/<key>?variant=primary&state=hover&own=true` (`designSystem.readComponent`): only the cells you mean. `own=true` keeps the cells actually set; filter by `size`, `part`, `breakpoint`, `property` too. Answers page by `limit` (100) with `total` and `nextCursor`: a large component has thousands of cells, so filter first.
+- `designSystem.lint` and `designSystem.diff` (read-only, through `dry_run_ops`) report problems and what differs from the blueprint. Their answers still carry the compiled CSS: when Claude Code saves one to a file, read its `findings` and `diff` only.
+
+## Check the answer of a write
+
+A design-system write (in `dry_run_ops` or `apply_ops`) answers its change, not the whole system. In each `results[].output`:
+
+- `dryRun` is `true` in a dry run; `changed` says whether anything would move; `revision` is the design-system revision it reaches.
+- `changes`: the overrides it adds, changes or removes. Check they are exactly what you meant (no extra token, the right set and theme).
+- `errors`: must be empty before you apply (an AA refusal comes back as a `422` instead).
+- `warnings`: at most 20, about what you changed (an AAA pair of the cell you touched, a lint note on your token). Tell the user about them.
+- `warningCount` and `warningsByReason`: the whole system's warnings by reason (`below-aaa`, `decorative`, `asset-missing`...). Compare the counts before and after: a jump means your change hurt pairs elsewhere.
 
 ## How it is built
 
@@ -61,7 +71,7 @@ When the gate refuses: pick another palette step, or change the palette step and
 ## Never
 
 - Never write a raw colour, size or font where a token exists, in a cell, a mixin or a node style.
-- Never invent a token path by accident: `setToken` on a path that does not exist **creates** a new token. Check the path in the `design-system` resource first; add a new token only when the user wants one.
+- Never invent a token path by accident: `setToken` on a path that does not exist **creates** a new token. Check the path in `design-system?tokens=<its group>` first; add a new token only when the user wants one.
 - Never edit `core` palette values when the user means a role ("the accent text"): change the role in `semantic-light` / `semantic-dark`.
 - Never delete a variant, a mixin or a theme, or run `designSystem.resetToBlueprint`, without the user's explicit yes: they are destructive and pages may use them.
 - Never work around the contrast gate or a `403` (the site's access settings may lock parts of the design system). If the refusal looks wrong, open a ticket (`libretto-report-issue`).

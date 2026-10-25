@@ -107,7 +107,8 @@ async function remoteSession() {
     const answer = await send({ jsonrpc: '2.0', id: nextId++, method: 'tools/call', params: { name, arguments: args } })
     if (answer?.error) throw new LibrettoError(`Libretto refused ${name}: ${answer.error.message}`, answer.error)
     const result = answer?.result
-    const value = result?.structuredContent ?? parseText(result)
+    // Libretto answers tools as JSON text; older servers also sent structuredContent.
+    const value = parseText(result) ?? result?.structuredContent
     if (result?.isError) throw new LibrettoError(`Libretto refused ${name}`, value)
     return value
   }

@@ -24,7 +24,7 @@ Dry run first, then again without `dryRun`. The answer's `answer` holds the medi
 
 ## 3. Place it
 
-- On an image node: `set_props` `{ id, patch: { "src": { "$media": "<media id>" } } }` in a `tree.commit`. Find the node in the outline (`kind:type` such as `primitive:image`); the prop names come from the `catalog` resource for that type (some types name it `media` or `image`, and carry their own alt prop).
+- On an image node: `set_props` `{ id, patch: { "src": { "$media": "<media id>" } } }` in a `tree.commit`. Find the node in the outline (`kind:type` such as `primitive:image`); the prop names come from `catalog/<type>` for that type (some types name it `media` or `image`, and carry their own alt prop).
 - A new image: `insert` an image node of a type listed in the catalogue, with `props.src` `{ "$media": "<id>" }` and a fresh 8-character id.
 - In a collection item: the media field takes the media id ([collections](collections-and-items.md)).
 - As a page's featured or social image: `page.update` with the field `page.read` shows.

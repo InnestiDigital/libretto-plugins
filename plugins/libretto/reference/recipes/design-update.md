@@ -6,11 +6,11 @@ Operations: [design-system](../operations/design-system.md), [media-and-fonts](.
 
 ## 1. Take stock
 
-1. `site_context`, then `read_resources` on `splash://site/<siteId>/design-system`. The answer is large; Claude Code saves it to a file. Query it, do not read it whole:
-   - every token: `jq -r '.. | objects | select(.path? and .type? and .sets?) | "\(.path)\t\(.type)\t\(.sets|tostring)"' FILE`
-   - one token: `jq -c '.. | objects | select(.path? == "color.text.accent")' FILE`
-   - components and variants: `jq -c '.. | objects | select(.variants? and .parts?) | {key, variants: [.variants[].key]}' FILE`
-   - themes: `jq -c '.. | objects | select(.sets? and .isDefault? != null) | {key, sets}' FILE`
+1. `site_context`, then `read_resources` on `splash://site/<siteId>/design-system`: a small index (sets, themes, each component's variant keys, each token group's size). Then read only the groups the brief touches, one query each:
+   - colours: `design-system?tokens=color.palette,color` (palette steps, then the roles);
+   - type: `design-system?tokens=font.family,type`;
+   - space and shape: `design-system?tokens=space,radius,shadow`.
+   Never read the whole design system (`css=true` adds a 240 KB stylesheet you do not need).
 2. `designSystem.diff` through `dry_run_ops`: what the site already changed from its blueprint (read `diff`, ignore `css`).
 3. Write the user a short mapping from the brief to tokens before changing anything: which palette steps, which roles, which type styles, which component variants. Ask about anything the brief leaves open.
 
@@ -42,7 +42,7 @@ Operations: [design-system](../operations/design-system.md), [media-and-fonts](.
 
 ## 5. Component looks
 
-1. Read the component: `read_resources` `splash://site/<siteId>/component/<key>` (large; query with `jq -c '.. | objects | select(.cell? and (.cell | startswith("primary.")))' FILE`). A cell is `<variant>.<size|all>.<state>.<part>.base.<property>`.
+1. Read only the cells you will change: `read_resources` `splash://site/<siteId>/component/<key>?variant=primary&state=hover&own=true` (add `part`, `property`, `breakpoint` to narrow further; page with `cursor` while `nextCursor` is set). A cell is `<variant>.<size|all>.<state>.<part>.<breakpoint>.<property>`; `design-system?components=true` lists each component's sizes, states and parts.
 2. `designSystem.setComponentCell` `{ "component": "button", "cells": [{ "cell": "primary.all.hover.container.base.background", "value": "{color.bg.accent-strong}" }] }`. Values are tokens.
 3. A look the site lacks: `designSystem.createVariant` `{ component, variant, label, from }`, then its cells; then `set_variant` on the nodes that should use it (`libretto-editing`).
 4. A node that already looks right through local overrides: `designSystem.promoteVariant` `{ pageId, nodeId, variant, label }` turns them into a variant and re-attaches the node.

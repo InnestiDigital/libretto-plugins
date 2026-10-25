@@ -4,7 +4,7 @@
 
 Tokens in sets, themes that stack sets, component variants and their cells, mixins. Every write passes the AA contrast gate in every theme on the batch's end state.
 
-[`designSystem.promoteVariant`](#designsystempromotevariant) · [`designSystem.setToken`](#designsystemsettoken) · [`designSystem.setTokens`](#designsystemsettokens) · [`designSystem.setComponentCell`](#designsystemsetcomponentcell) · [`designSystem.createVariant`](#designsystemcreatevariant) · [`designSystem.createTheme`](#designsystemcreatetheme) · [`designSystem.activateSet`](#designsystemactivateset) · [`designSystem.setScheme`](#designsystemsetscheme) · [`designSystem.resetToBlueprint`](#designsystemresettoblueprint) · [`designSystem.importTokens`](#designsystemimporttokens) · [`designSystem.diff`](#designsystemdiff) · [`designSystem.lint`](#designsystemlint) · [`designSystem.createSet`](#designsystemcreateset) · [`designSystem.updateTheme`](#designsystemupdatetheme) · [`designSystem.updateVariant`](#designsystemupdatevariant) · [`designSystem.deleteVariant`](#designsystemdeletevariant) · [`designSystem.setMixin`](#designsystemsetmixin) · [`designSystem.deleteMixin`](#designsystemdeletemixin)
+[`designSystem.promoteVariant`](#designsystempromotevariant) · [`designSystem.setToken`](#designsystemsettoken) · [`designSystem.setTokens`](#designsystemsettokens) · [`designSystem.setComponentCell`](#designsystemsetcomponentcell) · [`designSystem.createVariant`](#designsystemcreatevariant) · [`designSystem.createTheme`](#designsystemcreatetheme) · [`designSystem.activateSet`](#designsystemactivateset) · [`designSystem.setScheme`](#designsystemsetscheme) · [`designSystem.resetToBlueprint`](#designsystemresettoblueprint) · [`designSystem.importTokens`](#designsystemimporttokens) · [`designSystem.diff`](#designsystemdiff) · [`designSystem.lint`](#designsystemlint) · [`designSystem.createSet`](#designsystemcreateset) · [`designSystem.updateTheme`](#designsystemupdatetheme) · [`designSystem.updateVariant`](#designsystemupdatevariant) · [`designSystem.deleteVariant`](#designsystemdeletevariant) · [`designSystem.setMixin`](#designsystemsetmixin) · [`designSystem.deleteMixin`](#designsystemdeletemixin) · [`designSystem.read`](#designsystemread) · [`designSystem.readComponent`](#designsystemreadcomponent)
 
 ## designSystem.promoteVariant
 
@@ -71,6 +71,8 @@ Example input:
 ```
 
 > The contrast gate reads the end state of the whole batch: change a palette step and the role that sits on it together.
+
+> The answer is the change: `changes` (the overrides added, changed or removed), `errors`, at most 20 `warnings` about what changed, and `warningCount` / `warningsByReason` for the whole system. A dry run says `dryRun: true`.
 
 ## designSystem.setComponentCell
 
@@ -392,3 +394,57 @@ Example input:
 ```json
 {"key":"band"}
 ```
+
+## designSystem.read
+
+Read the draft design system's index: its revision, sets, themes, every component with its variant keys, and every token group with its number of paths. Ask for more with `tokens` (the groups whose paths and values to include, such as ["color.palette", "space"]), `components: true` (each component's sizes, states and parts, the segments of a setComponentCell key), `css: true` (the compiled stylesheet, about 240 KB on a large site) or `embeds: true`. The default answer stays small; read one component's cells with designSystem.readComponent.
+
+- permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `read`; writes nothing.
+
+| Input | Type | Required |
+|---|---|---|
+| `tokens` | string (min 1)[] (≤32) |  |
+| `components` | boolean |  |
+| `css` | boolean |  |
+| `embeds` | boolean |  |
+
+Output: { revision: integer ≥-9007199254740991, detached?: { component: string, count: integer ≥0 }[], sets: { key: string, label: string, position: integer ≥-9007199254740991, siteAdded: boolean }[], themes: ({ key: string, label: string, sets: string[], isDefault?: boolean, draft?: boolean, activation?: { prefersColorScheme?… (full schema: discover_operations)
+
+Example input:
+
+```json
+{"tokens":["color.palette"]}
+```
+
+> Small by default: an index of sets, themes, component variant keys and token group sizes. Ask for one group's values with `tokens` (`design-system?tokens=space`); `css: true` only when you need the stylesheet.
+
+## designSystem.readComponent
+
+Read the cells of one design-system component, filtered and paged: `variant`, `size`, `state`, `part`, `breakpoint` and `property` keep the cells whose key segment equals them (a cell key is `<variant>.<size>.<state>.<part>.<breakpoint>.<property>`), and `own: true` keeps only the cells set at their own key, leaving out the inherited ones. Each cell has its own value (null when it inherits), the key it inherits from and the blueprint's value; `resolved: true` adds its value in every theme, `css: true` the blueprint's baseline stylesheet. `limit` cells (100 by default) from `cursor`; `total` counts every match and `nextCursor` names the next page. A large component has thousands of cells: filter by variant and state first.
+
+- permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `read`; writes nothing.
+
+| Input | Type | Required |
+|---|---|---|
+| `component` | string (min 1) | yes |
+| `variant` | string (min 1) |  |
+| `size` | string (min 1) |  |
+| `state` | string (min 1) |  |
+| `part` | string (min 1) |  |
+| `breakpoint` | string (min 1) |  |
+| `property` | string (min 1) |  |
+| `own` | boolean |  |
+| `resolved` | boolean |  |
+| `css` | boolean |  |
+| `limit` | integer ≥1 ≤1000 |  |
+| `cursor` | integer ≥0 |  |
+
+Output: { revision: integer ≥-9007199254740991, component: string, total: integer ≥0, nextCursor: integer ≥0 \| null, cells: ({ cell: string, value: string (min 1) \| { component: …, variant: … } \| null, source: { cell: string, inheritedFromDefault: boolean }, blueprint: string (min 1) \| { component: …, variant: … } \| null, reso… (full schema: discover_operations)
+
+Example input:
+
+```json
+{"component":"button","variant":"primary","state":"hover","own":true}
+```
+
+> Filter before reading: `variant` and `state` first, `own: true` for the cells actually set. Page with `cursor` while `nextCursor` is set; `total` says how many match.

@@ -4,7 +4,7 @@
 
 A page is a row (slug, title, status, frame, SEO) plus a tree (`splash.tree/2`) of nodes. Header, footer, above and below are regions: their trees live on pages named `region-*`, and `region.read` gives their root ids. Every node edit is a `tree.commit` of `splash.ops/2` ops.
 
-[`catalog.read`](#catalogread) · [`region.read`](#regionread) · [`tree.read`](#treeread) · [`tree.commit`](#treecommit) · [`content.importMarkdown`](#contentimportmarkdown) · [`page.read`](#pageread) · [`page.create`](#pagecreate) · [`page.update`](#pageupdate) · [`page.delete`](#pagedelete) · [`page.forkTemplate`](#pageforktemplate) · [`page.setPassword`](#pagesetpassword)
+[`catalog.read`](#catalogread) · [`region.read`](#regionread) · [`tree.read`](#treeread) · [`tree.commit`](#treecommit) · [`content.importMarkdown`](#contentimportmarkdown) · [`page.read`](#pageread) · [`page.create`](#pagecreate) · [`page.update`](#pageupdate) · [`page.delete`](#pagedelete) · [`page.forkTemplate`](#pageforktemplate) · [`page.setPassword`](#pagesetpassword) · [`tree.node`](#treenode) · [`catalog.index`](#catalogindex) · [`catalog.entry`](#catalogentry)
 
 ## catalog.read
 
@@ -20,6 +20,8 @@ Example input:
 ```json
 {}
 ```
+
+> The whole registry at once. Use `catalog.index` (or the `catalog` resource) to choose a type, then `catalog.entry` (`catalog/<type>`) for its props.
 
 ## region.read
 
@@ -57,7 +59,7 @@ Example input:
 {"pageId":"6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f"}
 ```
 
-> The `tree/<pageId>` resource returns the same document. Trees are often longer than Claude Code shows inline: search the saved file with `jq '.. | objects | select(.id? == "<nodeId>")'`.
+> The whole tree, often too large for the conversation. Read the outline resource first, then one node with `tree.node` (or `tree/<pageId>?node=<nodeId>&depth=1`).
 
 ## tree.commit
 
@@ -241,4 +243,59 @@ Example input:
 
 ```json
 {"pageId":"6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f","password":"press-preview-2026"}
+```
+
+## tree.node
+
+Read one node of a page's draft tree with its props, styles, meta, variant and theme, and its children down to `depth` levels (1 by default, 0 for the node alone), without reading the whole tree. `path` names its ancestors from the root; `cut` lists the child ids left out at the depth limit. Find node ids in the page's outline resource; the answer's `revision` is the tree:<pageId> base revision of the batch that changes it.
+
+- permission `site.read` (admin, editor); class `read`; writes nothing.
+
+| Input | Type | Required |
+|---|---|---|
+| `pageId` | string (min 1) | yes |
+| `nodeId` | nodeId | yes |
+| `depth` | integer ≥0 ≤4 |  |
+
+Output: { pageId: string, revision: integer ≥0, path: ({ id: nodeId, kind: "root" \| "section" \| "repeater" \| "outlet" \| "primitive" \| "component" \| "instance", type: string })[], node: { meta?: { canvas?: boolean, attributes?: Record<string, string>, reveal?: { effect: …, distance?: …, mode?: …, once: …, threshold: …, duration… (full schema: discover_operations)
+
+Example input:
+
+```json
+{"pageId":"6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f","nodeId":"claim001","depth":1}
+```
+
+> The read to use before any node edit: props, styles, meta, variant and theme of one node, its children to `depth`. Its `revision` is the `tree:<pageId>` base revision. `cut` names the children left out: read them with another `tree.node` if you need them.
+
+## catalog.index
+
+List every node type this site can place, one entry each: its id (the node type of tree.commit inserts), kind, label, category, parts, states, slot names, what its children may be (`accepts`) and where it may sit (`parentOneOf`). Read one type's props schema with catalog.entry; list the presets with preset.index.
+
+- permission `site.read` (admin, editor); class `read`; writes nothing.
+- Input: `{}`.
+
+Output: { theme: string, entries: { id: string, kind: string, label: string, category?: string, parts: string[], states: string[], slots: string[], accepts?: string[], parentOneOf?: string[] }[] }
+
+Example input:
+
+```json
+{}
+```
+
+## catalog.entry
+
+Read one node type's whole registry entry by its id (`box`, `ds.button`, `sticky-bar`): its props schema with each field's help, parts, states, slots and content model. Refused with 404 type_not_found for an id catalog.index does not list.
+
+- permission `site.read` (admin, editor); class `read`; writes nothing.
+
+| Input | Type | Required |
+|---|---|---|
+| `type` | string (min 1) | yes |
+
+Output: { id: string, kind: "primitive" \| "ds" \| "behaviour" \| "section", label: string (min 1, max 80), keywords?: string (min 1, max 40)[] (≤16), category?: string, tags?: string[], propsSchema: ({ id: string, type: "text" \| "richtext-single" \| "richtext-inline" \| "richtext-block" \| "select" \| "toggle" \| "number" \| "range" \|… (full schema: discover_operations)
+
+Example input:
+
+```json
+{"type":"ds.button"}
 ```

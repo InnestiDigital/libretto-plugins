@@ -4,7 +4,7 @@
 
 Publishing snapshots the draft into a live version. History records every committed batch with its inverse, so `history.undo` reverses a batch. Provider operations (domains, publication effects) leave an external request that `external.status` / `external.close` inspect.
 
-[`history.read`](#historyread) · [`history.undo`](#historyundo) · [`publication.publish`](#publicationpublish) · [`publication.activate`](#publicationactivate) · [`publication.rollbackPage`](#publicationrollbackpage) · [`external.status`](#externalstatus) · [`external.close`](#externalclose)
+[`history.read`](#historyread) · [`history.undo`](#historyundo) · [`publication.publish`](#publicationpublish) · [`publication.activate`](#publicationactivate) · [`publication.rollbackPage`](#publicationrollbackpage) · [`external.status`](#externalstatus) · [`external.close`](#externalclose) · [`publication.versions`](#publicationversions) · [`publication.versionPages`](#publicationversionpages) · [`publication.pending`](#publicationpending)
 
 ## history.read
 
@@ -82,7 +82,7 @@ Example input:
 {"versionId":"8b9c0d1e-2f3a-4b4c-8d5e-6f7a8b9c0d1e"}
 ```
 
-> Needs `versions.activate`: a platform admin, or the workspace owner of the site's workspace. Needs a version id: from a publish answer, or from `item.history` on a collection item; the admin's Publish & versions page shows no ids (its Make live button does the same). It replaces the draft as well: unpublished changes are lost.
+> Needs `versions.activate`: a platform admin, or the workspace owner of the site's workspace. Take the version id from `publication.versions`. It replaces the draft as well: unpublished changes are lost.
 
 ## publication.rollbackPage
 
@@ -140,3 +140,58 @@ Example input:
 ```json
 {"requestId":"0b7c6d5e-4f3a-4b2c-8d1e-9f0a1b2c3d4e"}
 ```
+
+## publication.versions
+
+List the site's published versions, newest first, `limit` of them (20 by default): each with its id (the versionId of publication.activate and publication.rollbackPage), its date (`timestamp`), its status, its note and whether it is the live one (`isActive`). Read the pages of one with publication.versionPages.
+
+- permission `site.read` (admin, editor); class `read`; writes nothing.
+
+| Input | Type | Required |
+|---|---|---|
+| `limit` | integer ≥1 ≤100 |  |
+
+Output: { versions: ({ id: uuid, hash: string, timestamp: string, status: "building" \| "ready" \| "failed", isActive: boolean, note?: string, hasScreenshot?: boolean, hasMultipleScreenshots?: boolean })[] }
+
+Example input:
+
+```json
+{"limit":10}
+```
+
+> The ids `publication.activate` and `publication.rollbackPage` need, with dates, notes and which version is live. Read it before any rollback.
+
+## publication.versionPages
+
+List the pages of one published version: each with its id in that version (the pageId of publication.rollbackPage), its title and path, the draft page at the same path, and what a rollback of it would change in the draft (title, settings, content, animations; empty when the draft already matches).
+
+- permission `site.read` (admin, editor); class `read`; writes nothing.
+
+| Input | Type | Required |
+|---|---|---|
+| `versionId` | uuid | yes |
+
+Output: { versionId: uuid, pages: ({ id: string (min 1), kind: "page" \| "region" \| "template" \| "component", title: string, path: string, draft: { id: string (min 1), title: string } \| null, changes: ("title" \| "settings" \| "content" \| "animations")[] })[] }
+
+Example input:
+
+```json
+{"versionId":"8b9c0d1e-2f3a-4b4c-8d5e-6f7a8b9c0d1e"}
+```
+
+## publication.pending
+
+Say what changed since the live version, newest first: one entry per area (pages, designSystem, siteSettings, navigation, collections, fonts, ...) with the date of its latest draft edit and, for pages and collections, the changed rows. A changed page whose status is draft stays out of publication.publish until it is published itself; mark it with page.update.
+
+- permission `site.read` (admin, editor); class `read`; writes nothing.
+- Input: `{}`.
+
+Output: { neverPublished: boolean, publishedAt: string \| null, areas: ({ area: "pages" \| "designSystem" \| "siteSettings" \| "brandIdentity" \| "envVariables" \| "apiConfigs" \| "animationScenes" \| "navigation" \| "collections" \| "fonts", changedAt: string, items: ({ kind: …, id: …, title: …, status?: … } \| { kind: …, id: …, title: … (full schema: discover_operations)
+
+Example input:
+
+```json
+{}
+```
+
+> What a publish would ship, by area, everyone's changes included. Read it before asking the human for the go; a changed page still in draft status stays out.

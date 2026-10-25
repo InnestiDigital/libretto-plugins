@@ -261,7 +261,9 @@ async function compareLive() {
   const live = new Set()
   for (let cursor = 0; cursor !== null;) {
     const answer = await rpc({ jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'discover_operations', arguments: { query: '', cursor, limit: 100 } } })
-    const page = answer.result.structuredContent ?? JSON.parse(answer.result.content[0].text)
+    // Libretto answers tools as JSON text; older servers also sent structuredContent.
+    const text = answer.result.content?.find(part => part.type === 'text')?.text
+    const page = text === undefined ? answer.result.structuredContent : JSON.parse(text)
     for (const op of page.operations) live.add(op.name)
     cursor = page.nextCursor
   }

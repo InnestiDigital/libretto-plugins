@@ -6,7 +6,7 @@ Operations: [components and presets](../operations/components-and-presets.md), [
 
 ## 1. Choose the preset
 
-1. `read_resources` `splash://site/<siteId>/presets`, or `preset.list` through `dry_run_ops` with `{ "kind": "section" }` (kinds: `section`, `box`, `element`). Each preset has `id`, `kind`, `source`, `label`, `category`, `description`, `keywords` and its whole tree, so the answer is large: when Claude Code saves it to a file, list them with `jq -r '.. | objects | select(.kind? and .source? and .label?) | [.id, .kind, .source, .category, .label, (.description // "")] | @tsv' FILE`.
+1. `read_resources` `splash://site/<siteId>/presets?kind=section` (`preset.index`; kinds: `section`, `box`, `element`; `&source=site` for the site's own): each preset's `id`, `kind`, `source`, `label`, `category`, `description` and `keywords`, without trees. Read the tree of the one you are about to insert, if you need it, with `preset/<presetId>?kind=section`. Do not use `preset.list`: it answers every preset with its tree.
 2. Each preset has a `source`: `theme` (built in) or `site` (saved by someone on this site with `preset.save`).
 3. Pick by role (what the section does), not by its sample text. Tell the user which one and why; offer two when the brief is open.
 

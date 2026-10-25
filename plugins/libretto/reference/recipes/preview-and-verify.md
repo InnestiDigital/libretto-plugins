@@ -5,8 +5,8 @@ Use after every applied change, before telling the user it is done. An apply ans
 ## 1. Read it back (always)
 
 - `splash://site/<siteId>/outline/<pageId>`: the node is where you meant, with the variant and theme you set.
-- The node in `splash://site/<siteId>/tree/<pageId>`: the props and styles you wrote, tokens and all.
-- For the design system: the token or cell in the `design-system` or `component/<key>` resource.
+- The node: `tree/<pageId>?node=<nodeId>&depth=0`, the props and styles you wrote, tokens and all.
+- For the design system: the token in `design-system?tokens=<its group>`, or the cell in `component/<key>?variant=<v>&state=<s>&own=true`.
 - `history.read` `{ requestId }`: the committed outcome of a batch, rechecked.
 
 ## 2. See it

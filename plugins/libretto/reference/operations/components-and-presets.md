@@ -4,7 +4,7 @@
 
 Presets are insertable copies (theme presets and the site's own library). Site components are reusable subtrees with exposed props: every instance follows the component. Effects are saved visual effects nodes can use.
 
-[`preset.list`](#presetlist) · [`preset.insert`](#presetinsert) · [`preset.save`](#presetsave) · [`preset.rename`](#presetrename) · [`preset.delete`](#presetdelete) · [`component.list`](#componentlist) · [`component.createFromNode`](#componentcreatefromnode) · [`component.update`](#componentupdate) · [`component.instantiate`](#componentinstantiate) · [`component.detach`](#componentdetach) · [`effect.list`](#effectlist) · [`effect.save`](#effectsave) · [`effect.delete`](#effectdelete)
+[`preset.list`](#presetlist) · [`preset.insert`](#presetinsert) · [`preset.save`](#presetsave) · [`preset.rename`](#presetrename) · [`preset.delete`](#presetdelete) · [`component.list`](#componentlist) · [`component.createFromNode`](#componentcreatefromnode) · [`component.update`](#componentupdate) · [`component.instantiate`](#componentinstantiate) · [`component.detach`](#componentdetach) · [`effect.list`](#effectlist) · [`effect.save`](#effectsave) · [`effect.delete`](#effectdelete) · [`preset.index`](#presetindex) · [`preset.read`](#presetread)
 
 ## preset.list
 
@@ -25,7 +25,7 @@ Example input:
 {"kind":"section"}
 ```
 
-> The answer carries each preset's whole tree and is large; pass `kind` (and `source`) to narrow it, and search the saved file with `jq '.[] | {id, kind, label}'`.
+> Answers every preset with its whole tree: use `preset.index` (or the `presets` resource) to choose, then `preset.read` for one.
 
 ## preset.insert
 
@@ -263,4 +263,43 @@ Example input:
 
 ```json
 {"effectId":"soft-lift"}
+```
+
+## preset.index
+
+List the presets the site can insert, theme presets first, then the site library, without their trees: each with its source, id, kind, label, keywords, category and description. Read one preset's tree with preset.read; insert one with preset.insert.
+
+- permission `site.read` (admin, editor); class `read`; writes nothing.
+
+| Input | Type | Required |
+|---|---|---|
+| `kind` | "section" \| "box" \| "element" |  |
+| `source` | "theme" \| "site" |  |
+
+Output: ({ source: "theme" \| "site", id: string, kind: "section" \| "box" \| "element", label: string (min 1, max 80), keywords?: string (min 1, max 40)[] (≤16), category: string, description?: string (max 280) })[]
+
+Example input:
+
+```json
+{"kind":"section"}
+```
+
+## preset.read
+
+Read one preset with its tree, named as preset.insert names it (`kind`, `presetId`, and `source`, the theme's presets when absent). Refused with 404 preset_not_found when the site has no such preset.
+
+- permission `site.read` (admin, editor); class `read`; writes nothing.
+
+| Input | Type | Required |
+|---|---|---|
+| `kind` | "section" \| "box" \| "element" | yes |
+| `presetId` | string (min 1) | yes |
+| `source` | "theme" \| "site" |  |
+
+Output: { source: "theme" \| "site", id: string, kind: "section" \| "box" \| "element", label: string (min 1, max 80), keywords?: string (min 1, max 40)[] (≤16), category: string, description?: string (max 280), thumbnail?: string, page?: { scroll: { mode: "snap-y", snapType: "mandatory" \| "proximity" } }, scenes?: ({ trigger: { … (full schema: discover_operations)
+
+Example input:
+
+```json
+{"kind":"section","presetId":"hero-split","source":"theme"}
 ```

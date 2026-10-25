@@ -8,8 +8,8 @@ Operations: [pages and trees](../operations/pages-and-trees.md), [components and
 
 1. `site_context`: the page id and `baseRevisions` (you need `tree:<pageId>`).
 2. `read_resources` `splash://site/<siteId>/outline/<pageId>`: one line per node, indented, `id kind:type "name"`, then what the node sets (`variant=`, `theme=`, `ref=` for a component instance). Mixins and styles are only in the tree.
-3. For the nodes you will touch, read their styles in `splash://site/<siteId>/tree/<pageId>` (search the saved file: `jq '.. | objects | select(.id? == "<nodeId>")' FILE`).
-4. `catalog` resource (or `catalog.read`): the node types this site can place, their props and slots. Insert only types listed there.
+3. For each node you will touch, read it alone: `tree/<pageId>?node=<nodeId>&depth=1` (props, styles, variant, theme, and its children one level down). Never the whole tree.
+4. `catalog` resource (`catalog.index`): the node types this site can place, one line each. Before inserting one, read its props with `catalog/<type>` (`catalog.entry`, such as `catalog/ds.button`). Insert only types listed there.
 
 ## 2. Say the plan
 

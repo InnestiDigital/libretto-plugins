@@ -27,7 +27,7 @@ A text is either a plain string (the same in every language) or a **locale map**
 
 ## Translate a page
 
-1. Read the tree (`splash://site/<siteId>/tree/<pageId>`) and list every text prop with its node id, in the default language. With a saved file: `jq -c '.. | objects | select(.props?) | {id, type, props}' FILE`.
+1. Read the outline (`outline/<pageId>`): text nodes show as `primitive:text`, `primitive:richtext`, buttons and links. Read their props section by section with `tree/<pageId>?node=<section id>&depth=4` (a section's subtree, not the whole page), and list every text prop with its node id, in the default language.
 2. Translate them; show the user the list (node, original, translation) for a page of any length before writing.
 3. One `tree.commit` with a `set_props` per node; change only the language asked, keep the others.
 4. Dry run: `translation.missing` findings list texts that still lack the language. Apply, then translate the page's title and SEO fields with `page.update`, and the menu labels.
