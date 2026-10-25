@@ -1,0 +1,14 @@
+{
+  "name": "libretti",
+  "description": "Edit Libretto sites from Claude Code through Libretto's MCP server",
+  "owner": {
+    "name": "Innesti Digital"
+  },
+  "plugins": [
+    {
+      "name": "libretto",
+      "source": "./plugins/libretto",
+      "description": "Connects Claude Code to a Libretto site and teaches it to edit pages, the design system and publication safely"
+    }
+  ]
+}

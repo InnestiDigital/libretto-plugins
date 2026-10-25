@@ -1,0 +1,667 @@
+{
+  "format": "splash.mcpTools",
+  "v": 1,
+  "tools": [
+    {
+      "name": "site_context",
+      "group": "core",
+      "description": "Read this token’s site, compact page summaries, `resources` and `baseRevisions`. `resources` lists every resource of the site as a full URI, `splash://site/<siteId>/<path>` with this site's id, ready for read_resources. `baseRevisions` holds every document revision keyed exactly as an apply_ops batch's baseRevisions (history, pages, designSystem, tree:<pageId>, ...), ready to pass through unchanged.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "discover_operations",
+      "group": "core",
+      "description": "Lazily discover operations by name or by a word of their description: schemas, one worked example input each, permissions, written documents and confirmation requirements. Use the schemas and examples to build apply_ops batches.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "query": {
+            "default": "",
+            "type": "string"
+          },
+          "cursor": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "limit": {
+            "default": 20,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "read_resources",
+      "group": "core",
+      "description": "Read a bounded set of Splash resource URIs from this site (at most 16 per call), each the full `splash://site/<siteId>/<path>` with this site's id (`splash://site/<siteId>/pages`, never `splash://site/pages`). The paths are `context`, `pages`, `catalog`, `design-system`, `presets`, `motion` (scene recipes and diagnosis codes), `regions` (header and footer trees), `tree/<pageId>`, `outline/<pageId>` (the compact tree), `motion/<pageId>` (a page's scenes and findings) and `component/<key>` (the cells of a design-system component such as `button`); site_context.resources lists the ones this site has. No network URLs are fetched.",
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "uris": {
+            "minItems": 1,
+            "maxItems": 16,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "uris"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "apply_ops",
+      "group": "core",
+      "description": "Apply one confirmed, revision-checked operation batch to this token’s site; returns inverses, findings and structured conflicts. A batch with a motion.* operation also reports the scene problems of each touched page as motion.<code> findings; run motion.diagnose { pageId } to read them on their own, and prefer motion.applyRecipe (recipes and knobs from motion.listRecipes or the motion resource) to hand-written scenes. The arguments are the batch itself, at the top level (not wrapped in a `batch` or `file` key): `format: \"splash.batch\"`, `v: 1`, `requestId` (a fresh UUID; resending the same batch with it replays the stored answer), `baseRevisions` (copy site_context.baseRevisions; every document an operation writes must be named) and `operations` (1 to 100 `{ name, input, ref? }`), with optional `dryRun` and `confirmed` ([\"destructive\"], [\"publish\"]). discover_operations gives each operation's input schema and a worked example input.",
+      "example": {
+        "format": "splash.batch",
+        "v": 1,
+        "requestId": "0b7c6d5e-4f3a-4b2c-8d1e-9f0a1b2c3d4e",
+        "baseRevisions": {
+          "history": 12,
+          "site": 3
+        },
+        "operations": [
+          {
+            "name": "site.update",
+            "input": {
+              "name": "Studio"
+            }
+          }
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": true
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "format": {
+            "type": "string",
+            "const": "splash.batch"
+          },
+          "v": {
+            "type": "number",
+            "const": 1
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "baseRevisions": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-z][a-zA-Z]*(?::[a-zA-Z0-9_-]{1,100})?$"
+            },
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "operations": {
+            "minItems": 1,
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z]*\\.[a-z][a-zA-Z_]*$"
+                },
+                "input": {
+                  "$ref": "#/$defs/__schema0"
+                },
+                "ref": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+                }
+              },
+              "required": [
+                "name",
+                "input"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "dryRun": {
+            "default": false,
+            "type": "boolean"
+          },
+          "confirmed": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "destructive",
+                "publish"
+              ]
+            }
+          }
+        },
+        "required": [
+          "format",
+          "v",
+          "requestId",
+          "baseRevisions",
+          "operations"
+        ],
+        "additionalProperties": false,
+        "$defs": {
+          "__schema0": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/__schema0"
+                }
+              },
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "$ref": "#/$defs/__schema0"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "dry_run_ops",
+      "group": "core",
+      "description": "Validate a complete operation batch with transaction rollback; publication and provider effects are refused. A dry run reports each touched page's scene problems as motion.<code> findings (the reasons of motion.diagnose: target-missing, target-ambiguous, stateful-target, overlap, empty-range, hidden-at-rest, never-matches). The arguments are the batch itself, at the top level (not wrapped in a `batch` or `file` key): `format: \"splash.batch\"`, `v: 1`, `requestId` (a fresh UUID; resending the same batch with it replays the stored answer), `baseRevisions` (copy site_context.baseRevisions; every document an operation writes must be named) and `operations` (1 to 100 `{ name, input, ref? }`), with optional `dryRun` and `confirmed` ([\"destructive\"], [\"publish\"]). discover_operations gives each operation's input schema and a worked example input.",
+      "example": {
+        "format": "splash.batch",
+        "v": 1,
+        "requestId": "0b7c6d5e-4f3a-4b2c-8d1e-9f0a1b2c3d4e",
+        "baseRevisions": {
+          "history": 12,
+          "site": 3
+        },
+        "operations": [
+          {
+            "name": "site.update",
+            "input": {
+              "name": "Studio"
+            }
+          }
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "format": {
+            "type": "string",
+            "const": "splash.batch"
+          },
+          "v": {
+            "type": "number",
+            "const": 1
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "baseRevisions": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-z][a-zA-Z]*(?::[a-zA-Z0-9_-]{1,100})?$"
+            },
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "operations": {
+            "minItems": 1,
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-zA-Z]*\\.[a-z][a-zA-Z_]*$"
+                },
+                "input": {
+                  "$ref": "#/$defs/__schema0"
+                },
+                "ref": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+                }
+              },
+              "required": [
+                "name",
+                "input"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "dryRun": {
+            "default": false,
+            "type": "boolean"
+          },
+          "confirmed": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "destructive",
+                "publish"
+              ]
+            }
+          }
+        },
+        "required": [
+          "format",
+          "v",
+          "requestId",
+          "baseRevisions",
+          "operations"
+        ],
+        "additionalProperties": false,
+        "$defs": {
+          "__schema0": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/__schema0"
+                }
+              },
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "$ref": "#/$defs/__schema0"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "job_next_step",
+      "group": "jobs",
+      "description": "Lease the next bounded step of an assistant job and get what it needs: the brief, the summaries of the steps already reported, the steps left (counting this one; 1 means this step must end with done: true) and the job deadline. A step is yours for 5 minutes (leaseUntil). Calling again while the lease is live answers the same stepId, so a lost answer is safe to ask for again; after the lease lapses the step expires and the next call leases a new stepId. A queued job starts on the first call. A job that is cancelled, failed, waiting for review or applied answers job_not_running: stop working on it.",
+      "example": {
+        "jobId": "6f1c2b0e-3d4a-4e5f-8a9b-0c1d2e3f4a5b"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "jobId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "job_report_step",
+      "group": "jobs",
+      "description": "Report the result of a leased step: a summary, the operation calls this step adds to the job's proposal (the operations array of an apply_ops batch, without the batch fields; the server dry-runs the proposal so far plus these calls under your session, and refuses them with job_fragment_invalid and the dry-run issues, the step staying leased so you can fix and report it again), and done. done: false means call job_next_step for the next step; done: true ends the work and the job waits for the operator's review. Nothing is applied to the site: the operator applies the proposal. Reporting the same report again answers the first answer; a different report for an already reported step is job_step_report_conflict (409). A step whose lease lapsed answers job_step_expired.",
+      "example": {
+        "jobId": "6f1c2b0e-3d4a-4e5f-8a9b-0c1d2e3f4a5b",
+        "stepId": "0b7e9d2c-1a3f-4c5d-9e8f-7a6b5c4d3e2f",
+        "report": {
+          "summary": "Darkened the neutral text step for contrast",
+          "operations": [
+            {
+              "name": "designSystem.setTokens",
+              "input": {
+                "writes": [
+                  {
+                    "set": "core",
+                    "path": "color.palette.neutral.900",
+                    "type": "color",
+                    "value": "#4a4a4a"
+                  }
+                ]
+              }
+            }
+          ],
+          "done": false
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "idempotentHint": true,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "stepId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "report": {
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "operations": {
+                "default": [],
+                "maxItems": 100,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-zA-Z]*\\.[a-z][a-zA-Z_]*$"
+                    },
+                    "input": {
+                      "$ref": "#/$defs/__schema0"
+                    },
+                    "ref": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "input"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "done": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "summary",
+              "done"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "jobId",
+          "stepId",
+          "report"
+        ],
+        "additionalProperties": false,
+        "$defs": {
+          "__schema0": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/__schema0"
+                }
+              },
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "$ref": "#/$defs/__schema0"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "render_preview",
+      "group": "render",
+      "description": "See a draft page of this site. mode \"document\" (default) answers its splash.render/1 document and the compiled design-system CSS; mode \"screenshot\" a full-page JPEG for one device. With jobId (document mode only) the job's proposal runs as a dry run and the page is rendered as the proposal would leave it; the draft is not changed. Bounded by 30000 ms: past it the answer is the error code render_timeout.",
+      "example": {
+        "pageId": "<page id from site_context>",
+        "mode": "document",
+        "jobId": "<job id>"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "pageId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "device": {
+            "default": "desktop",
+            "type": "string",
+            "enum": [
+              "desktop",
+              "mobile"
+            ]
+          },
+          "mode": {
+            "default": "document",
+            "type": "string",
+            "enum": [
+              "screenshot",
+              "document"
+            ]
+          },
+          "jobId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "pageId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "compare_reference",
+      "group": "render",
+      "description": "Compare a full-page screenshot of a draft page with a reference image of this site's media library (referenceMediaId, a media id; no URLs). The reference is resized to the capture's width and compared with the visual review's metric: ratio (share of differing pixels, a pixel differs when a channel differs by more than the channel tolerance), heightMismatch (capture minus reference height, in pixels) and the verdict words (\"identical\" at or below the identical ratio, else \"differs (ratio 0.123)\"). Bounded by 30000 ms.",
+      "example": {
+        "pageId": "<page id>",
+        "device": "desktop",
+        "referenceMediaId": "<media id>"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "pageId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "device": {
+            "default": "desktop",
+            "type": "string",
+            "enum": [
+              "desktop",
+              "mobile"
+            ]
+          },
+          "referenceMediaId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "pageId",
+          "referenceMediaId"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ],
+  "resources": [
+    {
+      "path": "context",
+      "template": false,
+      "description": "The site, compact page summaries, its resources and baseRevisions: what site_context answers."
+    },
+    {
+      "path": "pages",
+      "template": false,
+      "description": "The pages of the site, as site_context summarises them."
+    },
+    {
+      "path": "catalog",
+      "template": false,
+      "description": "The catalogue of node types this site can place (catalog.read)."
+    },
+    {
+      "path": "design-system",
+      "template": false,
+      "description": "A summary of the draft design system: tokens, themes and components."
+    },
+    {
+      "path": "presets",
+      "template": false,
+      "description": "The presets this site can insert (preset.list)."
+    },
+    {
+      "path": "motion",
+      "template": false,
+      "description": "The scene recipes with their knobs, and the diagnosis codes.",
+      "note": "scene recipes and diagnosis codes"
+    },
+    {
+      "path": "regions",
+      "template": false,
+      "description": "The header and footer trees, whose node ids a scene names with `region`.",
+      "note": "header and footer trees"
+    },
+    {
+      "path": "tree/<pageId>",
+      "template": true,
+      "description": "The splash.tree/2 document of one page."
+    },
+    {
+      "path": "outline/<pageId>",
+      "template": true,
+      "description": "The compact outline of one page's tree.",
+      "note": "the compact tree"
+    },
+    {
+      "path": "motion/<pageId>",
+      "template": true,
+      "description": "One page's scenes and their findings.",
+      "note": "a page's scenes and findings"
+    },
+    {
+      "path": "component/<key>",
+      "template": true,
+      "description": "The cells of one design-system component, such as `button`.",
+      "note": "the cells of a design-system component such as `button`"
+    }
+  ]
+}

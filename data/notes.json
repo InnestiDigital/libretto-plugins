@@ -1,0 +1,130 @@
+{
+  "errors": [
+    {
+      "code": "409 stale_revision",
+      "meaning": "A document in `baseRevisions` moved since you read it. The answer carries the current `revisions` and the `missed` operations.",
+      "fix": "Read what moved (the missed operations, or the node again), rebuild the batch on the current revisions with a fresh `requestId`. Never resend blindly over someone else's change."
+    },
+    {
+      "code": "409 no_change",
+      "meaning": "The operation would leave its document as it is.",
+      "fix": "Nothing to do; drop the operation."
+    },
+    {
+      "code": "400 invalid_operation",
+      "meaning": "The batch or an input is malformed: schema mismatch, `Missing base revision for <key>`, `<op> requires <x> confirmation`, a non-undoable or external operation sharing a batch, publication in a dry run, a reused `requestId` with a different batch.",
+      "fix": "Read the message: it names the field or rule. Fix the input against `discover_operations`, add the missing base revision or `confirmed`, split the batch."
+    },
+    {
+      "code": "400 unknown_operation",
+      "meaning": "No operation has that name.",
+      "fix": "Find the name with `discover_operations`."
+    },
+    {
+      "code": "400 invalid_reference",
+      "meaning": "A `$ref` points at a later operation, itself, or a path its output lacks.",
+      "fix": "Reference only earlier operations, by their `ref`, with a path their output has."
+    },
+    {
+      "code": "403 operation_forbidden",
+      "meaning": "The token's role does not allow the operation (the message names the permission it needs), or the site's design-system access settings keep an area at view for editors: then `data` is `{ kind: \"access\", area, granted, needed }`.",
+      "fix": "Tell the user what needs which role. For a design-system area, a platform admin opens it in the admin (Design system > Permessi dei ruoli, column Editor); a new token does not help. Do not look for another way around it; open a ticket if the refusal looks wrong."
+    },
+    {
+      "code": "404 site_not_found / history_not_found",
+      "meaning": "The site or the committed request does not exist for this token.",
+      "fix": "Check the id; `history.undo` and `history.read` take a `requestId` that was applied on this site."
+    },
+    {
+      "code": "422",
+      "meaning": "A gate refused the change: tree invariants (codes such as `I5.section_placement`, `I8.default_stored`), the style catalogue, the design-system rules or the AA contrast gate. `detail` lists each failure with its path.",
+      "fix": "Change the input so the gate passes (another token, another parent, drop a stored default). Never work around a gate."
+    },
+    {
+      "code": "401",
+      "meaning": "The token is missing, expired, revoked, or its maker lost access.",
+      "fix": "The user makes a new token in the admin (Agenti e accessi MCP) and sets LIBRETTO_MCP_TOKEN."
+    }
+  ],
+  "operations": {
+    "tree.commit": [
+      "A text prop keeps its shape: a plain string is the same in every language; a map `{ \"it\": \"…\", \"en-US\": \"…\" }` holds one text per language. Change only the language asked.",
+      "Style values may be tokens (`\"{space.4}\"`, `\"{color.text.accent}\"`) or raw CSS; use a token whenever one exists. Scopes are `base` and breakpoints such as `bp:md`; `null` removes a declaration.",
+      "Inserted nodes need fresh 8-character ids (`[0-9a-z]{8}`) unique in the page. `set_props` never stores a value equal to the default (`I8.default_stored`).",
+      "Findings in the answer cover the whole page: look at the ones whose `nodeId` you touched."
+    ],
+    "tree.read": [
+      "The `tree/<pageId>` resource returns the same document. Trees are often longer than Claude Code shows inline: search the saved file with `jq '.. | objects | select(.id? == \"<nodeId>\")'`."
+    ],
+    "preset.insert": [
+      "A section preset goes under a tree root: the page root, or a region root from `region.read`. A section inside a region is refused as `I5.section_placement`. The answer's `nodeId` is the new node."
+    ],
+    "preset.list": [
+      "The answer carries each preset's whole tree and is large; pass `kind` (and `source`) to narrow it, and search the saved file with `jq '.[] | {id, kind, label}'`."
+    ],
+    "designSystem.setToken": [
+      "A path that does not exist is created as a new token. Check the path in the `design-system` resource first; add tokens only on purpose."
+    ],
+    "designSystem.setTokens": [
+      "The contrast gate reads the end state of the whole batch: change a palette step and the role that sits on it together."
+    ],
+    "designSystem.lint": [
+      "Read-only; run it through `dry_run_ops`. The answer also carries the whole compiled CSS: read `findings`."
+    ],
+    "designSystem.diff": [
+      "Read-only; run it through `dry_run_ops`. The answer also carries the compiled CSS: read `diff` and `findings`."
+    ],
+    "designSystem.resetToBlueprint": [
+      "Destructive: ask the user before running it, and say what scope it resets."
+    ],
+    "designSystem.deleteVariant": [
+      "Pages may use the variant: check the outline of the pages (`variant=` in each line) and ask before deleting."
+    ],
+    "brand.setup": [
+      "`acknowledgeContrast: true` saves a brand whose pairs fail AA. Set it only when the user explicitly says to save anyway."
+    ],
+    "media.upload": [
+      "The file travels as base64 inside the tool call (images up to 5 MB). For a file on the user's computer, call `upload_media_file` of the plugin's `libretto-files` server with the path: it sends this operation without the bytes passing through the conversation. Write the base64 yourself only for a tiny file. The answer's `id` is the media id to place with `{ \"$media\": \"<id>\" }`."
+    ],
+    "media.list": [
+      "Find an image by file name, then reference it in an image node as `{ \"src\": { \"$media\": \"<id>\" } }`."
+    ],
+    "media.recordUpload": [
+      "Records bytes already staged by the admin's upload route, which an MCP token cannot reach. From MCP use `media.upload`."
+    ],
+    "font.recordUpload": [
+      "Records a font file already staged by the admin's upload route, which an MCP token cannot reach: upload font files in the admin, or use `font.importGoogle`."
+    ],
+    "content.importMarkdown": [
+      "Pictures must already be in the media library (`media:<id>` or the file name)."
+    ],
+    "history.undo": [
+      "Undo is refused with 409 when a later batch changed the same documents; undo the later one first, or rebuild the change by hand."
+    ],
+    "publication.publish": [
+      "Publish only on the human's explicit go in the conversation. Alone in its batch, with `history` in `baseRevisions` (from a fresh `site_context`) and `\"confirmed\": [\"publish\"]`. The answer's `version.id` is the version to roll back to later."
+    ],
+    "publication.activate": [
+      "Needs `versions.activate`: a platform admin, or the workspace owner of the site's workspace. Needs a version id: from a publish answer, or from `item.history` on a collection item; the admin's Publish & versions page shows no ids (its Make live button does the same). It replaces the draft as well: unpublished changes are lost."
+    ],
+    "publication.rollbackPage": [
+      "Restores one page of the draft from a version; publish afterwards (with the human's go) to serve it."
+    ],
+    "page.create": [
+      "Needs `site.admin`: an editor or workspace owner token gets 403, and the admin refuses them too. Ask the user to have a platform admin create the page, then fill it here."
+    ],
+    "motion.applyRecipe": [
+      "Read the recipes and their knobs first (`motion.listRecipes` or the `motion` resource). After applying, the answer's `motion.*` findings name scene problems (hidden-at-rest, overlap...): fix them before finishing."
+    ],
+    "site.updateLanguages": [
+      "Needs `site.admin`: only a platform admin's token. An editor or workspace owner asks a platform admin to add or remove a language."
+    ]
+  },
+  "pending": {
+    "note": "Names the skills already use that the registry in data/ does not hold yet (a Libretto branch not merged). --check accepts them and lists them; remove an entry once --sync brings it in.",
+    "operations": [
+      "ticket.create",
+      "ticket.list"
+    ]
+  }
+}

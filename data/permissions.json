@@ -1,0 +1,18 @@
+{
+  "source": "splash-cms shared/contracts/admin/roles.ts (ROLE_GRANTS, WORKSPACE_OWNER_GRANTS), 2026-10-25",
+  "note": "A token acts with the lower of the role it was made with and its maker's current role. Only editors and platform admins can make tokens. A workspace owner is an editor who owns the workspace: on its sites it also gets content.publish and versions.activate. Design-system classes are also gated by the site's design-system access settings.",
+  "classes": {
+    "site.read": { "label": "read the site", "roles": ["admin", "editor"] },
+    "site.edit": { "label": "edit structure and styles", "roles": ["admin", "editor"] },
+    "content.edit": { "label": "edit content", "roles": ["admin", "editor"] },
+    "content.publish": { "label": "publish", "roles": ["admin", "editor", "workspace owner"] },
+    "versions.activate": { "label": "put an earlier version live", "roles": ["admin", "workspace owner"] },
+    "site.admin": { "label": "administer the site", "roles": ["admin"] },
+    "members.manage": { "label": "manage members", "roles": ["admin", "editor"] },
+    "history.operation": { "label": "undo and read history", "roles": ["admin", "editor"] },
+    "designSystem.operation": { "label": "design system", "roles": ["admin", "editor (as the access settings allow)"] },
+    "designSystem.promote": { "label": "promote overrides to a variant", "roles": ["admin", "editor (as the access settings allow)"] },
+    "breakpoints.edit": { "label": "breakpoints", "roles": ["admin", "editor (as the access settings allow)"] },
+    "brand.generate": { "label": "render brand images", "roles": ["admin"] }
+  }
+}

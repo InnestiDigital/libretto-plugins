@@ -1,0 +1,26 @@
+{
+  "name": "libretto",
+  "displayName": "Libretto",
+  "version": "0.2.0",
+  "description": "Edit a Libretto site from Claude Code: the Libretto MCP server plus skills for editing pages, the design system, visual checks, publishing and reporting issues",
+  "author": {
+    "name": "Innesti Digital"
+  },
+  "homepage": "https://librettocms.com",
+  "license": "MIT",
+  "keywords": ["libretto", "cms", "mcp", "design-system"],
+  "userConfig": {
+    "libretto_token": {
+      "type": "string",
+      "title": "Libretto site token",
+      "description": "The token made in the Libretto admin (user menu > Agenti e accessi MCP). Stored in the system keychain, never in settings.json. The LIBRETTO_MCP_TOKEN environment variable overrides it.",
+      "sensitive": true
+    },
+    "libretto_url": {
+      "type": "string",
+      "title": "Libretto address",
+      "description": "Where your Libretto runs, without a trailing slash. Change it only for a test install. The LIBRETTO_URL environment variable overrides it.",
+      "default": "https://librettocms.com"
+    }
+  }
+}

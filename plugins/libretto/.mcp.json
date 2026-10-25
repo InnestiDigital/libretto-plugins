@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "libretto": {
+      "type": "http",
+      "url": "${LIBRETTO_URL:-${user_config.libretto_url}}/api/mcp",
+      "headers": {
+        "Authorization": "Bearer ${LIBRETTO_MCP_TOKEN:-${user_config.libretto_token}}"
+      }
+    },
+    "libretto-files": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/server/libretto-files.mjs"],
+      "env": {
+        "LIBRETTO_URL": "${LIBRETTO_URL:-${user_config.libretto_url}}",
+        "LIBRETTO_MCP_TOKEN": "${LIBRETTO_MCP_TOKEN:-${user_config.libretto_token}}"
+      }
+    }
+  }
+}
