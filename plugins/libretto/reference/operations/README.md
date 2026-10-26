@@ -2,7 +2,7 @@
 
 # Libretto operations
 
-161 operations, from Libretto's operation registry. Each runs inside a `splash.batch` sent to `dry_run_ops` or `apply_ops` (see [mcp-tools.md](mcp-tools.md)). `discover_operations` with the name gives the live schema; this reference is the same registry, written for reading.
+161 operations, from Libretto's operation registry. Each runs inside a `libretto.batch` sent to `dry_run_ops` or `apply_ops` (see [mcp-tools.md](mcp-tools.md)). `discover_operations` with the name gives the live schema; this reference is the same registry, written for reading.
 
 | Domain | Operations |
 |---|---|
@@ -22,7 +22,7 @@
 
 ## Batches
 
-- A batch is `{ format: "splash.batch", v: 1, requestId, baseRevisions, operations: [{ name, input, ref? }], dryRun?, confirmed? }`, at most 100 operations, all or nothing.
+- A batch is `{ format: "libretto.batch", v: 1, requestId, baseRevisions, operations: [{ name, input, ref? }], dryRun?, confirmed? }`, at most 100 operations, all or nothing.
 - `requestId`: a fresh UUID per intent. Resending the identical batch with the same id replays the stored answer; the same id with a different batch is refused.
 - `baseRevisions`: the revision of every document the operations write (each operation lists its `writes` below; `{pageId}` is filled from the input). Every key you pass is checked, so pass the written ones: a key that moved since (including `history`, which moves on every commit to the site) refuses the batch with 409. `history` is required only by publication. After an apply, the answer's `revisions` are the new values.
 - `ref` names an operation's output so a later operation in the same batch can use it: `{ "$ref": { "operation": "<ref>", "path": ["nodeId"] } }`.

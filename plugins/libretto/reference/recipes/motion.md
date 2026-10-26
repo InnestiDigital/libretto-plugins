@@ -14,8 +14,8 @@ Three layers, from the simplest:
 
 ## Read first
 
-- `read_resources` `splash://site/<siteId>/motion`: the recipes with their knobs, and the diagnosis codes.
-- `splash://site/<siteId>/motion/<pageId>`: the page's scenes and their findings.
+- `read_resources` `libretto://site/<siteId>/motion`: the recipes with their knobs, and the diagnosis codes.
+- `libretto://site/<siteId>/motion/<pageId>`: the page's scenes and their findings.
 - `motion.listRecipes` and `effect.list` (read-only): built-in recipes (`reveal`, `parallax`, `read-along`, `payoff`, `hide`, `image-sequence`, `intro`, `build-up`, `dock`, `menus`, `retype`, `invert`, `snap`) and effect presets, then the site's own.
 
 ## A reveal on one node

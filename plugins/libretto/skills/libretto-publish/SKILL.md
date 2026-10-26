@@ -16,7 +16,7 @@ Publish only when the human says so in this conversation, for this change ("sì,
 1. List what this session changed, in the user's words: the page and what it did (keep the `requestId`s to yourself).
 2. Call `site_context` and check page `status`: a page in `draft` stays off the live site even after publishing; say so if the user edited one (`page.update` `{ pageId, patch: { "status": "published" } }` marks it for the publish, with the go). Collection items publish only when their status is `published` (`item.setStatus`).
 3. Run `designSystem.lint` through `dry_run_ops` if the design system changed: `findingsBySeverity.error` must be 0; report the `worst` findings that concern this change.
-4. Read `splash://site/<siteId>/pending-changes` (`publication.pending`): what changed since the live version, by area (pages, design system, settings, menus, collections, fonts...), with the date of the latest edit and, for pages and collections, the changed rows. A publish ships **all** of it, other people's changes included: show the user anything that is not yours, and any changed page still in draft status (it stays out). Keep its `publishBaseRevisions`: they are the publish batch's base revisions.
+4. Read `libretto://site/<siteId>/pending-changes` (`publication.pending`): what changed since the live version, by area (pages, design system, settings, menus, collections, fonts...), with the date of the latest edit and, for pages and collections, the changed rows. A publish ships **all** of it, other people's changes included: show the user anything that is not yours, and any changed page still in draft status (it stays out). Keep its `publishBaseRevisions`: they are the publish batch's base revisions.
 5. Ask: "Publish these changes now?" and wait.
 
 ## Publish
@@ -25,18 +25,18 @@ A batch with `publication.publish` **alone**, as `baseRevisions` exactly the `pu
 
 ```json
 {
-  "format": "splash.batch", "v": 1, "requestId": "<fresh UUID>",
+  "format": "libretto.batch", "v": 1, "requestId": "<fresh UUID>",
   "baseRevisions": { "...": "pending-changes' publishBaseRevisions, unchanged" },
   "confirmed": ["publish"],
   "operations": [{ "name": "publication.publish", "input": { "note": "Servizi: new heading" } }]
 }
 ```
 
-Send it to `apply_ops` (not `dry_run_ops`, which refuses publication). If the user wants it done in the admin instead, `libretto-admin-browser` has the steps; the rule of the go is the same. The answer holds `version` (`id`, `shortId`, `status`, `isActive`). Tell the user it is online, with the time and the note, and name the version by its `shortId` (the 8 characters **Pubblicazione e versioni** shows); keep the full `id` for yourself (it is how you roll back). The version's `hash` fingerprints the pages, settings and API configuration, not the design system: a publish that changes only tokens or component looks keeps the previous `hash`. That is expected; do not show the `hash` or treat it as a sign that nothing went live. A `409 stale_revision` means the draft moved after you read the pending changes: read `pending-changes` again, tell the user what else changed, and ask again. A refusal for a missing base revision means the batch did not carry `publishBaseRevisions`: read `pending-changes` and use them. Never publish a second time to make sure: read `versions` instead.
+Send it to `apply_ops` (not `dry_run_ops`, which refuses publication). If the user wants it done in the admin instead, `libretto-admin-browser` has the steps; the rule of the go is the same. The answer holds `version` (`id`, `shortId`, `status`, `isActive`) and `changedAreas`: the areas this publish changed against the version live before it (`["designSystem"]` for a design-system-only change; an empty list means nothing changed). Tell the user it is online, with the time, the note and what changed in their words ("il design system"), and name the version by its `shortId` (the 8 characters **Pubblicazione e versioni** shows); keep the full `id` for yourself (it is how you roll back). A `409 stale_revision` means the draft moved after you read the pending changes: read `pending-changes` again, tell the user what else changed, and ask again. A refusal for a missing base revision means the batch did not carry `publishBaseRevisions`: read `pending-changes` and use them. Never publish a second time to make sure: read `versions` instead.
 
 ## Roll back
 
-First read `splash://site/<siteId>/versions` (`publication.versions`): the published versions, newest first, each with its `id`, `shortId`, date (`timestamp`), note and `isActive` (the live one). Name versions to the user by `shortId`, date and note, as **Pubblicazione e versioni** shows them. For one page, `versions/<versionId>` (`publication.versionPages`) lists that version's pages with their id in the version and what a rollback of each would change in the draft. Show the user the candidate version (date and note) before anything else.
+First read `libretto://site/<siteId>/versions` (`publication.versions`): the published versions, newest first, each with its `id`, `shortId`, date (`timestamp`), note and `isActive` (the live one). Name versions to the user by `shortId`, date and note, as **Pubblicazione e versioni** shows them. For one page, `versions/<versionId>` (`publication.versionPages`) lists that version's pages with their id in the version and what a rollback of each would change in the draft. Show the user the candidate version (date and note) before anything else.
 
 Pick the smallest tool that fixes it, and get the human's explicit go for each:
 
@@ -49,4 +49,4 @@ Version ids come from `publication.versions` (and a publish answer). The admin's
 
 `publication.activate` replaces the draft too: every change not yet published is lost. Say so before asking for the go.
 
-After publishing, look at the public page (the site's domain, signed out) to confirm the version is live: with Chrome, `libretto-visual-check` or `libretto-admin-browser`. Without Chrome, do not fetch the public site with Bash or `curl`. Read `versions` (the new one is `isActive`), give the user the `publicSite` link from `site_context`, and ask them once to look, naming exactly what to check.
+After publishing or rolling back, look at what went live yourself: `render_preview` with `"target": "live"` on the pages the change touched, a crop of what changed at desktop and at mobile ([preview and verify](../../reference/recipes/preview-and-verify.md), The live site). The answer's `liveVersion` must be the version you just made live. Tell the user what you saw; do not ask them to check by hand. Never fetch the public site with Bash or `curl`. If the live capture is refused (`live_capture_unavailable`) or the server is older and has no `target`: with Chrome, `libretto-visual-check`; without it, give the user the `publicSite` link from `site_context` and ask them once to look, naming exactly what to check.

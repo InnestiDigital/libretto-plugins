@@ -6,19 +6,19 @@ Operations: [components and presets](../operations/components-and-presets.md), [
 
 ## 1. Choose the preset
 
-1. `read_resources` `splash://site/<siteId>/presets?kind=section` (`preset.index`; kinds: `section`, `box`, `element`; `&source=site` for the site's own): each preset's `id`, `kind`, `source`, `label`, `category`, `description` and `keywords`, without trees. Read the tree of the one you are about to insert, if you need it, with `preset/<presetId>?kind=section`. Do not use `preset.list`: it answers every preset with its tree.
+1. `read_resources` `libretto://site/<siteId>/presets?kind=section` (`preset.index`; kinds: `section`, `box`, `element`; `&source=site` for the site's own): each preset's `id`, `kind`, `source`, `label`, `category`, `description` and `keywords`, without trees. Read the tree of the one you are about to insert, if you need it, with `preset/<presetId>?kind=section`. Do not use `preset.list`: it answers every preset with its tree.
 2. Each preset has a `source`: `theme` (built in) or `site` (saved by someone on this site with `preset.save`).
 3. Pick by role (what the section does), not by its sample text. Tell the user which one and why; offer two when the brief is open.
 
 ## 2. Find where it goes
 
-- On a page: the parent is the page root, the first line of `splash://site/<siteId>/outline/<pageId>`. `index` is its position among the root's children (0 is first). Read the outline to pick the index between the right sections.
+- On a page: the parent is the page root, the first line of `libretto://site/<siteId>/outline/<pageId>`. `index` is its position among the root's children (0 is first). Read the outline to pick the index between the right sections.
 - In the header or footer: `region.read` `{ "region": "header" }` through `dry_run_ops`; its `pageId` and the tree's root id are the target. A section preset goes under the region root only (never inside a section: refused as `I5.section_placement`).
 
 ## 3. Insert, then fill
 
 ```json
-{ "format": "splash.batch", "v": 1, "requestId": "<uuid>", "baseRevisions": { "tree:<pageId>": 41 },
+{ "format": "libretto.batch", "v": 1, "requestId": "<uuid>", "baseRevisions": { "tree:<pageId>": 41 },
   "operations": [
     { "name": "preset.insert", "ref": "hero",
       "input": { "pageId": "<pageId>", "parentId": "<root id>", "index": 1, "kind": "section", "presetId": "hero-split", "source": "theme" } }

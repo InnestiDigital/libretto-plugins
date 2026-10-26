@@ -15,7 +15,7 @@ import { homedir } from 'node:os'
 import { randomUUID } from 'node:crypto'
 import { createInterface } from 'node:readline'
 
-const SERVER = { name: 'libretto-files', version: '0.2.1' }
+const SERVER = { name: 'libretto-files', version: '0.2.2' }
 const MAX_BYTES = 5 * 1024 * 1024
 /** font.upload's `data` holds at most 16 MiB of base64 characters; the server's FONT_MAX_FILE_MB may be lower. */
 const MAX_FONT_BASE64 = 16 * 1024 * 1024
@@ -94,7 +94,8 @@ async function remoteSession() {
     const session = response.headers.get('mcp-session-id')
     if (session) headers.set('mcp-session-id', session)
     const text = await response.text()
-    if (response.status === 401) throw new LibrettoError('Libretto refused the token (401): it is wrong, expired, revoked, or made before the Libretto was reset. Make a new one in the admin (Persone e accessi > Agenti e accessi MCP), set it with /plugin configure libretto@libretti and start a new session.')
+    if (response.status === 401) throw new LibrettoError('Libretto refused the token (401): it is wrong, expired, revoked, or made before the Libretto was reset. Make a new one in the admin (Persone e accessi > Agenti e accessi MCP), set it with /plugin configure libretto@libretti and start a new session.', text.slice(0, 500))
+    if (response.status === 403) throw new LibrettoError('Libretto accepted the token, but the person who made it can no longer work on this site (403: site or workspace access, role or password). The workspace owner restores the access first; then make a new token in the admin (Persone e accessi > Agenti e accessi MCP), set it with /plugin configure libretto@libretti and start a new session.', text.slice(0, 500))
     if (!response.ok) throw new LibrettoError(`Libretto answered ${response.status} at ${url}`, text.slice(0, 500))
     if (!text) return null
     const type = response.headers.get('content-type') ?? ''
@@ -149,7 +150,7 @@ async function sendOperation(name, input, revisionKey, dryRun) {
   const context = await remote.call('site_context', {})
   const requestId = randomUUID()
   const batch = {
-    format: 'splash.batch',
+    format: 'libretto.batch',
     v: 1,
     requestId,
     baseRevisions: { [revisionKey]: context.baseRevisions[revisionKey] },

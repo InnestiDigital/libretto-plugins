@@ -17,7 +17,7 @@ Libretto's owner reads agent tickets in the admin (Segnalazioni). A good ticket 
 | `discover_operations`, a resource or these skills say one thing and the server does another; a step is missing from the docs | `docs` | `low` or `medium` |
 | Anything else that blocks the person | `other` | as it affects them |
 
-Do **not** open one for: your own malformed batch (fix it), a `409 stale_revision` (re-read and rebuild), a contrast-gate refusal of colours that really fail AA, a 401 (the token: tell the user the steps in `libretto-editing`, When Libretto does not connect), or something the user simply chose not to do. Never open the same ticket twice: `ticket.list` (or the resource `splash://site/<siteId>/tickets`) shows the ones you already filed on this site.
+Do **not** open one for: your own malformed batch (fix it), a `409 stale_revision` (re-read and rebuild), a contrast-gate refusal of colours that really fail AA, a 401 (the token: tell the user the steps in `libretto-editing`, When Libretto does not connect), or something the user simply chose not to do. Never open the same ticket twice: `ticket.list` (or the resource `libretto://site/<siteId>/tickets`) shows the ones you already filed on this site.
 
 A ticket cannot be amended. When you learn something new about one you filed (the public site is right, only the draft is wrong; a way to reproduce it), open a follow-up whose title says what it adds and whose body starts with the first ticket's id. That is not a duplicate.
 

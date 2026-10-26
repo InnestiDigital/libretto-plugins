@@ -7,7 +7,7 @@ description: Read and change a Libretto site's design system through the librett
 
 The design system is where a site's appearance lives. Pages point at it (tokens in node styles, a component's variant, a mixin, a theme), so one change here updates every page that uses it. Prefer a change here to a local style on a node whenever the user means "everywhere".
 
-Use the editing loop of the `libretto-editing` skill: `site_context`, read, `dry_run_ops`, `apply_ops` with a fresh `requestId`, verify, `history.undo` to go back. Every operation below goes in a `splash.batch`; its input is in the table below and in the [design-system reference](../../reference/operations/design-system.md) (`Grep` `^## designSystem.setTokens` with about 40 lines after it). Call `discover_operations` only for a shape you still lack, one name at a time: four names with `schemas: true` answered 31,000 characters in a real session.
+Use the editing loop of the `libretto-editing` skill: `site_context`, read, `dry_run_ops`, `apply_ops` with a fresh `requestId`, verify, `history.undo` to go back. Every operation below goes in a `libretto.batch`; its input is in the table below and in the [design-system reference](../../reference/operations/design-system.md) (`Grep` `^## designSystem.setTokens` with about 40 lines after it). Call `discover_operations` only for a shape you still lack, one name at a time: four names with `schemas: true` answered 31,000 characters in a real session.
 
 ## One user-visible change per batch
 
@@ -15,7 +15,7 @@ A batch is the unit of undo, and a brief usually names several changes. Give eac
 
 ## Talking about the design system
 
-The person sees the admin's design system pages, not token files. Name what a change does, never its path or key: "il colore d'accento", "la dimensione dei titoli di sezione", "la scala degli spazi tra le sezioni", "lo stile Contorno del pulsante" (a variant's **label**), not `color.text.accent`, `font.size.section-title-display`, `space.section-y.4`, `sm` / `md` / `lg` or `secondary`. Give values in their units (#1F5C99, 48 px, 96 px), and contrast as a ratio with its threshold ("4,9:1, il minimo è 4,5:1"), never a warning count or a reason code.
+The person sees the admin's design system pages, not token files. Name what a change does, never its path or key: "il colore d'accento", "la dimensione dei titoli di sezione", "la scala degli spazi tra le sezioni", "lo stile Contorno del pulsante" (a variant's **label**), not `color.text.accent`, `font.size.display`, `space.section-y.4`, `sm` / `md` / `lg` or `secondary`. Give values in their units (#1F5C99, 48 px, 96 px), and contrast as a ratio with its threshold ("4,9:1, il minimo è 4,5:1"), never a warning count or a reason code.
 
 A whole design update (a brief, a reference, a Figma file) has its own step-by-step recipe: [design update](../../reference/recipes/design-update.md). Contrast and accessibility: [contrast and a11y](../../reference/recipes/contrast-and-a11y.md). Every design-system operation: [design-system reference](../../reference/operations/design-system.md); brand-wide setup: [brand](../../reference/operations/brand.md).
 
@@ -23,19 +23,19 @@ A whole design update (a brief, a reference, a Figma file) has its own step-by-s
 
 Read only what the change needs, through resource queries (each is a registry read you could also run through `dry_run_ops`). One narrow group per URI: a whole family (`?tokens=color`) or three groups in one call answered 55,000 characters in a real session.
 
-- `splash://site/<siteId>/design-system` (`designSystem.read`): the index, with the revision, sets, themes, every component's variant keys and each token group's size. Add the paths and values of the narrowest groups the change touches, one or two at a time: `?tokens=color.text`, `?tokens=color.palette.brand`, `?tokens=space.section-y`. Broad groups are large: `?tokens=color,space,font,type` answered 32 KB on one site; `?components=true` adds each component's sizes, states and parts (the segments of a cell key). Never ask for `css=true` unless you need the stylesheet.
-- `splash://site/<siteId>/component/<key>?variant=primary&state=hover&own=true` (`designSystem.readComponent`): only the cells you mean. `own=true` keeps the cells actually set; filter by `size`, `part`, `breakpoint`, `property` too. Answers page by `limit` (100) with `total` and `nextCursor`: a large component has thousands of cells, so filter first.
+- `libretto://site/<siteId>/design-system` (`designSystem.read`): the index, with the revision, sets, themes, every component's variant keys and each token group's size. Read it once; then ask only the part you need, which answers that part alone (add `index=true` to get the index again with it): the narrowest token groups the change touches, one or two at a time (`?tokens=color.text`, `?tokens=color.palette.brand`, `?tokens=space.section-y`). Broad groups are large: `?tokens=color,space,font,type` answered 32 KB on one site; `?components=true` gives each component's sizes, states and parts (the segments of a cell key). Never ask for `css=true` unless you need the stylesheet.
+- `libretto://site/<siteId>/component/<key>?variant=primary&state=hover&own=true` (`designSystem.readComponent`): only the cells you mean. `own=true` keeps the cells actually set; filter by `size`, `part`, `breakpoint`, `property` too. Answers page by `limit` (100) with `total` and `nextCursor`: a large component has thousands of cells, so filter first.
 - `designSystem.lint` and `designSystem.diff` (read-only, through `dry_run_ops`) answer a summary: `findingCount`, `findingsBySeverity`, `findingsByReason`, the `worst` 20 findings (errors first, then the contrast pairs furthest below what they need), `overrideCount` and the first 100 `overrides`. `full: true` gives the whole answer, stylesheet included: avoid it.
 - `access.read` answers your own level in each design-system area on this site: read it before a design update to know what you may change.
 
 ## Check the answer of a write
 
-A design-system write (in `dry_run_ops` or `apply_ops`) answers its change, not the whole system. In each `results[].output`:
+A design-system write (in `dry_run_ops` or `apply_ops`) answers its change, not the whole system. By default the batch answers a receipt; in each result:
 
 - `dryRun` is `true` in a dry run; `changed` says whether anything would move; `revision` is the design-system revision it reaches.
-- `changes`: the overrides it adds, changes or removes. Check they are exactly what you meant (no extra token, the right set and theme).
+- `overrides`: each override it adds, changes or removes, by name (`added token:core:space.section-y.scale`, `changed cell:button:primary.all.default.container.base.background`). Check they are exactly what you meant (no extra token, the right set and theme). `"answer": "full"` on the batch gives each change in full (`changes`, with the value before and after).
 - `errors`: must be empty before you apply (an AA refusal comes back as a `422` instead).
-- `warnings`: at most 20, about what you changed (an AAA pair of the cell you touched, a lint note on your token). Tell the user about them in plain words; the counts are for you.
+- `warnings`: at most 5 in the receipt (20 with `"answer": "full"`), about what you changed (an AAA pair of the cell you touched, a lint note on your token). Tell the user about them in plain words; the counts are for you.
 - `warningCount` and `warningsByReason`: the whole system's warnings by reason (`below-aaa`, `decorative`, `asset-missing`...). Compare the counts before and after: a jump means your change hurt pairs elsewhere.
 
 ## How it is built
@@ -44,6 +44,7 @@ A design-system write (in `dry_run_ops` or `apply_ops`) answers its change, not 
 - **Themes** stack sets: `light` = `core` + `semantic-light`; `dark` adds `semantic-dark`. A node or section takes a theme with `set_theme` or `designSystem.setScheme`.
 - **Components** (`button`, `card`, `navbar`, ...) have variants, sizes and states. A **cell** is one property of one part, named `<variant>.<size or all>.<state>.<part>.base.<property>`, for example `primary.all.hover.container.base.background`. Copy cell names from the component resource.
 - **Mixins** are named style sheets a node can carry (`set_mixins`), built from tokens.
+- **Space scale factors.** A `number` token named `scale` in the `space` group or a subgroup (`space.scale`, `space.section-y.scale`) multiplies every dimension of that group and its subgroups, aliases included, and everything downstream (component cells, the stylesheet, the contrast gate) reads the scaled values. "Section spacing 25 % tighter" is one write: `{ "set": "core", "path": "space.section-y.scale", "type": "number", "value": 0.75 }`. The factor must be above 0. Undo it, or set it back to 1, to return. It scales tokens only: spaces written by hand on nodes do not follow until they point at a token; and a node style or mixin cannot use the factor as a length.
 
 ## Operations
 
@@ -51,6 +52,7 @@ A design-system write (in `dry_run_ops` or `apply_ops`) answers its change, not 
 |---|---|---|
 | Change one token | `designSystem.setToken` | `{ "set": "semantic-light", "path": "color.text.accent", "type": "color", "value": "{color.palette.brand.500}" }` |
 | Change several together | `designSystem.setTokens` | `{ "writes": [ {set, path, type, value}, ... ] }` |
+| Scale a space group ("25 % tighter") | `designSystem.setToken` | `{ "set": "core", "path": "space.section-y.scale", "type": "number", "value": 0.75 }` |
 | Change a variant's look | `designSystem.setComponentCell` | `{ "component": "button", "cells": [{ "cell": "primary.all.hover.container.base.background", "value": "{color.bg.accent-strong}" }] }` |
 | New variant | `designSystem.createVariant` | `{ "component": "button", "variant": "ghost", "label": "Ghost", "from": "primary" }` |
 | Rename / remove a variant | `designSystem.updateVariant` / `designSystem.deleteVariant` | delete needs `"confirmed": ["destructive"]` |
@@ -81,8 +83,8 @@ Never compute WCAG ratios yourself with Bash, Python or Node: the person's Claud
 
 1. `dry_run_ops` a `designSystem.setTokens` with the candidate (the palette step and the roles on it). Nothing is saved.
 2. Read the answer:
-   - **refused** (`422`): the `detail` lists each failing pair with its ratio and threshold (`... on {color.bg.section} is 4.1:1, below 4.5:1`);
-   - **accepted**: `results[].output.warnings` lists up to 20 pairs below AAA, each with `foreground`, `background`, `ratio` and `required` (`warningCount` is the total). The list stops at 20, so a pair missing from it has no number: say it passes AA (at least 4.5:1 for text, 3:1 for icons) rather than guess one.
+   - **refused** (`422`): the `detail` lists each failing pair with its ratio and threshold (`... on {color.bg.section} is 4.1:1, below 4.5:1`), at most 20 lines, the rest counted in `omitted`;
+   - **accepted**: the result's `warnings` lists the pairs below AAA that name what you changed, each with `foreground`, `background`, `ratio` and `required` (`warningCount` is the total): at most 5 in the default receipt, so add `"answer": "full"` to this dry run for up to 20. A pair missing from the list has no number: say it passes AA (at least 4.5:1 for text, 3:1 for icons) rather than guess one.
 3. To find the nearest readable shade, dry-run one candidate at a time, a step darker or lighter, until it is accepted, and give the user the ratio the gate gave.
 
 `designSystem.lint` (through `dry_run_ops`) answers the same for the whole system: its `worst` list carries the ratio of each pair.

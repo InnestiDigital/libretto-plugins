@@ -14,7 +14,7 @@ The MCP server is the way to change a Libretto site: checked, audited, undoable.
 | Any edit an operation covers (texts, sections, tokens, variants, menus, media, publish, rollback) | MCP (`libretto-editing`, `libretto-design-system`, `libretto-publish`) |
 | A font file, when `upload_font_file` answers `unknown_operation` or the user has no plugin file tool | The admin's Typography page (below) |
 | Publishing when the user asks to do it in the admin, or MCP refuses it for a reason the admin does not share | Publishing & versions (below), on the user's explicit go |
-| What a visitor sees: published fonts, the live page at desktop and phone width | The public site (below) |
+| What a visitor sees: published fonts, the live page at desktop and phone width | First `render_preview` with `"target": "live"` through MCP; in Chrome, the public site (below) |
 | Anything else MCP lacks | Ask the user first; open a ticket for the missing operation (`libretto-report-issue`) |
 
 ## Start a session

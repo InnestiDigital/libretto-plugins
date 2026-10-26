@@ -164,7 +164,7 @@ Hints: readOnlyHint: false, destructiveHint: false, idempotentHint: false.
 
 ## Resources
 
-Each URI is `splash://site/<siteId>/<path>`; `site_context.resources` lists the ones the site has.
+Each URI is `libretto://site/<siteId>/<path>`; `site_context.resources` lists the ones the site has.
 
 | Path | Holds |
 |---|---|

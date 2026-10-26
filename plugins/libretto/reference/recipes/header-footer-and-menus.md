@@ -13,10 +13,10 @@ Operations: [pages and trees](../operations/pages-and-trees.md) (`region.read`, 
 ## Change the header or footer
 
 1. Find the region's page in `site_context`: the pages named `region-header`, `region-footer`, `region-above`, `region-below`. Read its outline (`outline/<region pageId>`): the first line is the region root.
-2. Read the node you change: `tree/<region pageId>?node=<nodeId>&depth=1`. (`region.read` `{ "region": "header" }` and the `regions` resource answer whole region trees: use them only to copy a large subtree.)
+2. Read the node you change: `tree/<region pageId>?node=<nodeId>&depth=1`; `tree/<region pageId>` is the region's outline. (`region.read` `{ "region": "header" }` and the `regions` resource answer whole region trees: use them only to copy a large subtree.)
 3. A `tree.commit` on the region's `pageId`, exactly like a page: `set_props`, `set_style`, `set_variant`, `insert`, `move`, `remove`. The base revision is `tree:<region pageId>` (in `site_context.baseRevisions`).
 4. New section in a region: `preset.insert` with the region's `pageId` and the region root as `parentId` ([sections from presets](sections-from-presets.md)).
-5. Dry run, apply, look at two pages (every page shows the change): [preview and visual check](preview-and-verify.md). To check a header or footer text, read its node in the region's tree (`tree/<region pageId>?node=<nodeId>&depth=0`), not `render_preview` with `full: true`. If the node has your text and the draft preview does not, that is a bug: tell the user and open a ticket (`libretto-report-issue`).
+5. Dry run, apply, look at two pages (every page shows the change): [preview and visual check](preview-and-verify.md). The draft preview renders the draft's header and footer. To check a text there, `render_preview` `{ "pageId": "<any page>", "find": "<a few words>" }` (it searches the page, its header and its footer) or the node in the region's tree; to see it, a screenshot cropped to the header or footer node (`"crop": { "nodeId": "<its id>" }`). If the node has your text and the draft preview does not, that is a bug: tell the user and open a ticket (`libretto-report-issue`).
 
 ## Change a menu
 
