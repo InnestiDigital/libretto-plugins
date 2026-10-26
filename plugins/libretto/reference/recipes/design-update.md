@@ -13,13 +13,15 @@ Operations: [design-system](../operations/design-system.md), [media-and-fonts](.
    The index gives each group's size: read the small groups, one or two per call. Asking for `color,space,font,type` at once answered 32 KB on Archiplan.
    Never read the whole design system (`css=true` adds a 240 KB stylesheet you do not need).
 2. `designSystem.diff` through `dry_run_ops`: a summary of what the site already changed from its blueprint (`overrideCount`, the first 100 `overrides`). `access.read`: your level in each design-system area.
-3. Write the user a short mapping from the brief to tokens before changing anything: which palette steps, which roles, which type styles, which component variants. Ask about anything the brief leaves open.
+3. Write the user a short plan before changing anything, one line per change they would name, in their words ("il colore d'accento", "la dimensione dei titoli di sezione", "il pulsante principale"), with the values in their units. Keep the token paths, scale keys and variant keys to yourself. Ask about anything the brief leaves open.
+4. **Plan the batches: one per change the user would name.** A brief with four items is four batches, even when the user asks for one dry run of everything. The batch is the unit of undo: a component look that shares a batch with the token changes cannot be undone alone, and the user then needs a hand-made edit to get it back. Put in each batch everything that one change needs (the palette steps and the roles on them; a new token and the nodes re-pointed at it), and nothing else. Dry-run each, report each, apply them in order on the `revisions` of the previous answer. A batch that needs a token another batch creates is dry-run after that batch is applied.
 
 ## 2. Colours
 
 - The palette lives in set `core` (`color.palette.<name>.<step>`); roles live in `semantic-light` and `semantic-dark` (`color.text.*`, `color.bg.*`, `color.border.*`) and are aliases of palette steps (`{color.palette.brand.500}`).
 - A new brand colour: change the palette steps. A colour that moves to another role: change the role's alias. Prefer aliases to hex in roles.
-- One `designSystem.setTokens` with the palette steps and the roles that sit on them, so the contrast gate judges the end state. `type` is `color`.
+- The colour change is one batch: one `designSystem.setTokens` with the palette steps and the roles that sit on them, so the contrast gate judges the end state. `type` is `color`.
+- "Is this colour readable on white?" is a question for the gate, not for a script: dry-run the candidate and read the ratio in the `422` detail or in the answer's `warnings` ([design-system skill](../../skills/libretto-design-system/SKILL.md), Measure contrast with the gate). To find the nearest readable shade, dry-run one darker step at a time.
 - If the gate refuses (422 lists each pair and ratio), pick a darker or lighter step, then dry run again. Never set `acknowledgeContrast` without the user's explicit yes.
 - A full rebrand from three colours, a type pairing and a scale is `brand.setup` (it rewrites palettes, roles, type, space and radii in one undoable change). Use it only when the user wants the whole brand replaced, and dry run it first.
 
@@ -39,7 +41,10 @@ Operations: [design-system](../operations/design-system.md), [media-and-fonts](.
 
 ## 4. Space, corners, shadows
 
-`space.*`, `radius.*`, `shadow.*`, `border.width.*` in `core`, one `setTokens` per family of tokens. Keep the scale's order (a larger step stays larger).
+`space.*`, `radius.*`, `shadow.*`, `border.width.*` in `core`, one `setTokens` per family of tokens, one batch per change the user named. Keep the scale's order (a larger step stays larger).
+
+- A percentage change ("25 % tighter") is a new value for each step, written as a dimension (`4.5rem`). A token cannot be a multiplier: a `number` token refuses with `type number is not allowed here (expected dimension)`, and a token value that multiplies tokens (`calc({space.24} * {space.scale})`) with `not a CSS length or percentage`.
+- Spaces written by hand on the sections do not follow the tokens. Before rewriting them, tell the user how many sections and pages it touches and propose linking them to the scale; it is one change, so one batch. Find them with each page's outline and the section nodes at `depth=0` (up to 16 URIs per call), never with whole page trees (77,000 to 304,000 characters each in a real session).
 
 ## 5. Component looks
 
@@ -63,5 +68,5 @@ Operations: [design-system](../operations/design-system.md), [media-and-fonts](.
 ## 8. Check and report
 
 - `designSystem.lint` (through `dry_run_ops`): errors must be zero; AAA warnings are information.
-- `render_preview` `{ "pageId", "device": "desktop" | "tablet" | "mobile", "mode": "screenshot" }` on the home page and two other key pages (`"area": "viewport"` for the first screen, `"crop": { "nodeId" }` for one section), then once more with `"theme": "dark"` (or another theme the update touched) and with the site's second locale at tablet width (`"locale": "en-US", "device": "tablet"`). Against a reference, `compare_reference` `{ pageId, device, referenceMediaId }` or `{ pageId, device, referenceUrl }` for a public https image.
-- Tell the user what each change did, in their words; keep each `requestId` for undo. Nothing is public until the user asks to publish (`libretto-publish`).
+- `render_preview` `{ "pageId", "device": "desktop" | "tablet" | "mobile", "mode": "screenshot" }` on the home page and two other key pages (`"area": "viewport"` for the first screen, `"crop": { "nodeId" }` for one section), then once more with `"theme": "dark"` (or another theme the update touched) and with the site's second locale at tablet width (`"locale": "en-US", "device": "tablet"`). Every screenshot stays in the conversation: prefer the first screen and crops of the sections the change reaches, and take each picture once. Against a reference, `compare_reference` `{ pageId, device, referenceMediaId }` or `{ pageId, device, referenceUrl }` for a public https image.
+- Tell the user what each change did, in their words, and that each can be undone alone; keep each `requestId` to yourself for the undo. Nothing is public until the user asks to publish (`libretto-publish`).

@@ -32,7 +32,7 @@ A batch with `publication.publish` **alone**, as `baseRevisions` exactly the `pu
 }
 ```
 
-Send it to `apply_ops` (not `dry_run_ops`, which refuses publication). If the user wants it done in the admin instead, `libretto-admin-browser` has the steps; the rule of the go is the same. The answer holds `version` (`id`, `shortId`, `status`, `isActive`). Tell the user it is online, with the time and the note, and name the version by its `shortId` (the 8 characters **Pubblicazione e versioni** shows); keep the full `id` for yourself (it is how you roll back). A `409 stale_revision` means the draft moved after you read the pending changes: read `pending-changes` again, tell the user what else changed, and ask again. A refusal for a missing base revision means the batch did not carry `publishBaseRevisions`: read `pending-changes` and use them. Never publish a second time to make sure: read `versions` instead.
+Send it to `apply_ops` (not `dry_run_ops`, which refuses publication). If the user wants it done in the admin instead, `libretto-admin-browser` has the steps; the rule of the go is the same. The answer holds `version` (`id`, `shortId`, `status`, `isActive`). Tell the user it is online, with the time and the note, and name the version by its `shortId` (the 8 characters **Pubblicazione e versioni** shows); keep the full `id` for yourself (it is how you roll back). The version's `hash` fingerprints the pages, settings and API configuration, not the design system: a publish that changes only tokens or component looks keeps the previous `hash`. That is expected; do not show the `hash` or treat it as a sign that nothing went live. A `409 stale_revision` means the draft moved after you read the pending changes: read `pending-changes` again, tell the user what else changed, and ask again. A refusal for a missing base revision means the batch did not carry `publishBaseRevisions`: read `pending-changes` and use them. Never publish a second time to make sure: read `versions` instead.
 
 ## Roll back
 
@@ -49,4 +49,4 @@ Version ids come from `publication.versions` (and a publish answer). The admin's
 
 `publication.activate` replaces the draft too: every change not yet published is lost. Say so before asking for the go.
 
-After publishing, look at the public page (the site's domain, signed out) to confirm the version is live.
+After publishing, look at the public page (the site's domain, signed out) to confirm the version is live: with Chrome, `libretto-visual-check` or `libretto-admin-browser`. Without Chrome, do not fetch the public site with Bash or `curl`. Read `versions` (the new one is `isActive`), give the user the `publicSite` link from `site_context`, and ask them once to look, naming exactly what to check.

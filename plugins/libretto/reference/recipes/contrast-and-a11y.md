@@ -20,13 +20,16 @@ Findings cover the whole page: filter by the `nodeId`s you touched, and mention 
 
 ## Run a check on demand
 
-1. `designSystem.lint` through `dry_run_ops`: a summary, `findingsBySeverity.error` must be 0; `worst` lists the 20 pairs furthest below what they need.
-2. For one page: there is no page lint operation; the page-wide findings come with every `tree.commit` dry run. Dry-run the batch you are about to apply and read its findings (a dry run changes nothing).
-3. Look at the result ([preview and visual check](preview-and-verify.md)): contrast over images and gradients is not computed by the gate; judge it on the screenshot and say so.
+Libretto computes every ratio: never work one out with Bash, Python or Node (the person's Claude may not be allowed to run code, and the gate's number is the one that counts).
+
+1. `designSystem.lint` through `dry_run_ops`: a summary, `findingsBySeverity.error` must be 0; `worst` lists the 20 pairs furthest below what they need, each with `foreground`, `background`, `ratio` and `required`.
+2. A colour that is not in the design system yet ("is #C0C0C0 readable on white?"): `dry_run_ops` a `designSystem.setTokens` that puts it on the role, nothing is saved. A `422` lists each failing pair with its ratio; an accepted dry run lists in `results[].output.warnings` up to 20 pairs below AAA (7:1) with their `ratio`. A pair missing from that list has no number: say it passes AA rather than guess one. For the nearest readable shade, dry-run one step darker or lighter at a time.
+3. For one page: there is no page lint operation; the page-wide findings come with every `tree.commit` dry run. Dry-run the batch you are about to apply and read its findings (a dry run changes nothing).
+4. Look at the result ([preview and visual check](preview-and-verify.md)): contrast over images and gradients is not computed by the gate; judge it on the screenshot and say so.
 
 ## When the gate refuses
 
-- Read every pair in the `detail`: `theme light components/button.json ...: {color.text.on-accent} on {color.bg.accent} is 3.9:1, below 4.5:1`.
+- Read every pair in the `detail`: `theme light components/button.json ...: {color.text.on-accent} on {color.bg.accent} is 3.9:1, below 4.5:1`. Tell the user in their words: "il testo bianco sul pulsante d'accento ha un contrasto 3,9:1, serve almeno 4,5:1", not the token paths.
 - Fix by moving the role to another palette step (darker text, lighter background), or change the palette step and its role together in one `designSystem.setTokens`.
 - Never set `acknowledgeContrast` (only `brand.setup` has it) without the user's explicit "save it anyway", and say which pairs stay below AA.
 

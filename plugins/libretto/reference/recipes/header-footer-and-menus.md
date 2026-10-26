@@ -16,7 +16,7 @@ Operations: [pages and trees](../operations/pages-and-trees.md) (`region.read`, 
 2. Read the node you change: `tree/<region pageId>?node=<nodeId>&depth=1`. (`region.read` `{ "region": "header" }` and the `regions` resource answer whole region trees: use them only to copy a large subtree.)
 3. A `tree.commit` on the region's `pageId`, exactly like a page: `set_props`, `set_style`, `set_variant`, `insert`, `move`, `remove`. The base revision is `tree:<region pageId>` (in `site_context.baseRevisions`).
 4. New section in a region: `preset.insert` with the region's `pageId` and the region root as `parentId` ([sections from presets](sections-from-presets.md)).
-5. Dry run, apply, look at two pages (every page shows the change): [preview and visual check](preview-and-verify.md).
+5. Dry run, apply, look at two pages (every page shows the change): [preview and visual check](preview-and-verify.md). To check a header or footer text, read its node in the region's tree (`tree/<region pageId>?node=<nodeId>&depth=0`), not `render_preview` with `full: true`. If the node has your text and the draft preview does not, that is a bug: tell the user and open a ticket (`libretto-report-issue`).
 
 ## Change a menu
 
