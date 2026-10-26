@@ -7,7 +7,7 @@ Use after every applied change, before telling the user it is done. An apply ans
 - `libretto://site/<siteId>/tree/<pageId>` (the outline): the node is where you meant, with the variant and theme you set; `?styles=<property>` shows the declarations you wrote on each line.
 - A text, wherever it is (the page, its header, its footer): `render_preview` `{ "pageId", "find": "<a few words of it>" }` lists the nodes whose text holds those words, with their whole text.
 - The node: `tree/<pageId>?node=<nodeId>&depth=0`, the props and styles you wrote, tokens and all.
-- For the design system: the token in `design-system?tokens=<its group>`, or the cell in `component/<key>?variant=<v>&state=<s>&own=true`.
+- For the design system: the token in `design-system?tokens=<its group>` (its `sets` hold what you wrote; `value`, or `values` by theme when the themes differ, what it resolves to), or the cell in `component/<key>?variant=<v>&state=<s>&own=true`.
 - `history.read` `{ requestId }`: the committed outcome of a batch, rechecked.
 
 ## 2. See it

@@ -7,7 +7,7 @@ Operations: [design-system](../operations/design-system.md), [media-and-fonts](.
 ## 1. Take stock
 
 1. `site_context`, then `read_resources` on `libretto://site/<siteId>/design-system`: a small index (sets, themes, each component's variant keys, each token group's size). Then read only the groups the brief touches, one query each (a query answers only what it asks; `index=true` adds the index back):
-   - colours: `design-system?tokens=color.palette.brand` (the steps you will change), then `?tokens=color.text` or `?tokens=color.bg` for the roles on them;
+   - colours: `design-system?tokens=color.palette.brand` (the steps you will change), then `?tokens=color.text` or `?tokens=color.bg` for the roles on them (a role answers `value` when light and dark resolve it alike, `values` by theme when they differ);
    - type: `design-system?tokens=font.family`, then `?tokens=type.role`;
    - space and shape: `design-system?tokens=space.section-y` (or the one group the brief names), `?tokens=radius`.
    The index gives each group's size: read the small groups, one or two per call. Asking for `color,space,font,type` at once answered 32 KB on one site.
@@ -32,7 +32,7 @@ Operations: [design-system](../operations/design-system.md), [media-and-fonts](.
    2. Upload each face (one file per weight and style, WOFF2 only) with `upload_font_file` of the `libretto-files` server: `{ "path", "name": "Sul Sans", "weight": 400, "style": "normal", "licence": "<the licence>", "dryRun": true }`, then without `dryRun`. It sends `font.upload`; 409 `font_face_exists` means the face is there already (`replace: true` only on the user's word).
    3. Point a family token at it (step 2). A Libretto without `font.upload` answers `unknown_operation`: then upload the faces on the admin's Typography page with Chrome (`libretto-admin-browser`), or ask the user to.
 2. Families: `font.family.display`, `font.family.heading`, `font.family.body`, `font.family.ui`... in set `core`, type `fontFamily`, value an array (`["DM Sans", "sans-serif"]`).
-3. Type styles: `type.<style>` tokens (`type.section-title`, `type.body`) are composites. `setToken` needs the **whole** value: copy `sets.core` of the token, change what the brief asks, write it back with `"type": "typography"`:
+3. Type styles: `type.<style>` tokens (`type.section-title`, `type.body`) are composites. `setToken` needs the **whole** value: copy `sets.core` of the token (its raw value, aliases included; not the resolved `value`, which has the aliases filled in), change what the brief asks, write it back with `"type": "typography"`:
    ```json
    { "set": "core", "path": "type.section-title", "type": "typography",
      "value": { "fontFamily": "{font.family.display}", "fontSize": "clamp(1.5rem, 5vw, 2rem)", "fontWeight": "{font.weight.regular}", "letterSpacing": "-0.01em", "lineHeight": 1.15 } }
