@@ -284,7 +284,7 @@ Example input:
 
 ## catalog.entry
 
-Read one node type's whole registry entry by its id (`box`, `ds.button`, `sticky-bar`): its props schema with each field's help, parts, states, slots and content model. Refused with 404 type_not_found for an id catalog.index does not list.
+Read one node type's whole registry entry by its id (`box`, `ds.button`, `sticky-bar`): its props schema with each field's help, parts, states, slots and content model. Refused with 404 type_not_found for an id catalog.index does not list. Read `embed` before placing a map or a third-party video: its `loading` prop (`immediate`, `onClick`, `afterConsent`) keeps the iframe out of the page, behind a placeholder with a notice, a load button and an optional link (`notice`, `loadLabel`, `allowLabel`, `linkUrl`, `linkLabel`), until the visitor clicks or grants the external media consent.
 
 - permission `site.read` (admin, editor); class `read`; writes nothing.
 
