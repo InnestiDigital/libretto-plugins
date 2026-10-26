@@ -43,6 +43,15 @@ Use `site_context`'s `urls` whenever it has them, and give the user only those: 
 5. For a site-wide change (a token, a variant, the header): check a second page that uses it.
 6. Close your tab; put the window back to the size it had (ask `tabs_context_mcp` first and note it).
 
+## Scaled layouts
+
+On a page whose layout is in scale mode (`responsiveMode: "scale"`), the server sends the unscaled page and the app scales it once it has started, about a second after load. So:
+
+- Wait until `document.documentElement.dataset.app` is `"started"` before you measure anything; earlier numbers are the unscaled draft of the page.
+- The scale is a `transform` on `.layout-scale-content`. Measure boxes with `getBoundingClientRect()`; a computed `font-size` or `rem` never changes under a transform, so a scaled 40px heading still reports `40px`.
+- Expected size = design size × (window width ÷ `designWidth`), clamped by `minScale`/`maxScale`, from `scaleFromWidth` upward; below it the page reflows instead.
+- The preview and the published page scale the same way. If they differ after the app has started, that is a bug worth a ticket; before it has started, it is not.
+
 ## Compare and report
 
 For each thing the user asked: matches / does not match, with what you saw ("the hover background is now the accent, but the label stayed dark on phone"). Also report what changed that was not asked (a wrapped heading, a shifted section, an overflow at 390 px). Attach or describe the before and after screenshots. Then say what you will fix, and fix it through MCP.
@@ -53,7 +62,7 @@ For each thing the user asked: matches / does not match, with what you saw ("the
 - If the preview still shows the old state after a successful apply: reload (the page can be cached for a moment), check you are on the draft preview (`?site=`) and not the public page, check the page and node ids, and read the node in the tree. If the tree has your change and the preview does not, that is a bug: open a ticket (`libretto-report-issue`).
 - The Activity page lists your applied batch under the token owner's name; a refusal is not listed there.
 - An editor tab the user left open does not refresh by itself. When the user then saves there, the editor refuses with "Il sito è cambiato dopo che l’hai aperto (in un’altra scheda, da un’altra persona o con una pubblicazione). Ricarica la pagina e riprova.", and its Annulla may say the change "non si può più annullare". Tell the user to reload the editor after your changes; never click its buttons yourself.
-- The editor's top bar shows **Segnalazioni · N** and the bar under the canvas lists them ("avviso · 'Testo' non ha la traduzione en-US"): these are the page's findings, the same as your dry run's `findings` (not tickets). A number that grew after your change points at something you introduced.
+- The editor's top bar shows **Controlli · N** and the bar under the canvas summarises them ("Avvisi: N, nessuno blocca la pubblicazione.") ("avviso · 'Testo' non ha la traduzione en-US"): these are the page's findings, the same as your dry run's `findings` (not tickets). A number that grew after your change points at something you introduced.
 - The top bar says **Tutte le modifiche salvate** when the editor holds nothing unsaved; if it shows unsaved work, the user is editing too: tell them before you apply more.
 
 ## Without Chrome

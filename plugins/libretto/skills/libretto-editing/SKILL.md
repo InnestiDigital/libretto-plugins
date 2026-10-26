@@ -42,6 +42,7 @@ Every operation, its input, permission and typical errors: [operations reference
 9. **MCP first.** Use an operation whenever one exists. The admin in Chrome (`libretto-admin-browser`) is only for what MCP lacks and for checking the public site.
 10. **Look at the result** before saying it is done (`libretto-visual-check`).
 11. **Blocked?** Tell the user, do what you can, and open a ticket when Libretto is at fault (`libretto-report-issue`). Never work around a refusal.
+12. **Scaled layouts scale by themselves.** A page whose layout frame has `responsiveMode: "scale"` (for example "Branded canvas — scaled to fit") draws the whole design at its `designWidth` and scales it to the window between `scaleFromWidth` and `maxScale`. Author it at design size with the usual tokens. Never rewrite sizes as `vw`, `min(vw, rem)` or `calc()` to imitate the scaling: that fights the tokens and doubles the scale. Read the page's frame first (`site_context`, the page's `frame`, and the layout's settings).
 
 ## Talking to the user
 

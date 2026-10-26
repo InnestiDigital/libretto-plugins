@@ -19,6 +19,8 @@ Libretto's owner reads agent tickets in the admin (Segnalazioni). A good ticket 
 
 Do **not** open one for: your own malformed batch (fix it), a `409 stale_revision` (re-read and rebuild), a contrast-gate refusal of colours that really fail AA, a 401 (the token: tell the user), or something the user simply chose not to do. Never open the same ticket twice: `ticket.list` (or the resource `splash://site/<siteId>/tickets`) shows the ones you already filed on this site.
 
+Before filing a `bug`, reproduce it the way a visitor sees it: let the page finish loading (`data-app="started"`), measure boxes rather than computed font sizes, and compare draft and published at the same width. A first ticket (2026-10-26) reported "the live page does not scale" from measurements taken before the app had started; the page did scale.
+
 Ask the user before filing when the ticket would quote their content or their client's data; otherwise file it and tell them.
 
 ## What a good ticket holds
