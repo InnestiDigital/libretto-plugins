@@ -50,6 +50,7 @@ On a page whose layout is in scale mode (`responsiveMode: "scale"`), the server 
 - Wait until `document.documentElement.dataset.app` is `"started"` before you measure anything; earlier numbers are the unscaled draft of the page.
 - The scale is a `transform` on `.layout-scale-content`. Measure boxes with `getBoundingClientRect()`; a computed `font-size` or `rem` never changes under a transform, so a scaled 40px heading still reports `40px`.
 - Expected size = design size × (window width ÷ `designWidth`), clamped by `minScale`/`maxScale`, from `scaleFromWidth` upward; below it the page reflows instead.
+- A heading that is smaller than expected on a scaled page usually uses a fluid (`vw`) token, which shrinks twice: see rule 12 in `libretto-editing`.
 - The preview and the published page scale the same way. If they differ after the app has started, that is a bug worth a ticket; before it has started, it is not.
 
 ## Compare and report
