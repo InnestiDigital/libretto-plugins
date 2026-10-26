@@ -6,7 +6,7 @@ Operations: [pages and trees](../operations/pages-and-trees.md), [site and setti
 
 ## The site's languages
 
-- MCP has no read of the site's language list. Use the codes the site's texts already use: the page titles in `site_context` are locale maps (Archiplan: `it` and `en-US`), and so are the texts in the trees. The first is usually the default. Never invent a code (`en` is not `en-US`).
+- MCP has no read of the site's language list. Use the codes the site's texts already use: the page titles in `site_context` are locale maps (for a site in Italian and English: `it` and `en-US`), and so are the texts in the trees. The first is usually the default. Never invent a code (`en` is not `en-US`).
 - Adding or removing a language is `site.updateLanguages`, which needs `site.admin`: a platform admin's token. An editor or a workspace owner gets 403; ask the user to have a platform admin add it (admin: Impostazioni > Lingue). Removing one sweeps it out of every text and needs `"confirmed": ["destructive"]`.
 - An added language shows the default language's text until translated.
 

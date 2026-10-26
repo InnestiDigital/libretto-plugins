@@ -10,7 +10,7 @@ Operations: [design-system](../operations/design-system.md), [media-and-fonts](.
    - colours: `design-system?tokens=color.palette.brand` (the steps you will change), then `?tokens=color.text` or `?tokens=color.bg` for the roles on them;
    - type: `design-system?tokens=font.family`, then `?tokens=type.role`;
    - space and shape: `design-system?tokens=space.section-y` (or the one group the brief names), `?tokens=radius`.
-   The index gives each group's size: read the small groups, one or two per call. Asking for `color,space,font,type` at once answered 32 KB on Archiplan.
+   The index gives each group's size: read the small groups, one or two per call. Asking for `color,space,font,type` at once answered 32 KB on one site.
    Never read the whole design system (`css=true` adds a 240 KB stylesheet you do not need).
 2. `designSystem.diff` through `dry_run_ops`: a summary of what the site already changed from its blueprint (`overrideCount`, the first 100 `overrides`). `access.read`: your level in each design-system area.
 3. Write the user a short plan before changing anything, one line per change they would name, in their words ("il colore d'accento", "la dimensione dei titoli di sezione", "il pulsante principale"), with the values in their units. Keep the token paths, scale keys and variant keys to yourself. Ask about anything the brief leaves open.

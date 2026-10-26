@@ -1,6 +1,6 @@
 ---
 name: libretto-editing
-description: Edit or read a Libretto site through the libretto MCP server - texts, styles, sections from presets, component variants, images, header and footer, menus, collections, translations, motion. Use whenever the user asks to change, add, move, remove or look up anything on their Libretto site (Archiplan or any other), or mentions Libretto pages, sections, nodes or batches. Also use when the libretto tools are missing, the server failed to connect, or Libretto rejected the token (401, Invalid MCP token, Authorization header rejected): it says what to tell the person.
+description: Edit or read a Libretto site through the libretto MCP server - texts, styles, sections from presets, component variants, images, header and footer, menus, collections, translations, motion. Use whenever the user asks to change, add, move, remove or look up anything on their Libretto site, or mentions Libretto pages, sections, nodes or batches. Also use when the libretto tools are missing, the server failed to connect, or Libretto rejected the token (401, Invalid MCP token, Authorization header rejected): it says what to tell the person.
 ---
 
 # Editing a Libretto site

@@ -17,7 +17,7 @@ Il plugin contiene:
   - `libretto-admin-browser`: fa nell'admin, con Chrome, le poche cose che il server MCP non sa fare (caricare file di font, pubblicare dall'admin quando lo chiedi) e controlla il sito pubblico;
   - `libretto-publish`: pubblicare o tornare a una versione precedente, solo quando lo dici tu;
   - `libretto-report-issue`: apre una segnalazione per il team di Libretto quando qualcosa manca o non funziona;
-- le ricette passo passo (`plugins/libretto/reference/recipes/`) e il riferimento di tutte le 158 operazioni (`plugins/libretto/reference/operations/`).
+- le ricette passo passo (`plugins/libretto/reference/recipes/`) e il riferimento di tutte le operazioni (`plugins/libretto/reference/operations/`).
 
 ### Cosa serve
 
@@ -93,7 +93,7 @@ Con l'estensione Claude in Chrome collegata, Claude apre l'anteprima della bozza
 
 ### Immagini
 
-Indica a Claude il file sul tuo computer ("metti la foto ~/Desktop/cortile.jpg nella sezione Restauro"): il server `libretto-files` la carica nella libreria Media (fino a 5 MB), poi Claude la usa e scrive il testo alternativo. Puoi anche caricare le immagini nell'admin (Media) e dire a Claude il nome del file.
+Indica a Claude il file sul tuo computer ("metti la foto ~/Immagini/foto.jpg nella sezione Restauro"): il server `libretto-files` la carica nella libreria Media (fino a 5 MB), poi Claude la usa e scrive il testo alternativo. Puoi anche caricare le immagini nell'admin (Media) e dire a Claude il nome del file.
 
 ### Segnalazioni
 
@@ -126,7 +126,7 @@ The plugin holds:
   - `libretto-admin-browser`: does in the admin, with Chrome, the few things the MCP server cannot (uploading font files, publishing from the admin when you ask) and checks the public site;
   - `libretto-publish`: publishing or going back to an earlier version, only when you say so;
   - `libretto-report-issue`: opens a ticket for the Libretto team when something is missing or broken;
-- step-by-step recipes (`plugins/libretto/reference/recipes/`) and a reference of all 158 operations (`plugins/libretto/reference/operations/`).
+- step-by-step recipes (`plugins/libretto/reference/recipes/`) and a reference of every operation (`plugins/libretto/reference/operations/`).
 
 ### Prerequisites
 
@@ -202,7 +202,7 @@ With the Claude in Chrome extension connected, Claude opens the draft preview an
 
 ### Images
 
-Point Claude at the file on your computer ("put ~/Desktop/cortile.jpg in the Restauro section"): the `libretto-files` server uploads it into the Media library (up to 5 MB), then Claude places it and writes its alt text. You can also upload images in the admin (Media) and give Claude the file name.
+Point Claude at the file on your computer ("put ~/Pictures/photo.jpg in the Restauro section"): the `libretto-files` server uploads it into the Media library (up to 5 MB), then Claude places it and writes its alt text. You can also upload images in the admin (Media) and give Claude the file name.
 
 ### Tickets
 

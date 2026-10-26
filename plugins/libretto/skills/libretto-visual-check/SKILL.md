@@ -31,7 +31,7 @@ Use `site_context`'s `urls` whenever it has them, and give the user only those: 
 | Design system | `<LIBRETTO_URL>/admin/p/<programId>/s/<siteId>/design-system/colours` (also `/typography`, `/space`, `/surfaces`, `/components`, `/components/<key>`, `/themes`, `/specimen`) | tokens, components and the specimen page as the designer sees them |
 | Menus | `.../navigation` | the site's menus |
 | Media | `.../media` | the library, with your uploads |
-| Activity | `.../settings/activity` | every applied batch, yours under the name of the person who made the token ("Daniele ha inserito un preset nella pagina Servizi") |
+| Activity | `.../settings/activity` | every applied batch, yours under the name of the person who made the token ("Giulia ha inserito un preset nella pagina Servizi") |
 | Publish & versions (Pubblicazione e versioni) | `.../publish` | pending changes (everyone's) and published versions with screenshots: **look only** |
 
 ## Before and after
@@ -39,7 +39,7 @@ Use `site_context`'s `urls` whenever it has them, and give the user only those: 
 1. **Before** you apply: open the draft preview of the page in a new tab. Desktop: `resize_window` to 1440 x 900, screenshot the area you will change (scroll to it; full page if the change is site-wide). Phone: `resize_window` to 390 x 844, reload, screenshot the same area. For a text or translation change also check the other language at tablet width (820 x 1180): the same address with the language prefix, in lower case, such as `/en-us/servizi?site=<siteId>` for `en-US` (the language switcher shows the prefix).
 2. Apply your change through MCP (`libretto-editing`, `libretto-design-system`).
 3. **After**: reload the same tab, the same two widths, the same scroll position. Screenshot.
-4. For a node change, open the editor with `&nodeId=<nodeId>`: the node is selected in the canvas and in Layers, and the inspector (right) shows it under Impostazioni / Stili / Movimento. The inspector shows a variant's **label**, not its key (the `secondary` button variant reads "Contorno" on Archiplan; labels are in the `design-system` resource). Read; do not edit there.
+4. For a node change, open the editor with `&nodeId=<nodeId>`: the node is selected in the canvas and in Layers, and the inspector (right) shows it under Impostazioni / Stili / Movimento. The inspector shows a variant's **label**, not its key (a `secondary` button variant may read "Contorno"; labels are in the `design-system` resource). Read; do not edit there.
 5. For a site-wide change (a token, a variant, the header): check a second page that uses it.
 6. Close your tab; put the window back to the size it had (ask `tabs_context_mcp` first and note it).
 

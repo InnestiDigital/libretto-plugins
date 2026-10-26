@@ -9,14 +9,14 @@ Operations: [media and fonts](../operations/media-and-fonts.md), [pages and tree
 **A file on this computer** (the usual case): call `upload_media_file` of the plugin's `libretto-files` server with its path. It reads the file and sends `media.upload` for you, so the bytes never pass through the conversation.
 
 ```json
-{ "path": "/Users/daniele/Desktop/archiplan/cortile.jpg", "dryRun": true }
+{ "path": "/Users/<utente>/Immagini/foto.jpg", "dryRun": true }
 ```
 
 Dry run first, then again without `dryRun`. The answer's `answer` holds the media record (`id`, `url`, kind, width, height) and `requestId` (undo with `history.undo`). Images are capped at 5 MB: shrink a larger one first (macOS: `sips -Z 2400 in.jpg --out in-2400.jpg`; keep JPEG for photos, PNG or SVG for flat graphics).
 
 **Without the `libretto-files` server** (Node missing): `media.upload` in an `apply_ops` batch takes the file as base64 in `data` (`{ filename, contentType, data, folderId }`, `baseRevisions` with `media`). That puts every byte in the conversation: only for small files (an icon, a logo under ~50 KB). For a photo, ask the user to upload it in the admin (Media) and give you the file name.
 
-**Already in the library**: `media.list` `{ "search": "cortile", "kinds": ["image"] }` (read-only) finds it by file name.
+**Already in the library**: `media.list` `{ "search": "foto", "kinds": ["image"] }` (read-only) finds it by file name.
 
 ## 2. Describe it
 
