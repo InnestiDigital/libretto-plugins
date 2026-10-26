@@ -46,7 +46,7 @@ Example input:
 
 ## publication.publish
 
-Publish the site: snapshot the draft (pages whose status is published, their trees, menus, collections with their published items, design system, settings, fonts) into a new live version, so the public site serves it. Run it alone in a batch with `confirmed: ["publish"]` and, as `baseRevisions`, the `publishBaseRevisions` of publication.pending (read the pending changes first, and publish what you read; a change after that read refuses it as stale); it cannot be dry-run. External effects (cache purge, screenshots) run after the commit.
+Publish the site: snapshot the draft (pages whose status is published, their trees, menus, collections with their published items, design system, settings, fonts) into a new live version, so the public site serves it. Run it alone in a batch with `confirmed: ["publish"]` and, as `baseRevisions`, the `publishBaseRevisions` of publication.pending (read the pending changes first, and publish what you read; a change after that read refuses it as stale); it cannot be dry-run. The answer is the new live version (`shortId` as Pubblicazione e versioni shows it) and `changedAreas`, the areas it changed against the version live before it (`designSystem` alone for a design-system-only change; empty when nothing changed); check the live result with render_preview `target: "live"`. External effects (cache purge, screenshots) run after the commit.
 
 - permission `content.publish` (admin, editor, workspace owner); class `external`; writes `publication`, `pages`, `designSystem`, `settings`, `environment`, `apiConfig`, `fonts`, `brand`, `navigation`, `collections`; needs `"confirmed": ["publish"]`; **not undoable**: alone in its batch; external: alone in its batch, never in a dry run.
 
@@ -54,7 +54,7 @@ Publish the site: snapshot the draft (pages whose status is published, their tre
 |---|---|---|
 | `note` | string (max 2000) |  |
 
-Output: { version: { id: uuid, shortId: string (min 8, max 8), hash: string, timestamp: string, status: "building" \| "ready" \| "failed", isActive: boolean, note?: string, hasScreenshot?: boolean, hasMultipleScreenshots?: boolean } }
+Output: { version: { id: uuid, shortId: string (min 8, max 8), timestamp: string, status: "building" \| "ready" \| "failed", isActive: boolean, note?: string, hasScreenshot?: boolean, hasMultipleScreenshots?: boolean }, changedAreas: ("pages" \| "designSystem" \| "siteSettings" \| "brandIdentity" \| "envVariables" \| "apiConfigs" \| "… (full schema: discover_operations)
 
 Example input:
 
@@ -66,7 +66,7 @@ Example input:
 
 ## publication.activate
 
-Make an earlier published version of the site live again (roll back). Run it alone in a batch with `confirmed: ["publish"]`. External effects (cache purge, screenshots) run after the commit.
+Make an earlier published version of the site live again (roll back). Run it alone in a batch with `confirmed: ["publish"]`; check the live result with render_preview `target: "live"`. External effects (cache purge, screenshots) run after the commit.
 
 - permission `versions.activate` (admin, workspace owner); class `external`; writes `publication`, `pages`, `designSystem`, `settings`, `environment`, `apiConfig`, `fonts`, `brand`, `navigation`, `collections`; needs `"confirmed": ["publish"]`; **not undoable**: alone in its batch; external: alone in its batch, never in a dry run.
 
@@ -151,7 +151,7 @@ List the site's published versions, newest first, `limit` of them (20 by default
 |---|---|---|
 | `limit` | integer ≥1 ≤100 |  |
 
-Output: { versions: ({ id: uuid, shortId: string (min 8, max 8), hash: string, timestamp: string, status: "building" \| "ready" \| "failed", isActive: boolean, note?: string, hasScreenshot?: boolean, hasMultipleScreenshots?: boolean })[] }
+Output: { versions: ({ id: uuid, shortId: string (min 8, max 8), timestamp: string, status: "building" \| "ready" \| "failed", isActive: boolean, note?: string, hasScreenshot?: boolean, hasMultipleScreenshots?: boolean })[] }
 
 Example input:
 

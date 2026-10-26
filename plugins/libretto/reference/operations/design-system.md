@@ -29,7 +29,7 @@ Example input:
 
 ## designSystem.setToken
 
-Design-system setToken, using the same validation and access gates as the editor.
+Write one token ({ set, path, type, value }), under the AA contrast gate and the token group rules. To scale spacing, write a scale factor instead of every step: a `number` token named `scale` in a space group multiplies every dimension of that group and its subgroups (`space.section-y.scale: 0.75` makes every section spacing 25 % tighter, `space.scale` scales all spacing; above 0).
 
 - permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
@@ -54,7 +54,7 @@ Example input:
 
 ## designSystem.setTokens
 
-Design-system setTokens, using the same validation and access gates as the editor.
+Write many tokens as one change, gated once for AA contrast on the end state, so one undo restores the lot. To scale spacing, write a scale factor instead of every step: a `number` token named `scale` in a space group multiplies every dimension of that group and its subgroups (`space.section-y.scale: 0.75` makes every section spacing 25 % tighter, `space.scale` scales all spacing; above 0).
 
 - permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
@@ -405,12 +405,13 @@ Read the draft design system's index: its revision, sets, themes, every componen
 
 | Input | Type | Required |
 |---|---|---|
+| `index` | boolean |  |
 | `tokens` | string (min 1)[] (≤32) |  |
 | `components` | boolean |  |
 | `css` | boolean |  |
 | `embeds` | boolean |  |
 
-Output: { revision: integer ≥-9007199254740991, detached?: { component: string, count: integer ≥0 }[], sets: { key: string, label: string, position: integer ≥-9007199254740991, siteAdded: boolean }[], themes: ({ key: string, label: string, sets: string[], isDefault?: boolean, draft?: boolean, activation?: { prefersColorScheme?… (full schema: discover_operations)
+Output: { revision: integer ≥-9007199254740991, detached?: { component: string, count: integer ≥0 }[], sets?: { key: string, label: string, position: integer ≥-9007199254740991, siteAdded: boolean }[], themes?: ({ key: string, label: string, sets: string[], isDefault?: boolean, draft?: boolean, activation?: { prefersColorSchem… (full schema: discover_operations)
 
 Example input:
 

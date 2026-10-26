@@ -38,7 +38,7 @@
     "$defs": {
       "__schema0": {
         "type": "string",
-        "const": "splash.batch"
+        "const": "libretto.batch"
       },
       "__schema1": {
         "type": "number",
@@ -51711,7 +51711,7 @@
     },
     {
       "name": "publication.publish",
-      "description": "Publish the site: snapshot the draft (pages whose status is published, their trees, menus, collections with their published items, design system, settings, fonts) into a new live version, so the public site serves it. Run it alone in a batch with `confirmed: [\"publish\"]` and, as `baseRevisions`, the `publishBaseRevisions` of publication.pending (read the pending changes first, and publish what you read; a change after that read refuses it as stale); it cannot be dry-run. External effects (cache purge, screenshots) run after the commit.",
+      "description": "Publish the site: snapshot the draft (pages whose status is published, their trees, menus, collections with their published items, design system, settings, fonts) into a new live version, so the public site serves it. Run it alone in a batch with `confirmed: [\"publish\"]` and, as `baseRevisions`, the `publishBaseRevisions` of publication.pending (read the pending changes first, and publish what you read; a change after that read refuses it as stale); it cannot be dry-run. The answer is the new live version (`shortId` as Pubblicazione e versioni shows it) and `changedAreas`, the areas it changed against the version live before it (`designSystem` alone for a design-system-only change; empty when nothing changed); check the live result with render_preview `target: \"live\"`. External effects (cache purge, screenshots) run after the commit.",
       "example": {
         "note": "Opening section and team page"
       },
@@ -51743,9 +51743,6 @@
                 "minLength": 8,
                 "maxLength": 8
               },
-              "hash": {
-                "type": "string"
-              },
               "timestamp": {
                 "type": "string"
               },
@@ -51773,16 +51770,34 @@
             "required": [
               "id",
               "shortId",
-              "hash",
               "timestamp",
               "status",
               "isActive"
             ],
             "additionalProperties": false
+          },
+          "changedAreas": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "pages",
+                "designSystem",
+                "siteSettings",
+                "brandIdentity",
+                "envVariables",
+                "apiConfigs",
+                "animationScenes",
+                "navigation",
+                "collections",
+                "fonts"
+              ]
+            }
           }
         },
         "required": [
-          "version"
+          "version",
+          "changedAreas"
         ],
         "additionalProperties": false
       },
@@ -51818,7 +51833,7 @@
     },
     {
       "name": "publication.activate",
-      "description": "Make an earlier published version of the site live again (roll back). Run it alone in a batch with `confirmed: [\"publish\"]`. External effects (cache purge, screenshots) run after the commit.",
+      "description": "Make an earlier published version of the site live again (roll back). Run it alone in a batch with `confirmed: [\"publish\"]`; check the live result with render_preview `target: \"live\"`. External effects (cache purge, screenshots) run after the commit.",
       "example": {
         "versionId": "8b9c0d1e-2f3a-4b4c-8d5e-6f7a8b9c0d1e"
       },
@@ -70069,7 +70084,7 @@
     },
     {
       "name": "designSystem.setToken",
-      "description": "Design-system setToken, using the same validation and access gates as the editor.",
+      "description": "Write one token ({ set, path, type, value }), under the AA contrast gate and the token group rules. To scale spacing, write a scale factor instead of every step: a `number` token named `scale` in a space group multiplies every dimension of that group and its subgroups (`space.section-y.scale: 0.75` makes every section spacing 25 % tighter, `space.scale` scales all spacing; above 0).",
       "example": {
         "set": "core",
         "path": "radius.md",
@@ -72662,7 +72677,7 @@
     },
     {
       "name": "designSystem.setTokens",
-      "description": "Design-system setTokens, using the same validation and access gates as the editor.",
+      "description": "Write many tokens as one change, gated once for AA contrast on the end state, so one undo restores the lot. To scale spacing, write a scale factor instead of every step: a `number` token named `scale` in a space group multiplies every dimension of that group and its subgroups (`space.section-y.scale: 0.75` makes every section spacing 25 % tighter, `space.scale` scales all spacing; above 0).",
       "example": {
         "writes": [
           {
@@ -114336,6 +114351,9 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "properties": {
+          "index": {
+            "type": "boolean"
+          },
           "tokens": {
             "maxItems": 32,
             "type": "array",
@@ -114558,6 +114576,7 @@
                         },
                         "additionalProperties": {}
                       },
+                      "value": {},
                       "values": {
                         "type": "object",
                         "propertyNames": {
@@ -114569,8 +114588,7 @@
                     "required": [
                       "path",
                       "type",
-                      "sets",
-                      "values"
+                      "sets"
                     ],
                     "additionalProperties": false
                   }
@@ -114783,11 +114801,7 @@
           }
         },
         "required": [
-          "revision",
-          "sets",
-          "themes",
-          "components",
-          "tokenGroups"
+          "revision"
         ],
         "additionalProperties": false
       },
@@ -119462,9 +119476,6 @@
                   "minLength": 8,
                   "maxLength": 8
                 },
-                "hash": {
-                  "type": "string"
-                },
                 "timestamp": {
                   "type": "string"
                 },
@@ -119492,7 +119503,6 @@
               "required": [
                 "id",
                 "shortId",
-                "hash",
                 "timestamp",
                 "status",
                 "isActive"
