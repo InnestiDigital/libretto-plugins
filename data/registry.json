@@ -19732,7 +19732,7 @@
     },
     {
       "name": "tree.commit",
-      "description": "Apply an invertible batch of splash.ops/2 ops to a page tree. Each op names its node by `id` (insert names `parentId` and `index`): `insert` { parentId, index, node }, `remove` { id }, `move` { id, parentId, index }, `set_props` { id, patch } (a patch of props; null removes one), `set_style` { id, scope, patch }, `set_meta` { id, anchor?, name?, meta?, visibleTo?, locked? }, `set_attrs` { id, patch }, `set_variant` { id, variant }, `set_theme` { id, theme }, `set_mixins` { id, mixins }, `set_visibility` { id, visibility }, `set_type` { id, type }, `set_override` { id, target, patch }; only `insert` carries a whole node with its `props`. A node's section anchor is the node field `anchor`, not a prop or meta key. In a set_style patch and in the styles.sheet of an inserted node, each declaration value may be a raw CSS string (\"clamp(22px, 2.3vw, 34px)\", \"{color.text}\" for a token) or { kind: \"raw\", css }; the server tokenizes it with the inspector's parser and refuses a value the style catalogue does not allow, at its path. The class is content.edit, but only a content-prop edit (a set_props of a content field) needs no more: every other op of the batch needs site.edit.",
+      "description": "Apply an invertible batch of splash.ops/2 ops to a page tree. Each op names its node by `id` (insert names `parentId` and `index`): `insert` { parentId, index, node }, `remove` { id }, `move` { id, parentId, index }, `set_props` { id, patch } (a patch of props; null removes one), `set_style` { id, scope, patch }, `set_meta` { id, anchor?, name?, meta?, visibleTo?, locked? }, `set_attrs` { id, patch }, `set_variant` { id, variant }, `set_theme` { id, theme }, `set_mixins` { id, mixins }, `set_visibility` { id, visibility }, `set_type` { id, type }, `set_override` { id, target, patch }; only `insert` carries a whole node with its `props`. A node's section anchor is the node field `anchor`, not a prop or meta key. In a set_style patch and in the styles.sheet of an inserted node, each declaration value may be a raw CSS string (\"clamp(22px, 2.3vw, 34px)\", \"{color.text}\" for a token) or { kind: \"raw\", css }; the server tokenizes it with the inspector's parser and refuses a value the style catalogue does not allow, at its path. A `scope` is a scope key, `base` or segments joined by `|` in this order: `bp:<breakpoint>` (a site breakpoint, mobile-first: `bp:md` from 768 px up), `cq:(max-width:767px)` or `cq:<name>(min-width:480px)` (a container condition, the way to style a desktop-first range; a named container is an ancestor whose base `container-name` names it), `mq:(prefers-reduced-motion:reduce)` (one media condition: reduced motion, colour scheme, contrast, forced colours, hover, pointer, orientation or print), `v:<variant>`, `th:<theme>`, `a:<type>[data-state=\"<state>\"]` (the nearest ancestor of that type in a state its entry declares, such as `a:sticky-bar[data-state=\"scrolled\"]`), `p:<part>` (a part of the node's component), `s:<state>` (pseudo-classes, at most one pseudo-element and attribute selectors on the node: `s::hover`, `s::focus-visible`, `s::has(> img)`, `s:[data-state=\"open\"]`) and `t:<selector>` (a descendant, `t: img`, or a child, `t:> .icon`, that the value applies to). So `bp:md|s::hover|t: img` styles the node's images while the node is hovered, from 768 px up. `bp:` and `cq:` compile to container queries on the page's content box (or on the nearest node that sets `container-type`): where a page's frame scales (`responsiveMode: \"scale\"`, from its `scaleFromWidth`, 769 px by default), that box keeps the frame's design width, so they resolve at the design width there. A hover state applies only on a device that hovers. The class is content.edit, but only a content-prop edit (a set_props of a content field) needs no more: every other op of the batch needs site.edit.",
       "example": {
         "pageId": "6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f",
         "ops": [
@@ -29679,7 +29679,7 @@
     },
     {
       "name": "page.create",
-      "description": "Create a page with an empty tree. `status` defaults to draft; a draft page stays out of the site publish, so pass `status: \"published\"` for a page the next publication.publish should serve. Fill the tree with tree.commit in the same batch: read the new root id with tree.read through a $ref to this operation's page.id. A section's anchor is the node field `anchor` in that tree, not a page field, `meta.anchor` or `props.anchor`. A `pageType: \"dynamic\"` page names a collection in `collectionKey` and is the detail page of its items: it answers `/<slug>/<item slug>` in each locale, and its tree binds the item. Page validation and ownership checks apply.",
+      "description": "Create a page (`slug`, `title` per locale, and optionally `frame`, the theme layout frame it renders in, `parentId`, `pageType`, SEO and members-only fields) with an empty tree. `status` defaults to draft; a draft page stays out of the site publish, so pass `status: \"published\"` for a page the next publication.publish should serve. Fill the tree with tree.commit in the same batch: read the new root id with tree.read through a $ref to this operation's page.id. A section's anchor is the node field `anchor` in that tree, not a page field, `meta.anchor` or `props.anchor`. A `pageType: \"dynamic\"` page names a collection in `collectionKey` and is the detail page of its items: it answers `/<slug>/<item slug>` in each locale, and its tree binds the item. Page validation and ownership checks apply.",
       "example": {
         "slug": "studio",
         "title": {
@@ -31563,7 +31563,7 @@
     },
     {
       "name": "page.update",
-      "description": "Patch page fields as { pageId, patch }; `patch.status: \"published\"` marks a draft page for the next site publish. Page validation and ownership checks apply.",
+      "description": "Patch a page's fields as { pageId, patch }: slug, title, `frame` (the theme layout frame it renders in, such as `default`, which reflows at the site breakpoints, or a scaled canvas such as `scale-canvas`; layout.update edits a frame), status, SEO, members-only access or `meta`. `patch.status: \"published\"` marks a draft page for the next site publish. `patch.meta` replaces the page's whole meta, so read the page first (page.read) and send its meta back with your change. `meta.layoutOverrides` overrides the frame for this page alone, layer by layer, where the frame's `overridePolicy` allows it: `background` ({ color, image, overlay, texture }: the page's own background colour, as raw CSS such as `var(--ds-color-bg-inverse)`), `header`, `footer`, `scroll` and `chrome`. Page validation and ownership checks apply.",
       "example": {
         "pageId": "6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f",
         "patch": {
@@ -36766,7 +36766,7 @@
     },
     {
       "name": "navigation.read",
-      "description": "Read the draft menus of the site and their revision. A page or anchor target names its page by id. Menus are versioned with the site: publish copies them, and the public site serves the published ones.",
+      "description": "Read the draft menus of the site and their revision: each menu with its key (what the `menu` prop of a nav list, a menu dialog's list or the footer names), its label and its items. An item has an id, a translatable `label` and a `target` of kind `page` { pageId }, `anchor` { pageId, anchor }, `external` { href } (an absolute, mail or phone link) or `languages` (one link per site locale); a top-level item may hold one level of `children`, and a child's `group` titles its column. A page or anchor target names its page by id. Menus are versioned with the site: publish copies them, and the public site serves the published ones.",
       "example": {},
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -38275,7 +38275,7 @@
     },
     {
       "name": "blog.create",
-      "description": "blog.create with entry validation and ownership checks.",
+      "description": "Create a blog index page from its `title` (in `locale`), an optional `slug` and `templateId`, the theme template it renders with; articles go under it with article.create. Answers the new page's id and slug. Entry validation (page type, template, slug) and ownership checks apply.",
       "example": {
         "title": "Journal",
         "templateId": "blog-index-editorial-grid"
@@ -38346,7 +38346,7 @@
     },
     {
       "name": "article.create",
-      "description": "article.create with entry validation and ownership checks.",
+      "description": "Create a draft article under a blog index (`blogId`, the blog index page id) from its `title`, an optional `slug` and `templateId`, the article template it renders with. Its content is its tree: fill it with tree.commit on the answered id; it stays off the public site until article.publish. Entry validation (page type, template, slug) and ownership checks apply.",
       "example": {
         "title": "A house on the hill",
         "templateId": "article-gallery-sticky",
@@ -38424,7 +38424,7 @@
     },
     {
       "name": "blog.update",
-      "description": "blog.update with entry validation and ownership checks.",
+      "description": "Patch a blog index page as { id, patch }: its slug, title, excerpt, featured image, author, canonical URL, SEO (`seo.metaTitle`, `metaDescription`, `ogImageId`, `noIndex`), template or members-only access. Its content is its tree. Entry validation (page type, template, slug) and ownership checks apply.",
       "example": {
         "id": "5f6a7b8c-9d0e-4f1a-8b2c-3d4e5f6a7b8c",
         "patch": {
@@ -38607,7 +38607,7 @@
     },
     {
       "name": "article.update",
-      "description": "article.update with entry validation and ownership checks.",
+      "description": "Patch an article as { id, patch }: its slug, title, excerpt, featured image, author, canonical URL, SEO (`seo.metaTitle`, `metaDescription`, `ogImageId`, `noIndex`), template or members-only access. Its content is its tree. Entry validation (page type, template, slug) and ownership checks apply.",
       "example": {
         "id": "4e5f6a7b-8c9d-4e0f-9a1b-2c3d4e5f6a7b",
         "patch": {
@@ -38793,7 +38793,7 @@
     },
     {
       "name": "article.publish",
-      "description": "article.publish with entry validation and ownership checks.",
+      "description": "Put an article and its current content on the public site on their own, at once, without a site publish: its status becomes published and its first publication date is set the first time. Entry validation (page type, template, slug) and ownership checks apply.",
       "example": {
         "id": "4e5f6a7b-8c9d-4e0f-9a1b-2c3d4e5f6a7b"
       },
@@ -38839,7 +38839,7 @@
     },
     {
       "name": "article.unpublish",
-      "description": "article.unpublish with entry validation and ownership checks.",
+      "description": "Take an article off the public site at once: it becomes a draft again and keeps its first publication date for a later article.publish. Entry validation (page type, template, slug) and ownership checks apply.",
       "example": {
         "id": "4e5f6a7b-8c9d-4e0f-9a1b-2c3d4e5f6a7b"
       },
@@ -40670,7 +40670,7 @@
     },
     {
       "name": "site.read",
-      "description": "site.read with validated settings and revisioned undo.",
+      "description": "Read the site record: its id, slug (the site part of its platform address, `<site>--<program>.<base domain>`), name, theme, blueprint, program, and the parent site and mount path when it is mounted under another site. site_context answers its languages and addresses.",
       "example": {},
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -40762,7 +40762,7 @@
     },
     {
       "name": "site.update",
-      "description": "site.update with validated settings and revisioned undo.",
+      "description": "Rename the site, change its slug (lowercase letters, digits and single hyphens; a reserved slug is refused, one another site holds is 409 site_slug_exists) or mount it under another site of the same workspace at a path (`parentSiteId`, `mountPath`; null unmounts it). Undo restores the routing it changed.",
       "example": {
         "name": "Studio site"
       },
@@ -41058,7 +41058,7 @@
     },
     {
       "name": "access.update",
-      "description": "access.update with validated settings and revisioned undo.",
+      "description": "Set the design-system level of the editor or client role on this site in one area (`{ role, area, level }`, a level the area offers): what people of that role may view or change in the palette, the components, the variants, the themes and the other areas. Undo restores the levels.",
       "example": {
         "role": "editor",
         "area": "palette",
@@ -41262,7 +41262,7 @@
     },
     {
       "name": "settings.read",
-      "description": "settings.read with validated settings and revisioned undo.",
+      "description": "Read the draft site settings, key by key: the theme's setting fields (`companyName`, `legalLine`, `supportEmail`, `logoWidth`, `socialImage`, `favicon`, the analytics and consent keys `analyticsProvider`, `analyticsSiteId`, `analyticsHost`, `consentPolicyVersion`, ...), `blockReveal` (the reveal every block of the page's sections, or the footer's, plays) and `styleBreakpoints` (the list breakpoints.update replaces; absent while the site keeps the defaults).",
       "example": {},
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -41334,7 +41334,7 @@
     },
     {
       "name": "settings.update",
-      "description": "settings.update with validated settings and revisioned undo.",
+      "description": "Write site settings key by key: each key of the input replaces that setting and the others stay. The analytics and consent keys are checked together on the result (an unknown provider, a site id of the wrong shape is refused), and `blockReveal` against its contract (null clears it). `styleBreakpoints` and the layout frames are refused here: use breakpoints.update and layout.update. Settings are versioned: the public site serves them after the next publish; undo restores the previous values.",
       "example": {
         "siteTitle": "Studio"
       },
@@ -41451,7 +41451,7 @@
     },
     {
       "name": "breakpoints.update",
-      "description": "breakpoints.update with validated settings and revisioned undo.",
+      "description": "Replace the site's style breakpoints, the ids `bp:<id>` scopes and component cells name. `styleBreakpoints` is the whole new list, mobile-first: `base` first, then each `{ id, label, minWidth, maxWidth?, condition? }` with min widths increasing (a breakpoint may hold only a media `condition` instead). `before` is the list as it is now (settings.read `styleBreakpoints`, or the defaults `base`, `sm` 480, `md` 768, `lg` 1024, `xl` 1440 when it is absent); another one is refused as changed elsewhere (409). The ids `base`, `sm`, `md`, `lg` and `xl` must stay; add your own, such as `{ id: \"menu\", label: \"Menu folds\", minWidth: 1081 }`. A breakpoint a draft node's style still names cannot go (422, with the node ids).",
       "example": {
         "before": [
           {
@@ -41811,7 +41811,7 @@
     },
     {
       "name": "layout.update",
-      "description": "layout.update with validated settings and revisioned undo.",
+      "description": "Replace this site's version of one of the theme's layout frames (`layoutId`, the frame a page names in `frame`, such as `default` or `scale-canvas`) with `layout`, the whole frame object (its `id` is `layoutId`; settings.read answers the frames the site already replaced under `__siteLayoutOverrides`, and any other frame is the theme's). `frame.responsiveMode` decides how its pages fit the window: `breakpoint` reflows them at the site breakpoints, with fluid tokens growing with the window; `scale` lays them out at `designWidth` and scales the whole canvas to the window from `scaleFromWidth` (769 px by default) up, reflowing below it. The other layers are `header`, `footer`, `background`, `scroll`, `chrome` and `overridePolicy` (which `meta.layoutOverrides` layers a page may apply). Answers the frame as the site now resolves it, with warnings.",
       "example": {
         "layoutId": "default",
         "layout": {
@@ -43103,7 +43103,7 @@
     },
     {
       "name": "apiConfig.read",
-      "description": "apiConfig.read with validated settings and revisioned undo.",
+      "description": "Read the site's API configuration: the external API `sources` (each a base URL the public site's proxy may call), the shared `headers`, the `baseUrl` and the named `requests` the site's data calls use.",
       "example": {},
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -43308,7 +43308,7 @@
     },
     {
       "name": "apiConfig.update",
-      "description": "apiConfig.update with validated settings and revisioned undo.",
+      "description": "Replace the site's API configuration as a whole: `baseUrl`, `headers`, `sources` (the public proxy forwards only to a URL under a source's base URL) and `requests` ({ id, name, method, endpoint, sourceId?, body?, contract? }). Undo restores the previous configuration.",
       "example": {
         "headers": [],
         "sources": [],
@@ -43688,7 +43688,7 @@
     },
     {
       "name": "environment.read",
-      "description": "environment.read with validated settings and revisioned undo.",
+      "description": "List the names of the site's environment variables. Their values are never answered: each comes back as null.",
       "example": {},
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -43727,7 +43727,7 @@
     },
     {
       "name": "environment.update",
-      "description": "environment.update with validated settings and revisioned undo.",
+      "description": "Replace the site's environment variables as a whole: `variables` maps each name to its new value, or to null to keep the stored value; a name left out is deleted, and null for a name with no stored value is refused. The input is redacted from the history and the audit log; undo restores the previous set.",
       "example": {
         "variables": {
           "NEWSLETTER_LIST_ID": "list-42"
@@ -46758,7 +46758,7 @@
     },
     {
       "name": "motion.read",
-      "description": "motion.read with scene validation and page ownership.",
+      "description": "Read the draft scenes of a page: each scene with its id, trigger, entries and options, as motion.replace writes them. A scene write shares the page tree's revision, and publish copies the scenes with the page.",
       "example": {
         "pageId": "6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f"
       },
@@ -47715,7 +47715,7 @@
     },
     {
       "name": "motion.replace",
-      "description": "motion.replace with scene validation and page ownership.",
+      "description": "Replace every scene of a page with `scenes` (at most 500; scene and entry ids unique, each scene's `pageId` the page and `versionId` \"_draft\"). Each scene is validated against the nodes of the page and of its header and footer: a target none of them holds, or a node id two of them hold (422 scene_target_ambiguous), is refused. For the common effects prefer motion.applyRecipe. A scene write shares the page tree's revision, and publish copies the scenes with the page.",
       "example": {
         "pageId": "6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f",
         "scenes": []
@@ -48677,7 +48677,7 @@
     },
     {
       "name": "motion.delete",
-      "description": "motion.delete with scene validation and page ownership.",
+      "description": "Delete one scene of a page by `sceneId` (404 scene_not_found when the page has none with it); the other scenes stay. A scene write shares the page tree's revision, and publish copies the scenes with the page.",
       "example": {
         "pageId": "6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f",
         "sceneId": "scene-1"
@@ -50651,7 +50651,7 @@
     },
     {
       "name": "font.list",
-      "description": "font.list with verified bytes and retained undo assets.",
+      "description": "List the site's font library: each face with its id, family name, weight, style, display, unicode range, source (`upload`, `google` or `blueprint`), licence note and file URL. A `font.family.*` token names a family by its name. Undo restores the library; its files are kept.",
       "example": {},
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -50852,7 +50852,7 @@
     },
     {
       "name": "font.recordUpload",
-      "description": "font.recordUpload with verified bytes and retained undo assets.",
+      "description": "Record a WOFF2 face the admin staged through its upload endpoint (`id`, `storageKey`, and the face's family name, weight, style, display and fallback stack) after checking its bytes again. With the bytes in hand, upload with font.upload instead. Undo restores the library; its files are kept.",
       "example": {
         "id": "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c0d",
         "storageKey": "fonts/dm-sans-400.woff2",
@@ -51124,7 +51124,7 @@
     },
     {
       "name": "font.upload",
-      "description": "Upload a font face from its base64 bytes: a WOFF2 file (the bytes decide, by their signature), checked like the admin upload (file size, the site's font quota, the family name) and stored with its family name, weight, style, display, fallback stack and licence note. Record the licence the face is used under in `licence` (for example the foundry's terms or the licence file's name); the library shows it with the face. A face the library already holds is refused (409 `font_face_exists`) unless `replace` is set. The face is in the draft at once; the public site draws it after the next publish.",
+      "description": "Upload a font face from its base64 bytes: a WOFF2 file (the bytes decide, by their signature), checked like the admin upload (file size, the site's font quota, the family name) and stored with its family name, weight, style, display, fallback stack and licence note. Record the licence the face is used under in `licence` (for example the foundry's terms or the licence file's name); the library shows it with the face. A face the library already holds is refused (409 `font_face_exists`) unless `replace` is set. The face is in the draft at once; the public site draws it after the next publish. Undo restores the library; its files are kept.",
       "example": {
         "fileName": "inter-400.woff2",
         "name": "Inter",
@@ -51395,7 +51395,7 @@
     },
     {
       "name": "font.delete",
-      "description": "font.delete with verified bytes and retained undo assets.",
+      "description": "Delete one face of the library by `fontId`. The last face of a family is refused while a `font.family.*` token of any theme names that family (409 font_family_in_use, with the tokens): point them at another family first. Undo restores the library; its files are kept.",
       "example": {
         "fontId": "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c0d"
       },
@@ -51442,7 +51442,7 @@
     },
     {
       "name": "font.importGoogle",
-      "description": "Self-host a Google Fonts family: fetch its latin and latin-ext woff2 faces for the weights and styles asked, check the answers, and store one face per weight, style and subset with its unicode-range and the family's Google Fonts licence page as the licence note. A face the library already holds is refused (409 `font_face_exists`) unless `replace` is set: that face then leaves the library, the live site keeping it until the next publish, and the new one takes its place. A failure stores nothing.",
+      "description": "Self-host a Google Fonts family: fetch its latin and latin-ext woff2 faces for the weights and styles asked, check the answers, and store one face per weight, style and subset with its unicode-range and the family's Google Fonts licence page as the licence note. A face the library already holds is refused (409 `font_face_exists`) unless `replace` is set: that face then leaves the library, the live site keeping it until the next publish, and the new one takes its place. A failure stores nothing. Undo restores the library; its files are kept.",
       "example": {
         "family": "DM Sans",
         "weights": [
@@ -51711,7 +51711,7 @@
     },
     {
       "name": "publication.publish",
-      "description": "Publish the site: snapshot the draft (pages whose status is published, their trees, menus, collections with their published items, design system, settings, fonts) into a new live version, so the public site serves it. Run it alone in a batch with `confirmed: [\"publish\"]` and, as `baseRevisions`, the `publishBaseRevisions` of publication.pending (read the pending changes first, and publish what you read; a change after that read refuses it as stale); it cannot be dry-run. The answer is the new live version (`shortId` as Pubblicazione e versioni shows it) and `changedAreas`, the areas it changed against the version live before it (`designSystem` alone for a design-system-only change; empty when nothing changed); check the live result with render_preview `target: \"live\"`. External effects (cache purge, screenshots) run after the commit.",
+      "description": "Publish the site: snapshot the draft (pages whose status is published, their trees, menus, collections with their published items, design system, settings, fonts) into a new live version, so the public site serves it. Run it alone in a batch with `confirmed: [\"publish\"]` and, as `baseRevisions`, the `publishBaseRevisions` of publication.pending (read the pending changes first, and publish what you read; a change after that read refuses it as stale); it cannot be dry-run. The answer is the new live version (`shortId` as Pubblicazione e versioni shows it) and `changedAreas`, the areas it changed against the version live before it (`designSystem` alone for a design-system-only change; empty when nothing changed), and `draftThemes`, the draft themes it put live because a published node names them (a draft theme no node names stays out); check the live result with render_preview `target: \"live\"`. External effects (cache purge, screenshots) run after the commit.",
       "example": {
         "note": "Opening section and team page"
       },
@@ -51793,11 +51793,31 @@
                 "fonts"
               ]
             }
+          },
+          "draftThemes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "label"
+              ],
+              "additionalProperties": false
+            }
           }
         },
         "required": [
           "version",
-          "changedAreas"
+          "changedAreas",
+          "draftThemes"
         ],
         "additionalProperties": false
       },
@@ -62005,7 +62025,7 @@
     },
     {
       "name": "brand.presets",
-      "description": "brand.presets with brand validation and transactional history.",
+      "description": "List the site's brand presets, the brand identities its brand templates draw from, each with its id, name and last change. Brand validation applies, and history.undo restores the brand rows the batch changed.",
       "example": {},
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -62059,7 +62079,7 @@
     },
     {
       "name": "brand.templates",
-      "description": "brand.templates with brand validation and transactional history.",
+      "description": "List the site's brand templates, the fixed-size canvases (a social post, a banner) brand.render draws: each with its name, size, status (draft or approved), version and canvas page. Brand validation applies, and history.undo restores the brand rows the batch changed.",
       "example": {},
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -63575,7 +63595,7 @@
     },
     {
       "name": "brand.updateIdentity",
-      "description": "brand.updateIdentity with brand validation and transactional history.",
+      "description": "Patch a brand identity (the default preset's, or `presetId`'s): its brand name, tagline, logos, the four brand colours, the headline and body roles, the tone words and the do and don't rules. Brand validation applies, and history.undo restores the brand rows the batch changed.",
       "example": {
         "identity": {
           "brandName": "Studio",
@@ -63819,7 +63839,7 @@
     },
     {
       "name": "brand.createPreset",
-      "description": "brand.createPreset with brand validation and transactional history.",
+      "description": "Add a brand preset named `presetName`: a copy of preset `cloneFrom`, or without it the theme's default identity for the site. Brand validation applies, and history.undo restores the brand rows the batch changed.",
       "example": {
         "presetName": "Autumn campaign"
       },
@@ -63878,7 +63898,7 @@
     },
     {
       "name": "brand.renamePreset",
-      "description": "brand.renamePreset with brand validation and transactional history.",
+      "description": "Rename a brand preset. Brand validation applies, and history.undo restores the brand rows the batch changed.",
       "example": {
         "presetId": "autumn-campaign",
         "presetName": "Autumn campaign 2026"
@@ -63939,7 +63959,7 @@
     },
     {
       "name": "brand.deletePreset",
-      "description": "brand.deletePreset with brand validation and transactional history.",
+      "description": "Delete a brand preset; the site's last one is refused (409 brand_last_preset). Brand validation applies, and history.undo restores the brand rows the batch changed.",
       "example": {
         "presetId": "autumn-campaign"
       },
@@ -63986,7 +64006,7 @@
     },
     {
       "name": "brand.createTemplate",
-      "description": "brand.createTemplate with brand validation and transactional history.",
+      "description": "Create a brand template: a canvas page of `width` by `height` pixels (fixed at creation) with a first section, laid out from one of the theme's canvas presets when `layoutId` names one. Edit its content with tree.commit on its page, then approve it with brand.updateTemplate. Brand validation applies, and history.undo restores the brand rows the batch changed.",
       "example": {
         "name": "Instagram post",
         "width": 1080,
@@ -65522,7 +65542,7 @@
     },
     {
       "name": "brand.updateTemplate",
-      "description": "brand.updateTemplate with brand validation and transactional history.",
+      "description": "Rename a brand template, approve it (`status: \"approved\"` with `expectedDraftRevision`, the canvas revision you approve: that canvas becomes the version brand.render draws) or set which of its fields a person may change when generating (`customerSettings`). Brand validation applies, and history.undo restores the brand rows the batch changed.",
       "example": {
         "templateId": "4e5f6a7b-8c9d-4e0f-9a1b-2c3d4e5f6a7b",
         "patch": {
@@ -67097,7 +67117,7 @@
     },
     {
       "name": "brand.deleteTemplate",
-      "description": "brand.deleteTemplate with brand validation and transactional history.",
+      "description": "Delete a brand template, then its canvas page. Brand validation applies, and history.undo restores the brand rows the batch changed.",
       "example": {
         "templateId": "4e5f6a7b-8c9d-4e0f-9a1b-2c3d4e5f6a7b"
       },
@@ -67145,7 +67165,7 @@
     },
     {
       "name": "brand.rebuildTemplate",
-      "description": "brand.rebuildTemplate with brand validation and transactional history.",
+      "description": "Recreate the canvas page of a brand template whose page was deleted, from its last approved snapshot (refused when it has none); edits made after that approval do not come back. Brand validation applies, and history.undo restores the brand rows the batch changed.",
       "example": {
         "templateId": "4e5f6a7b-8c9d-4e0f-9a1b-2c3d4e5f6a7b"
       },
@@ -68662,7 +68682,7 @@
     },
     {
       "name": "brand.render",
-      "description": "brand.render from an approved, curated template through a standalone render boundary.",
+      "description": "Render an approved brand template to a PNG (`scale` 1 or 2) in a brand preset (`presetId`), with the overrides of the fields its curation lets a person change (`overrides`, by node), and answer it as base64 without storing it. The render runs in a standalone boundary; run it alone in a batch.",
       "example": {
         "templateId": "4e5f6a7b-8c9d-4e0f-9a1b-2c3d4e5f6a7b",
         "scale": 1
@@ -68760,7 +68780,7 @@
     },
     {
       "name": "brand.save",
-      "description": "brand.save from an approved, curated template through a standalone render boundary.",
+      "description": "Render an approved brand template as brand.render does and store the PNG in the media library, with the record of how it was made. The render runs in a standalone boundary; run it alone in a batch.",
       "example": {
         "templateId": "4e5f6a7b-8c9d-4e0f-9a1b-2c3d4e5f6a7b",
         "scale": 2
@@ -69025,7 +69045,7 @@
     },
     {
       "name": "domain.add",
-      "description": "domain.add with domain ownership and provider gates.",
+      "description": "Connect a hostname to the site. The platform's base domain or one plain label under it goes live at once; any other hostname waits for its DNS record (`ownershipVerification`, `dnsTarget`) and the edge provider's certificate, checked with domain.verify. The first domain that goes live becomes primary while the platform address still is. A refused hostname is domain_refused with its `reason` (invalid, too_deep, platform_address, provider_unavailable; taken is 409). Site ownership is checked.",
       "example": {
         "hostname": "www.example.com"
       },
@@ -69268,7 +69288,7 @@
     },
     {
       "name": "domain.primary",
-      "description": "domain.primary with domain ownership and provider gates.",
+      "description": "Make an active domain the site's primary address, the one its other addresses redirect to; a domain that is not active yet is refused (409). Site ownership is checked.",
       "example": {
         "domainId": "9c0d1e2f-3a4b-4c5d-9e6f-7a8b9c0d1e2f"
       },
@@ -69511,7 +69531,7 @@
     },
     {
       "name": "domain.verify",
-      "description": "domain.verify with domain ownership and provider gates.",
+      "description": "Check a connected domain again: its DNS record, and the edge provider's hostname and certificate (provisioned at the first check). The domain is active once all three are; the answer gives its status, its DNS and SSL states and the last error. Site ownership is checked.",
       "example": {
         "domainId": "9c0d1e2f-3a4b-4c5d-9e6f-7a8b9c0d1e2f"
       },
@@ -69754,7 +69774,7 @@
     },
     {
       "name": "domain.delete",
-      "description": "domain.delete with domain ownership and provider gates.",
+      "description": "Disconnect a domain from the site and release it at the edge provider; the platform address cannot be removed. When it was the primary, the platform address takes over. Site ownership is checked.",
       "example": {
         "domainId": "9c0d1e2f-3a4b-4c5d-9e6f-7a8b9c0d1e2f"
       },
@@ -69801,7 +69821,7 @@
     },
     {
       "name": "maintenance.migrate",
-      "description": "maintenance.migrate in one transaction; recovery uses an explicit backup restore.",
+      "description": "Bring the draft page trees in line with the theme's component props: a prop removed or retyped since the site's last props snapshot is stripped from every draft tree, all pages or none, after a backup of the trees it changes (an added prop writes nothing). A publish runs the same step. It runs in one transaction and is not undone: recovery is maintenance.restoreBackup.",
       "example": {},
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -69885,7 +69905,7 @@
     },
     {
       "name": "maintenance.restoreBackup",
-      "description": "maintenance.restoreBackup in one transaction; recovery uses an explicit backup restore.",
+      "description": "Restore the draft page trees a migration backup holds (`backupId`): each page's root children go back to the backup's, in one commit for all the pages. It runs in one transaction and is not undone: recovery is maintenance.restoreBackup.",
       "example": {
         "backupId": "backup-2026-10-16"
       },
@@ -70084,7 +70104,7 @@
     },
     {
       "name": "designSystem.setToken",
-      "description": "Write one token ({ set, path, type, value }), under the AA contrast gate and the token group rules. To scale spacing, write a scale factor instead of every step: a `number` token named `scale` in a space group multiplies every dimension of that group and its subgroups (`space.section-y.scale: 0.75` makes every section spacing 25 % tighter, `space.scale` scales all spacing; above 0).",
+      "description": "Write one token ({ set, path, type, value }), under the AA contrast gate and the token group rules. A dimension token (a `type.*.fontSize`, a space step, a radius) may be fluid: its value may be a `clamp()`, `calc()`, `min()` or `max()`, such as `clamp(2.125rem, 1.2rem + 3.9vw, 6.4rem)`. A fluid size suits pages on a breakpoint frame; on a page whose frame scales (`responsiveMode: \"scale\"`) the canvas already scales, so a `vw` size there scales twice. To scale spacing, write a scale factor instead of every step: a `number` token named `scale` in a space group multiplies every dimension of that group and its subgroups (`space.section-y.scale: 0.75` makes every section spacing 25 % tighter, `space.scale` scales all spacing; above 0).",
       "example": {
         "set": "core",
         "path": "radius.md",
@@ -72677,7 +72697,7 @@
     },
     {
       "name": "designSystem.setTokens",
-      "description": "Write many tokens as one change, gated once for AA contrast on the end state, so one undo restores the lot. To scale spacing, write a scale factor instead of every step: a `number` token named `scale` in a space group multiplies every dimension of that group and its subgroups (`space.section-y.scale: 0.75` makes every section spacing 25 % tighter, `space.scale` scales all spacing; above 0).",
+      "description": "Write many tokens as one change, gated once for AA contrast on the end state, so one undo restores the lot. A dimension token (a `type.*.fontSize`, a space step, a radius) may be fluid: its value may be a `clamp()`, `calc()`, `min()` or `max()`, such as `clamp(2.125rem, 1.2rem + 3.9vw, 6.4rem)`. A fluid size suits pages on a breakpoint frame; on a page whose frame scales (`responsiveMode: \"scale\"`) the canvas already scales, so a `vw` size there scales twice. To scale spacing, write a scale factor instead of every step: a `number` token named `scale` in a space group multiplies every dimension of that group and its subgroups (`space.section-y.scale: 0.75` makes every section spacing 25 % tighter, `space.scale` scales all spacing; above 0).",
       "example": {
         "writes": [
           {
@@ -75290,7 +75310,7 @@
     },
     {
       "name": "designSystem.setComponentCell",
-      "description": "Design-system setComponentCell, using the same validation and access gates as the editor.",
+      "description": "Set cells of one design-system component in one save: each `{ cell, value }`, the cell key `<variant>.<size>.<state>.<part>.<breakpoint>.<property>` (`primary.all.hover.container.base.background`: `all` when the value does not vary by size, `base` or a breakpoint id). A value is a token alias such as `{color.bg.accent}` (a semantic or foundation token, never a palette step or a raw literal), a bare keyword for a property whose values are modes (a link underline's `none`, `always`, `hover`), or `{ component, variant }` for a part that embeds another component. Read the cell keys of a component with the `component/<key>` resource (designSystem.readComponent) and the segments with designSystem.read `components: true`. The menu dialog's drawer is the `drawer-nav` component: its `overlay` cells (`background`, `opacity`, `blur`), `panel` cells (`background`, `width`, `padding`, `shadow`, `z`, `radius`, `offset-x`, `offset-y`, `fit`) and `motion` cells (`delay`, `duration`, `easing`, `fade`) style it, such as `full.all.default.overlay.base.blur`. Every save runs the AA contrast gate.",
       "example": {
         "component": "button",
         "cells": [
@@ -77915,7 +77935,7 @@
     },
     {
       "name": "designSystem.createVariant",
-      "description": "Design-system createVariant, using the same validation and access gates as the editor.",
+      "description": "Add a variant to a design-system component, such as a light or a small button, a pill tag or a dark card: `variant` (its key, kebab case), `label`, and `from`, the variant whose cells it copies as the same aliases, so the new one follows the system until one of its cells changes. Change its cells with setComponentCell and draw it on a node with tree.commit `set_variant` { id, variant }. Under the AA contrast gate.",
       "example": {
         "component": "button",
         "variant": "ghost",
@@ -80505,7 +80525,7 @@
     },
     {
       "name": "designSystem.createTheme",
-      "description": "Design-system createTheme, using the same validation and access gates as the editor.",
+      "description": "Add a theme ({ key, label, sets in precedence order, activation? }) as a draft, under the AA contrast gate: the previews show it, and a publish ships it only where a node names it (node theme, an instance's $theme, a data-theme attribute; the publish answer lists it in `draftThemes`). A draft's activation rule never applies on the public site: clear the draft flag with updateTheme to make the theme live by its rule.",
       "example": {
         "key": "night",
         "label": "Night",
@@ -83122,7 +83142,7 @@
     },
     {
       "name": "designSystem.activateSet",
-      "description": "Design-system activateSet, using the same validation and access gates as the editor.",
+      "description": "Add a token set to the sets of a theme (`theme`, `set`): the set takes its place in the precedence order the sets follow, so there is no position to choose, and its tokens apply wherever the theme does. Under the AA contrast gate.",
       "example": {
         "theme": "night",
         "set": "semantic-dark"
@@ -85698,7 +85718,7 @@
     },
     {
       "name": "designSystem.setScheme",
-      "description": "Design-system setScheme, using the same validation and access gates as the editor.",
+      "description": "Set the design-system theme a page node and its subtree draw in (`pageId`, `nodeId`, `theme`; null makes the node inherit its parent's again), as tree.commit `set_theme` does: the write goes through the tree commit's gates and needs the page's `tree:<pageId>` base revision.",
       "example": {
         "pageId": "6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f",
         "nodeId": "claim001",
@@ -88273,7 +88293,7 @@
     },
     {
       "name": "designSystem.resetToBlueprint",
-      "description": "Design-system resetToBlueprint, using the same validation and access gates as the editor.",
+      "description": "Remove site overrides so the blueprint's values apply again, in one revision. `scope` names what: `{ kind: \"all\" }`, one `token` ({ set, path }), every token under a path `prefix`, a `component`, some `cells` of a component, a `variant`, a `theme`, a site `set`, or `many` of these. A token the site added is deleted, which is refused (409) while a cell still aliases it.",
       "example": {
         "scope": {
           "kind": "prefix",
@@ -91027,7 +91047,7 @@
     },
     {
       "name": "designSystem.importTokens",
-      "description": "Design-system importTokens, using the same validation and access gates as the editor.",
+      "description": "Import tokens from DTCG files in the Tokens Studio layout (one file per set plus `$themes`, loose or zipped as base64) or from a Figma variables export (collections become sets, modes themes); `mapping` renames imported paths to existing ones. Run it as a dry run first: the answer's `report` lists the adds, the changes, the type conflicts and the unknown names, and nothing is written. A confirmed import lands as one revision under the AA contrast gate.",
       "example": {
         "format": "dtcg",
         "files": [
@@ -98798,7 +98818,7 @@
     },
     {
       "name": "designSystem.createSet",
-      "description": "Design-system createSet, using the same validation and access gates as the editor.",
+      "description": "Add an empty token set `key` after set `after` in the precedence order. No theme uses it until activateSet or updateTheme lists it.",
       "example": {
         "key": "brand-sub",
         "label": "Sub-brand",
@@ -101383,7 +101403,7 @@
     },
     {
       "name": "designSystem.updateTheme",
-      "description": "Design-system updateTheme, using the same validation and access gates as the editor.",
+      "description": "Edit a theme: its label, its sets in precedence order, its activation rule, `isDefault` (the former default stops being it; a default takes no rule and is never a draft) or `draft`. `draft: false` makes the theme live: published wherever its rule applies or a node names it. A draft theme is published only where a node names it.",
       "example": {
         "key": "night",
         "label": "Night",
@@ -104007,7 +104027,7 @@
     },
     {
       "name": "designSystem.updateVariant",
-      "description": "Design-system updateVariant, using the same validation and access gates as the editor.",
+      "description": "Relabel a component variant or hide it (`hidden: true`): a hidden variant still draws wherever a node uses it, and the pickers leave it out.",
       "example": {
         "component": "button",
         "variant": "ghost",
@@ -106597,7 +106617,7 @@
     },
     {
       "name": "designSystem.deleteVariant",
-      "description": "Design-system deleteVariant, using the same validation and access gates as the editor.",
+      "description": "Delete a variant the site added, with its cells. A variant the blueprint ships is refused (hide it with updateVariant), and so is one a cell or a node uses (409, with the usage).",
       "example": {
         "component": "button",
         "variant": "ghost"
@@ -109173,7 +109193,7 @@
     },
     {
       "name": "designSystem.setMixin",
-      "description": "Design-system setMixin, using the same validation and access gates as the editor.",
+      "description": "Create or update a mixin, a surface nodes apply by key with tree.commit `set_mixins` (a pattern background, a card surface): `key`, `label` and `sheet`, CSS property to value in the order written, with tokens as `{path}`. The sheet takes the properties of the style catalogue, no `!important`, and semantic or foundation tokens of a group the property takes, each defined in some theme of the draft.",
       "example": {
         "key": "band",
         "label": "Band",
@@ -111770,7 +111790,7 @@
     },
     {
       "name": "designSystem.deleteMixin",
-      "description": "Design-system deleteMixin, using the same validation and access gates as the editor.",
+      "description": "Delete a mixin the site added. A mixin the blueprint ships is refused, and so is one a draft node applies (the refusal names the nodes).",
       "example": {
         "key": "band"
       },

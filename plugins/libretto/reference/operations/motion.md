@@ -8,7 +8,7 @@ Scenes animate nodes on scroll, on load or on interaction. Prefer recipes (`moti
 
 ## motion.read
 
-motion.read with scene validation and page ownership.
+Read the draft scenes of a page: each scene with its id, trigger, entries and options, as motion.replace writes them. A scene write shares the page tree's revision, and publish copies the scenes with the page.
 
 - permission `site.read` (admin, editor); class `read`; writes nothing.
 
@@ -26,7 +26,7 @@ Example input:
 
 ## motion.replace
 
-motion.replace with scene validation and page ownership.
+Replace every scene of a page with `scenes` (at most 500; scene and entry ids unique, each scene's `pageId` the page and `versionId` "_draft"). Each scene is validated against the nodes of the page and of its header and footer: a target none of them holds, or a node id two of them hold (422 scene_target_ambiguous), is refused. For the common effects prefer motion.applyRecipe. A scene write shares the page tree's revision, and publish copies the scenes with the page.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `tree:{pageId}`; undoable with `history.undo`.
 
@@ -45,7 +45,7 @@ Example input:
 
 ## motion.delete
 
-motion.delete with scene validation and page ownership.
+Delete one scene of a page by `sceneId` (404 scene_not_found when the page has none with it); the other scenes stay. A scene write shares the page tree's revision, and publish copies the scenes with the page.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `tree:{pageId}`; needs `"confirmed": ["destructive"]`; undoable with `history.undo`.
 

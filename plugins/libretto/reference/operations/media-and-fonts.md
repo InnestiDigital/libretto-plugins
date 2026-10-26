@@ -234,7 +234,7 @@ Example input:
 
 ## font.list
 
-font.list with verified bytes and retained undo assets.
+List the site's font library: each face with its id, family name, weight, style, display, unicode range, source (`upload`, `google` or `blueprint`), licence note and file URL. A `font.family.*` token names a family by its name. Undo restores the library; its files are kept.
 
 - permission `site.read` (admin, editor); class `read`; writes nothing.
 - Input: `{}`.
@@ -249,7 +249,7 @@ Example input:
 
 ## font.recordUpload
 
-font.recordUpload with verified bytes and retained undo assets.
+Record a WOFF2 face the admin staged through its upload endpoint (`id`, `storageKey`, and the face's family name, weight, style, display and fallback stack) after checking its bytes again. With the bytes in hand, upload with font.upload instead. Undo restores the library; its files are kept.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `fonts`; undoable with `history.undo`.
 
@@ -278,7 +278,7 @@ Example input:
 
 ## font.upload
 
-Upload a font face from its base64 bytes: a WOFF2 file (the bytes decide, by their signature), checked like the admin upload (file size, the site's font quota, the family name) and stored with its family name, weight, style, display, fallback stack and licence note. Record the licence the face is used under in `licence` (for example the foundry's terms or the licence file's name); the library shows it with the face. A face the library already holds is refused (409 `font_face_exists`) unless `replace` is set. The face is in the draft at once; the public site draws it after the next publish.
+Upload a font face from its base64 bytes: a WOFF2 file (the bytes decide, by their signature), checked like the admin upload (file size, the site's font quota, the family name) and stored with its family name, weight, style, display, fallback stack and licence note. Record the licence the face is used under in `licence` (for example the foundry's terms or the licence file's name); the library shows it with the face. A face the library already holds is refused (409 `font_face_exists`) unless `replace` is set. The face is in the draft at once; the public site draws it after the next publish. Undo restores the library; its files are kept.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `fonts`; undoable with `history.undo`.
 
@@ -306,7 +306,7 @@ Example input:
 
 ## font.delete
 
-font.delete with verified bytes and retained undo assets.
+Delete one face of the library by `fontId`. The last face of a family is refused while a `font.family.*` token of any theme names that family (409 font_family_in_use, with the tokens): point them at another family first. Undo restores the library; its files are kept.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `fonts`; needs `"confirmed": ["destructive"]`; undoable with `history.undo`.
 
@@ -324,7 +324,7 @@ Example input:
 
 ## font.importGoogle
 
-Self-host a Google Fonts family: fetch its latin and latin-ext woff2 faces for the weights and styles asked, check the answers, and store one face per weight, style and subset with its unicode-range and the family's Google Fonts licence page as the licence note. A face the library already holds is refused (409 `font_face_exists`) unless `replace` is set: that face then leaves the library, the live site keeping it until the next publish, and the new one takes its place. A failure stores nothing.
+Self-host a Google Fonts family: fetch its latin and latin-ext woff2 faces for the weights and styles asked, check the answers, and store one face per weight, style and subset with its unicode-range and the family's Google Fonts licence page as the licence note. A face the library already holds is refused (409 `font_face_exists`) unless `replace` is set: that face then leaves the library, the live site keeping it until the next publish, and the new one takes its place. A failure stores nothing. Undo restores the library; its files are kept.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `fonts`; undoable with `history.undo`.
 

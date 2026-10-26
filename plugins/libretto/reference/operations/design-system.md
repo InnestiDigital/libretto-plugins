@@ -29,7 +29,7 @@ Example input:
 
 ## designSystem.setToken
 
-Write one token ({ set, path, type, value }), under the AA contrast gate and the token group rules. To scale spacing, write a scale factor instead of every step: a `number` token named `scale` in a space group multiplies every dimension of that group and its subgroups (`space.section-y.scale: 0.75` makes every section spacing 25 % tighter, `space.scale` scales all spacing; above 0).
+Write one token ({ set, path, type, value }), under the AA contrast gate and the token group rules. A dimension token (a `type.*.fontSize`, a space step, a radius) may be fluid: its value may be a `clamp()`, `calc()`, `min()` or `max()`, such as `clamp(2.125rem, 1.2rem + 3.9vw, 6.4rem)`. A fluid size suits pages on a breakpoint frame; on a page whose frame scales (`responsiveMode: "scale"`) the canvas already scales, so a `vw` size there scales twice. To scale spacing, write a scale factor instead of every step: a `number` token named `scale` in a space group multiplies every dimension of that group and its subgroups (`space.section-y.scale: 0.75` makes every section spacing 25 % tighter, `space.scale` scales all spacing; above 0).
 
 - permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
@@ -54,7 +54,7 @@ Example input:
 
 ## designSystem.setTokens
 
-Write many tokens as one change, gated once for AA contrast on the end state, so one undo restores the lot. To scale spacing, write a scale factor instead of every step: a `number` token named `scale` in a space group multiplies every dimension of that group and its subgroups (`space.section-y.scale: 0.75` makes every section spacing 25 % tighter, `space.scale` scales all spacing; above 0).
+Write many tokens as one change, gated once for AA contrast on the end state, so one undo restores the lot. A dimension token (a `type.*.fontSize`, a space step, a radius) may be fluid: its value may be a `clamp()`, `calc()`, `min()` or `max()`, such as `clamp(2.125rem, 1.2rem + 3.9vw, 6.4rem)`. A fluid size suits pages on a breakpoint frame; on a page whose frame scales (`responsiveMode: "scale"`) the canvas already scales, so a `vw` size there scales twice. To scale spacing, write a scale factor instead of every step: a `number` token named `scale` in a space group multiplies every dimension of that group and its subgroups (`space.section-y.scale: 0.75` makes every section spacing 25 % tighter, `space.scale` scales all spacing; above 0).
 
 - permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
@@ -76,7 +76,7 @@ Example input:
 
 ## designSystem.setComponentCell
 
-Design-system setComponentCell, using the same validation and access gates as the editor.
+Set cells of one design-system component in one save: each `{ cell, value }`, the cell key `<variant>.<size>.<state>.<part>.<breakpoint>.<property>` (`primary.all.hover.container.base.background`: `all` when the value does not vary by size, `base` or a breakpoint id). A value is a token alias such as `{color.bg.accent}` (a semantic or foundation token, never a palette step or a raw literal), a bare keyword for a property whose values are modes (a link underline's `none`, `always`, `hover`), or `{ component, variant }` for a part that embeds another component. Read the cell keys of a component with the `component/<key>` resource (designSystem.readComponent) and the segments with designSystem.read `components: true`. The menu dialog's drawer is the `drawer-nav` component: its `overlay` cells (`background`, `opacity`, `blur`), `panel` cells (`background`, `width`, `padding`, `shadow`, `z`, `radius`, `offset-x`, `offset-y`, `fit`) and `motion` cells (`delay`, `duration`, `easing`, `fade`) style it, such as `full.all.default.overlay.base.blur`. Every save runs the AA contrast gate.
 
 - permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
@@ -96,7 +96,7 @@ Example input:
 
 ## designSystem.createVariant
 
-Design-system createVariant, using the same validation and access gates as the editor.
+Add a variant to a design-system component, such as a light or a small button, a pill tag or a dark card: `variant` (its key, kebab case), `label`, and `from`, the variant whose cells it copies as the same aliases, so the new one follows the system until one of its cells changes. Change its cells with setComponentCell and draw it on a node with tree.commit `set_variant` { id, variant }. Under the AA contrast gate.
 
 - permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
@@ -118,7 +118,7 @@ Example input:
 
 ## designSystem.createTheme
 
-Design-system createTheme, using the same validation and access gates as the editor.
+Add a theme ({ key, label, sets in precedence order, activation? }) as a draft, under the AA contrast gate: the previews show it, and a publish ships it only where a node names it (node theme, an instance's $theme, a data-theme attribute; the publish answer lists it in `draftThemes`). A draft's activation rule never applies on the public site: clear the draft flag with updateTheme to make the theme live by its rule.
 
 - permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
@@ -143,7 +143,7 @@ Example input:
 
 ## designSystem.activateSet
 
-Design-system activateSet, using the same validation and access gates as the editor.
+Add a token set to the sets of a theme (`theme`, `set`): the set takes its place in the precedence order the sets follow, so there is no position to choose, and its tokens apply wherever the theme does. Under the AA contrast gate.
 
 - permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
@@ -163,7 +163,7 @@ Example input:
 
 ## designSystem.setScheme
 
-Design-system setScheme, using the same validation and access gates as the editor.
+Set the design-system theme a page node and its subtree draw in (`pageId`, `nodeId`, `theme`; null makes the node inherit its parent's again), as tree.commit `set_theme` does: the write goes through the tree commit's gates and needs the page's `tree:<pageId>` base revision.
 
 - permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `tree:{pageId}`; undoable with `history.undo`.
 
@@ -183,7 +183,7 @@ Example input:
 
 ## designSystem.resetToBlueprint
 
-Design-system resetToBlueprint, using the same validation and access gates as the editor.
+Remove site overrides so the blueprint's values apply again, in one revision. `scope` names what: `{ kind: "all" }`, one `token` ({ set, path }), every token under a path `prefix`, a `component`, some `cells` of a component, a `variant`, a `theme`, a site `set`, or `many` of these. A token the site added is deleted, which is refused (409) while a cell still aliases it.
 
 - permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; needs `"confirmed": ["destructive"]`; undoable with `history.undo`.
 
@@ -204,7 +204,7 @@ Example input:
 
 ## designSystem.importTokens
 
-Design-system importTokens, using the same validation and access gates as the editor.
+Import tokens from DTCG files in the Tokens Studio layout (one file per set plus `$themes`, loose or zipped as base64) or from a Figma variables export (collections become sets, modes themes); `mapping` renames imported paths to existing ones. Run it as a dry run first: the answer's `report` lists the adds, the changes, the type conflicts and the unknown names, and nothing is written. A confirmed import lands as one revision under the AA contrast gate.
 
 - permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
@@ -267,7 +267,7 @@ Example input:
 
 ## designSystem.createSet
 
-Design-system createSet, using the same validation and access gates as the editor.
+Add an empty token set `key` after set `after` in the precedence order. No theme uses it until activateSet or updateTheme lists it.
 
 - permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
@@ -288,7 +288,7 @@ Example input:
 
 ## designSystem.updateTheme
 
-Design-system updateTheme, using the same validation and access gates as the editor.
+Edit a theme: its label, its sets in precedence order, its activation rule, `isDefault` (the former default stops being it; a default takes no rule and is never a draft) or `draft`. `draft: false` makes the theme live: published wherever its rule applies or a node names it. A draft theme is published only where a node names it.
 
 - permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
@@ -315,7 +315,7 @@ Example input:
 
 ## designSystem.updateVariant
 
-Design-system updateVariant, using the same validation and access gates as the editor.
+Relabel a component variant or hide it (`hidden: true`): a hidden variant still draws wherever a node uses it, and the pickers leave it out.
 
 - permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
@@ -337,7 +337,7 @@ Example input:
 
 ## designSystem.deleteVariant
 
-Design-system deleteVariant, using the same validation and access gates as the editor.
+Delete a variant the site added, with its cells. A variant the blueprint ships is refused (hide it with updateVariant), and so is one a cell or a node uses (409, with the usage).
 
 - permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; needs `"confirmed": ["destructive"]`; undoable with `history.undo`.
 
@@ -359,7 +359,7 @@ Example input:
 
 ## designSystem.setMixin
 
-Design-system setMixin, using the same validation and access gates as the editor.
+Create or update a mixin, a surface nodes apply by key with tree.commit `set_mixins` (a pattern background, a card surface): `key`, `label` and `sheet`, CSS property to value in the order written, with tokens as `{path}`. The sheet takes the properties of the style catalogue, no `!important`, and semantic or foundation tokens of a group the property takes, each defined in some theme of the draft.
 
 - permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; undoable with `history.undo`.
 
@@ -380,7 +380,7 @@ Example input:
 
 ## designSystem.deleteMixin
 
-Design-system deleteMixin, using the same validation and access gates as the editor.
+Delete a mixin the site added. A mixin the blueprint ships is refused, and so is one a draft node applies (the refusal names the nodes).
 
 - permission `designSystem.operation` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `designSystem`; needs `"confirmed": ["destructive"]`; undoable with `history.undo`.
 

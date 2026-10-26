@@ -37,7 +37,7 @@ Example input:
 
 ## brand.presets
 
-brand.presets with brand validation and transactional history.
+List the site's brand presets, the brand identities its brand templates draw from, each with its id, name and last change. Brand validation applies, and history.undo restores the brand rows the batch changed.
 
 - permission `site.admin` (admin); class `read`; writes nothing.
 - Input: `{}`.
@@ -52,7 +52,7 @@ Example input:
 
 ## brand.templates
 
-brand.templates with brand validation and transactional history.
+List the site's brand templates, the fixed-size canvases (a social post, a banner) brand.render draws: each with its name, size, status (draft or approved), version and canvas page. Brand validation applies, and history.undo restores the brand rows the batch changed.
 
 - permission `site.admin` (admin); class `read`; writes nothing.
 - Input: `{}`.
@@ -67,7 +67,7 @@ Example input:
 
 ## brand.updateIdentity
 
-brand.updateIdentity with brand validation and transactional history.
+Patch a brand identity (the default preset's, or `presetId`'s): its brand name, tagline, logos, the four brand colours, the headline and body roles, the tone words and the do and don't rules. Brand validation applies, and history.undo restores the brand rows the batch changed.
 
 - permission `site.admin` (admin); class `transaction`; writes `brand`; undoable with `history.undo`.
 
@@ -86,7 +86,7 @@ Example input:
 
 ## brand.createPreset
 
-brand.createPreset with brand validation and transactional history.
+Add a brand preset named `presetName`: a copy of preset `cloneFrom`, or without it the theme's default identity for the site. Brand validation applies, and history.undo restores the brand rows the batch changed.
 
 - permission `site.admin` (admin); class `transaction`; writes `brand`; undoable with `history.undo`.
 
@@ -105,7 +105,7 @@ Example input:
 
 ## brand.renamePreset
 
-brand.renamePreset with brand validation and transactional history.
+Rename a brand preset. Brand validation applies, and history.undo restores the brand rows the batch changed.
 
 - permission `site.admin` (admin); class `transaction`; writes `brand`; undoable with `history.undo`.
 
@@ -124,7 +124,7 @@ Example input:
 
 ## brand.deletePreset
 
-brand.deletePreset with brand validation and transactional history.
+Delete a brand preset; the site's last one is refused (409 brand_last_preset). Brand validation applies, and history.undo restores the brand rows the batch changed.
 
 - permission `site.admin` (admin); class `transaction`; writes `brand`; needs `"confirmed": ["destructive"]`; undoable with `history.undo`.
 
@@ -142,7 +142,7 @@ Example input:
 
 ## brand.createTemplate
 
-brand.createTemplate with brand validation and transactional history.
+Create a brand template: a canvas page of `width` by `height` pixels (fixed at creation) with a first section, laid out from one of the theme's canvas presets when `layoutId` names one. Edit its content with tree.commit on its page, then approve it with brand.updateTemplate. Brand validation applies, and history.undo restores the brand rows the batch changed.
 
 - permission `site.admin` (admin); class `transaction`; writes `brand`, `pages`; undoable with `history.undo`.
 
@@ -163,7 +163,7 @@ Example input:
 
 ## brand.updateTemplate
 
-brand.updateTemplate with brand validation and transactional history.
+Rename a brand template, approve it (`status: "approved"` with `expectedDraftRevision`, the canvas revision you approve: that canvas becomes the version brand.render draws) or set which of its fields a person may change when generating (`customerSettings`). Brand validation applies, and history.undo restores the brand rows the batch changed.
 
 - permission `site.admin` (admin); class `transaction`; writes `brand`, `pages`; undoable with `history.undo`.
 
@@ -186,7 +186,7 @@ Example input:
 
 ## brand.deleteTemplate
 
-brand.deleteTemplate with brand validation and transactional history.
+Delete a brand template, then its canvas page. Brand validation applies, and history.undo restores the brand rows the batch changed.
 
 - permission `site.admin` (admin); class `transaction`; writes `brand`, `pages`; needs `"confirmed": ["destructive"]`; undoable with `history.undo`.
 
@@ -204,7 +204,7 @@ Example input:
 
 ## brand.rebuildTemplate
 
-brand.rebuildTemplate with brand validation and transactional history.
+Recreate the canvas page of a brand template whose page was deleted, from its last approved snapshot (refused when it has none); edits made after that approval do not come back. Brand validation applies, and history.undo restores the brand rows the batch changed.
 
 - permission `site.admin` (admin); class `transaction`; writes `brand`, `pages`; undoable with `history.undo`.
 
@@ -222,7 +222,7 @@ Example input:
 
 ## brand.render
 
-brand.render from an approved, curated template through a standalone render boundary.
+Render an approved brand template to a PNG (`scale` 1 or 2) in a brand preset (`presetId`), with the overrides of the fields its curation lets a person change (`overrides`, by node), and answer it as base64 without storing it. The render runs in a standalone boundary; run it alone in a batch.
 
 - permission `brand.generate` (admin); class `external`; writes nothing; external: alone in its batch, never in a dry run.
 
@@ -243,7 +243,7 @@ Example input:
 
 ## brand.save
 
-brand.save from an approved, curated template through a standalone render boundary.
+Render an approved brand template as brand.render does and store the PNG in the media library, with the record of how it was made. The render runs in a standalone boundary; run it alone in a batch.
 
 - permission `brand.generate` (admin); class `external`; writes `media`, `generations`; undoable with `history.undo`; external: alone in its batch, never in a dry run.
 

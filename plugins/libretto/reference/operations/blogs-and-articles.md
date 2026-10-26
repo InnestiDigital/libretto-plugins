@@ -8,7 +8,7 @@ A blog is an index page with its articles; an article is a page with its own pub
 
 ## blog.create
 
-blog.create with entry validation and ownership checks.
+Create a blog index page from its `title` (in `locale`), an optional `slug` and `templateId`, the theme template it renders with; articles go under it with article.create. Answers the new page's id and slug. Entry validation (page type, template, slug) and ownership checks apply.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `pages`; undoable with `history.undo`.
 
@@ -29,7 +29,7 @@ Example input:
 
 ## article.create
 
-article.create with entry validation and ownership checks.
+Create a draft article under a blog index (`blogId`, the blog index page id) from its `title`, an optional `slug` and `templateId`, the article template it renders with. Its content is its tree: fill it with tree.commit on the answered id; it stays off the public site until article.publish. Entry validation (page type, template, slug) and ownership checks apply.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `pages`; undoable with `history.undo`.
 
@@ -51,7 +51,7 @@ Example input:
 
 ## blog.update
 
-blog.update with entry validation and ownership checks.
+Patch a blog index page as { id, patch }: its slug, title, excerpt, featured image, author, canonical URL, SEO (`seo.metaTitle`, `metaDescription`, `ogImageId`, `noIndex`), template or members-only access. Its content is its tree. Entry validation (page type, template, slug) and ownership checks apply.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `pages`; undoable with `history.undo`.
 
@@ -81,7 +81,7 @@ Example input:
 
 ## article.update
 
-article.update with entry validation and ownership checks.
+Patch an article as { id, patch }: its slug, title, excerpt, featured image, author, canonical URL, SEO (`seo.metaTitle`, `metaDescription`, `ogImageId`, `noIndex`), template or members-only access. Its content is its tree. Entry validation (page type, template, slug) and ownership checks apply.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `pages`; undoable with `history.undo`.
 
@@ -111,7 +111,7 @@ Example input:
 
 ## article.publish
 
-article.publish with entry validation and ownership checks.
+Put an article and its current content on the public site on their own, at once, without a site publish: its status becomes published and its first publication date is set the first time. Entry validation (page type, template, slug) and ownership checks apply.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `pages`; needs `"confirmed": ["publish"]`; undoable with `history.undo`.
 
@@ -129,7 +129,7 @@ Example input:
 
 ## article.unpublish
 
-article.unpublish with entry validation and ownership checks.
+Take an article off the public site at once: it becomes a draft again and keeps its first publication date for a later article.publish. Entry validation (page type, template, slug) and ownership checks apply.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `pages`; needs `"confirmed": ["publish"]`; undoable with `history.undo`.
 

@@ -8,7 +8,7 @@ Site-wide configuration. Most writes here need `site.admin` (platform admin only
 
 ## site.read
 
-site.read with validated settings and revisioned undo.
+Read the site record: its id, slug (the site part of its platform address, `<site>--<program>.<base domain>`), name, theme, blueprint, program, and the parent site and mount path when it is mounted under another site. site_context answers its languages and addresses.
 
 - permission `site.read` (admin, editor); class `read`; writes nothing.
 - Input: `{}`.
@@ -23,7 +23,7 @@ Example input:
 
 ## site.update
 
-site.update with validated settings and revisioned undo.
+Rename the site, change its slug (lowercase letters, digits and single hyphens; a reserved slug is refused, one another site holds is 409 site_slug_exists) or mount it under another site of the same workspace at a path (`parentSiteId`, `mountPath`; null unmounts it). Undo restores the routing it changed.
 
 - permission `site.admin` (admin); class `transaction`; writes `site`; undoable with `history.undo`.
 
@@ -59,7 +59,7 @@ Example input:
 
 ## access.update
 
-access.update with validated settings and revisioned undo.
+Set the design-system level of the editor or client role on this site in one area (`{ role, area, level }`, a level the area offers): what people of that role may view or change in the palette, the components, the variants, the themes and the other areas. Undo restores the levels.
 
 - permission `site.admin` (admin); class `transaction`; writes `access`; undoable with `history.undo`.
 
@@ -79,7 +79,7 @@ Example input:
 
 ## settings.read
 
-settings.read with validated settings and revisioned undo.
+Read the draft site settings, key by key: the theme's setting fields (`companyName`, `legalLine`, `supportEmail`, `logoWidth`, `socialImage`, `favicon`, the analytics and consent keys `analyticsProvider`, `analyticsSiteId`, `analyticsHost`, `consentPolicyVersion`, ...), `blockReveal` (the reveal every block of the page's sections, or the footer's, plays) and `styleBreakpoints` (the list breakpoints.update replaces; absent while the site keeps the defaults).
 
 - permission `site.read` (admin, editor); class `read`; writes nothing.
 - Input: `{}`.
@@ -94,7 +94,7 @@ Example input:
 
 ## settings.update
 
-settings.update with validated settings and revisioned undo.
+Write site settings key by key: each key of the input replaces that setting and the others stay. The analytics and consent keys are checked together on the result (an unknown provider, a site id of the wrong shape is refused), and `blockReveal` against its contract (null clears it). `styleBreakpoints` and the layout frames are refused here: use breakpoints.update and layout.update. Settings are versioned: the public site serves them after the next publish; undo restores the previous values.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `settings`; undoable with `history.undo`.
 - Input: `{}`.
@@ -109,7 +109,7 @@ Example input:
 
 ## breakpoints.update
 
-breakpoints.update with validated settings and revisioned undo.
+Replace the site's style breakpoints, the ids `bp:<id>` scopes and component cells name. `styleBreakpoints` is the whole new list, mobile-first: `base` first, then each `{ id, label, minWidth, maxWidth?, condition? }` with min widths increasing (a breakpoint may hold only a media `condition` instead). `before` is the list as it is now (settings.read `styleBreakpoints`, or the defaults `base`, `sm` 480, `md` 768, `lg` 1024, `xl` 1440 when it is absent); another one is refused as changed elsewhere (409). The ids `base`, `sm`, `md`, `lg` and `xl` must stay; add your own, such as `{ id: "menu", label: "Menu folds", minWidth: 1081 }`. A breakpoint a draft node's style still names cannot go (422, with the node ids).
 
 - permission `breakpoints.edit` (admin, workspace owner, editor (as the access settings allow)); class `transaction`; writes `settings`; undoable with `history.undo`.
 
@@ -128,7 +128,7 @@ Example input:
 
 ## layout.update
 
-layout.update with validated settings and revisioned undo.
+Replace this site's version of one of the theme's layout frames (`layoutId`, the frame a page names in `frame`, such as `default` or `scale-canvas`) with `layout`, the whole frame object (its `id` is `layoutId`; settings.read answers the frames the site already replaced under `__siteLayoutOverrides`, and any other frame is the theme's). `frame.responsiveMode` decides how its pages fit the window: `breakpoint` reflows them at the site breakpoints, with fluid tokens growing with the window; `scale` lays them out at `designWidth` and scales the whole canvas to the window from `scaleFromWidth` (769 px by default) up, reflowing below it. The other layers are `header`, `footer`, `background`, `scroll`, `chrome` and `overridePolicy` (which `meta.layoutOverrides` layers a page may apply). Answers the frame as the site now resolves it, with warnings.
 
 - permission `site.structure` (admin, workspace owner); class `transaction`; writes `settings`; undoable with `history.undo`.
 
@@ -157,7 +157,7 @@ Example input:
 
 ## apiConfig.read
 
-apiConfig.read with validated settings and revisioned undo.
+Read the site's API configuration: the external API `sources` (each a base URL the public site's proxy may call), the shared `headers`, the `baseUrl` and the named `requests` the site's data calls use.
 
 - permission `site.read` (admin, editor); class `read`; writes nothing.
 - Input: `{}`.
@@ -172,7 +172,7 @@ Example input:
 
 ## apiConfig.update
 
-apiConfig.update with validated settings and revisioned undo.
+Replace the site's API configuration as a whole: `baseUrl`, `headers`, `sources` (the public proxy forwards only to a URL under a source's base URL) and `requests` ({ id, name, method, endpoint, sourceId?, body?, contract? }). Undo restores the previous configuration.
 
 - permission `site.admin` (admin); class `transaction`; writes `apiConfig`; undoable with `history.undo`.
 
@@ -193,7 +193,7 @@ Example input:
 
 ## environment.read
 
-environment.read with validated settings and revisioned undo.
+List the names of the site's environment variables. Their values are never answered: each comes back as null.
 
 - permission `site.read` (admin, editor); class `read`; writes nothing.
 - Input: `{}`.
@@ -208,7 +208,7 @@ Example input:
 
 ## environment.update
 
-environment.update with validated settings and revisioned undo.
+Replace the site's environment variables as a whole: `variables` maps each name to its new value, or to null to keep the stored value; a name left out is deleted, and null for a name with no stored value is refused. The input is redacted from the history and the audit log; undo restores the previous set.
 
 - permission `site.admin` (admin); class `transaction`; writes `environment`; undoable with `history.undo`.
 
@@ -278,7 +278,7 @@ Example input:
 
 ## domain.add
 
-domain.add with domain ownership and provider gates.
+Connect a hostname to the site. The platform's base domain or one plain label under it goes live at once; any other hostname waits for its DNS record (`ownershipVerification`, `dnsTarget`) and the edge provider's certificate, checked with domain.verify. The first domain that goes live becomes primary while the platform address still is. A refused hostname is domain_refused with its `reason` (invalid, too_deep, platform_address, provider_unavailable; taken is 409). Site ownership is checked.
 
 - permission `site.admin` (admin); class `external`; writes `site`; **not undoable**: alone in its batch; external: alone in its batch, never in a dry run.
 
@@ -296,7 +296,7 @@ Example input:
 
 ## domain.primary
 
-domain.primary with domain ownership and provider gates.
+Make an active domain the site's primary address, the one its other addresses redirect to; a domain that is not active yet is refused (409). Site ownership is checked.
 
 - permission `site.admin` (admin); class `transaction`; writes `site`; undoable with `history.undo`.
 
@@ -314,7 +314,7 @@ Example input:
 
 ## domain.verify
 
-domain.verify with domain ownership and provider gates.
+Check a connected domain again: its DNS record, and the edge provider's hostname and certificate (provisioned at the first check). The domain is active once all three are; the answer gives its status, its DNS and SSL states and the last error. Site ownership is checked.
 
 - permission `site.admin` (admin); class `external`; writes `site`; **not undoable**: alone in its batch; external: alone in its batch, never in a dry run.
 
@@ -332,7 +332,7 @@ Example input:
 
 ## domain.delete
 
-domain.delete with domain ownership and provider gates.
+Disconnect a domain from the site and release it at the edge provider; the platform address cannot be removed. When it was the primary, the platform address takes over. Site ownership is checked.
 
 - permission `site.admin` (admin); class `external`; writes `site`; needs `"confirmed": ["destructive"]`; **not undoable**: alone in its batch; external: alone in its batch, never in a dry run.
 
@@ -350,7 +350,7 @@ Example input:
 
 ## maintenance.migrate
 
-maintenance.migrate in one transaction; recovery uses an explicit backup restore.
+Bring the draft page trees in line with the theme's component props: a prop removed or retyped since the site's last props snapshot is stripped from every draft tree, all pages or none, after a backup of the trees it changes (an added prop writes nothing). A publish runs the same step. It runs in one transaction and is not undone: recovery is maintenance.restoreBackup.
 
 - permission `site.admin` (admin); class `transaction`; writes `pages`, `site`; needs `"confirmed": ["destructive"]`; **not undoable**: alone in its batch.
 - Input: `{}`.
@@ -365,7 +365,7 @@ Example input:
 
 ## maintenance.restoreBackup
 
-maintenance.restoreBackup in one transaction; recovery uses an explicit backup restore.
+Restore the draft page trees a migration backup holds (`backupId`): each page's root children go back to the backup's, in one commit for all the pages. It runs in one transaction and is not undone: recovery is maintenance.restoreBackup.
 
 - permission `site.admin` (admin); class `transaction`; writes `pages`, `site`; needs `"confirmed": ["destructive"]`; **not undoable**: alone in its batch.
 

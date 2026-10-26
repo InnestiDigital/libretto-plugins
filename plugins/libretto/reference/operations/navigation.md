@@ -8,7 +8,7 @@ Menus are keyed lists of items that target a page, an anchor on a page, or a URL
 
 ## navigation.read
 
-Read the draft menus of the site and their revision. A page or anchor target names its page by id. Menus are versioned with the site: publish copies them, and the public site serves the published ones.
+Read the draft menus of the site and their revision: each menu with its key (what the `menu` prop of a nav list, a menu dialog's list or the footer names), its label and its items. An item has an id, a translatable `label` and a `target` of kind `page` { pageId }, `anchor` { pageId, anchor }, `external` { href } (an absolute, mail or phone link) or `languages` (one link per site locale); a top-level item may hold one level of `children`, and a child's `group` titles its column. A page or anchor target names its page by id. Menus are versioned with the site: publish copies them, and the public site serves the published ones.
 
 - permission `site.read` (admin, editor); class `read`; writes nothing.
 - Input: `{}`.
