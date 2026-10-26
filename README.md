@@ -245,6 +245,7 @@ Maintenance:
 ```bash
 node scripts/build-reference.mjs --sync ../splash-cms   # copy the registry and tool catalogue from a Libretto checkout, regenerate
 node scripts/build-reference.mjs --check                # fails on a stale file, an uncovered operation, an unknown name or a broken link
+node scripts/test-libretto-files.mjs                    # how libretto-files resolves paths (~/, relative, absolute); needs no server
 LIBRETTO_URL=... LIBRETTO_MCP_TOKEN=... node scripts/build-reference.mjs --live   # compare with a running server
 claude plugin validate .
 ```

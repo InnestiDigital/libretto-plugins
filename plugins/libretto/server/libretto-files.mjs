@@ -10,11 +10,12 @@
 // It talks to ${LIBRETTO_URL}/api/mcp with ${LIBRETTO_MCP_TOKEN} (both set by the
 // plugin's .mcp.json) and needs nothing but Node 18 or later.
 import { readFile, stat } from 'node:fs/promises'
-import { basename, extname, isAbsolute, resolve } from 'node:path'
+import { basename, extname, isAbsolute, join, resolve, sep } from 'node:path'
+import { homedir } from 'node:os'
 import { randomUUID } from 'node:crypto'
 import { createInterface } from 'node:readline'
 
-const SERVER = { name: 'libretto-files', version: '0.2.0' }
+const SERVER = { name: 'libretto-files', version: '0.2.1' }
 const MAX_BYTES = 5 * 1024 * 1024
 /** font.upload's `data` holds at most 16 MiB of base64 characters; the server's FONT_MAX_FILE_MB may be lower. */
 const MAX_FONT_BASE64 = 16 * 1024 * 1024
@@ -36,7 +37,7 @@ class LibrettoError extends Error {
 const TOOLS = [
   {
     name: 'upload_media_file',
-    description: 'Upload a file from this computer (an absolute path, or relative to the working directory) into the Libretto site\'s media library through media.upload, without putting its bytes in the conversation. Images up to 5 MB (shrink larger ones first, for example `sips -Z 2400 in.jpg --out out.jpg` on macOS). dryRun: true runs every check and stores nothing. The answer holds the media record (`id`, `url`, kind, dimensions) and the `requestId` that history.undo takes. Then place the image with `{ "$media": "<id>" }` and set its alt text with media.update.',
+    description: 'Upload a file from this computer (an absolute path, a path starting with ~/, or relative to the working directory) into the Libretto site\'s media library through media.upload, without putting its bytes in the conversation. Images up to 5 MB (shrink larger ones first, for example `sips -Z 2400 in.jpg --out out.jpg` on macOS). dryRun: true runs every check and stores nothing. The answer holds the media record (`id`, `url`, kind, dimensions) and the `requestId` that history.undo takes. Then place the image with `{ "$media": "<id>" }` and set its alt text with media.update.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -127,10 +128,16 @@ function parseText(result) {
   }
 }
 
+/** `~` and `~/...` start at the home directory, as in a shell; any other relative path is under the working directory. */
+function absolutePath(path) {
+  if (path === '~' || path.startsWith('~/') || path.startsWith(`~${sep}`)) return join(homedir(), path.slice(1))
+  return isAbsolute(path) ? path : resolve(process.cwd(), path)
+}
+
 /** The absolute path and size of the file at `path`, or a refusal naming it. */
 async function localFile(path) {
   if (typeof path !== 'string' || !path) throw new LibrettoError('path is required')
-  const file = isAbsolute(path) ? path : resolve(process.cwd(), path)
+  const file = absolutePath(path)
   const info = await stat(file).catch(() => null)
   if (!info?.isFile()) throw new LibrettoError(`No file at ${file}`)
   return { file, bytes: info.size }
