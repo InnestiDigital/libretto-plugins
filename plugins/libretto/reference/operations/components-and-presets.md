@@ -17,7 +17,7 @@ List the presets the site can insert, theme presets first, then the site library
 | `kind` | "section" \| "box" \| "element" |  |
 | `source` | "theme" \| "site" |  |
 
-Output: ({ source: "theme" \| "site", id: string, kind: "section" \| "box" \| "element", label: string (min 1, max 80), keywords?: string (min 1, max 40)[] (≤16), category: string, description?: string (max 280), thumbnail?: string, page?: { scroll: { mode: "snap-y", snapType: "mandatory" \| "proximity" } }, scenes?: ({ trigger: {… (full schema: discover_operations)
+Output: ({ source: "theme" \| "site", id: string, kind: "section" \| "box" \| "element", label: string (min 1, max 80), keywords?: string (min 1, max 40)[] (≤16), category: string, description?: string (max 280), thumbnail?: string, scenes?: ({ trigger: { type: …, anchor: …, start: …, end?: …, endAnchor?: …, scrub?: …, pin?: … } … (full schema: discover_operations)
 
 Example input:
 
@@ -68,7 +68,7 @@ Save a page node and its subtree into the site preset library, with fresh ids; r
 | `category` | string |  |
 | `description` | string (max 280) |  |
 
-Output: { source: "theme" \| "site", id: string, kind: "section" \| "box" \| "element", label: string (min 1, max 80), keywords?: string (min 1, max 40)[] (≤16), category: string, description?: string (max 280), thumbnail?: string, page?: { scroll: { mode: "snap-y", snapType: "mandatory" \| "proximity" } }, scenes?: ({ trigger: { … (full schema: discover_operations)
+Output: { source: "theme" \| "site", id: string, kind: "section" \| "box" \| "element", label: string (min 1, max 80), keywords?: string (min 1, max 40)[] (≤16), category: string, description?: string (max 280), thumbnail?: string, scenes?: ({ trigger: { type: "scroll", anchor: … \| …, start: { edge: …, viewport: …, offset?: …, be… (full schema: discover_operations)
 
 Example input:
 
@@ -87,7 +87,7 @@ Rename a preset of the site library.
 | `presetId` | string | yes |
 | `label` | string (min 1, max 80) | yes |
 
-Output: { source: "theme" \| "site", id: string, kind: "section" \| "box" \| "element", label: string (min 1, max 80), keywords?: string (min 1, max 40)[] (≤16), category: string, description?: string (max 280), thumbnail?: string, page?: { scroll: { mode: "snap-y", snapType: "mandatory" \| "proximity" } }, scenes?: ({ trigger: { … (full schema: discover_operations)
+Output: { source: "theme" \| "site", id: string, kind: "section" \| "box" \| "element", label: string (min 1, max 80), keywords?: string (min 1, max 40)[] (≤16), category: string, description?: string (max 280), thumbnail?: string, scenes?: ({ trigger: { type: "scroll", anchor: … \| …, start: { edge: …, viewport: …, offset?: …, be… (full schema: discover_operations)
 
 Example input:
 
@@ -296,7 +296,7 @@ Read one preset with its tree, named as preset.insert names it (`kind`, `presetI
 | `presetId` | string (min 1) | yes |
 | `source` | "theme" \| "site" |  |
 
-Output: { source: "theme" \| "site", id: string, kind: "section" \| "box" \| "element", label: string (min 1, max 80), keywords?: string (min 1, max 40)[] (≤16), category: string, description?: string (max 280), thumbnail?: string, page?: { scroll: { mode: "snap-y", snapType: "mandatory" \| "proximity" } }, scenes?: ({ trigger: { … (full schema: discover_operations)
+Output: { source: "theme" \| "site", id: string, kind: "section" \| "box" \| "element", label: string (min 1, max 80), keywords?: string (min 1, max 40)[] (≤16), category: string, description?: string (max 280), thumbnail?: string, scenes?: ({ trigger: { type: "scroll", anchor: … \| …, start: { edge: …, viewport: …, offset?: …, be… (full schema: discover_operations)
 
 Example input:
 

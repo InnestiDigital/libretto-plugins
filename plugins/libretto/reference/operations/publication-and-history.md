@@ -46,7 +46,7 @@ Example input:
 
 ## publication.publish
 
-Publish the site: snapshot the draft (pages whose status is published, their trees, menus, collections with their published items, design system, settings, fonts) into a new live version, so the public site serves it. Run it alone in a batch with `confirmed: ["publish"]` and the site_context baseRevisions (history included); it cannot be dry-run. External effects (cache purge, screenshots) run after the commit.
+Publish the site: snapshot the draft (pages whose status is published, their trees, menus, collections with their published items, design system, settings, fonts) into a new live version, so the public site serves it. Run it alone in a batch with `confirmed: ["publish"]` and, as `baseRevisions`, the `publishBaseRevisions` of publication.pending (read the pending changes first, and publish what you read; a change after that read refuses it as stale); it cannot be dry-run. External effects (cache purge, screenshots) run after the commit.
 
 - permission `content.publish` (admin, editor, workspace owner); class `external`; writes `publication`, `pages`, `designSystem`, `settings`, `environment`, `apiConfig`, `fonts`, `brand`, `navigation`, `collections`; needs `"confirmed": ["publish"]`; **not undoable**: alone in its batch; external: alone in its batch, never in a dry run.
 
@@ -54,7 +54,7 @@ Publish the site: snapshot the draft (pages whose status is published, their tre
 |---|---|---|
 | `note` | string (max 2000) |  |
 
-Output: { version: { id: uuid, hash: string, timestamp: string, status: "building" \| "ready" \| "failed", isActive: boolean, note?: string, hasScreenshot?: boolean, hasMultipleScreenshots?: boolean } }
+Output: { version: { id: uuid, shortId: string (min 8, max 8), hash: string, timestamp: string, status: "building" \| "ready" \| "failed", isActive: boolean, note?: string, hasScreenshot?: boolean, hasMultipleScreenshots?: boolean } }
 
 Example input:
 
@@ -143,7 +143,7 @@ Example input:
 
 ## publication.versions
 
-List the site's published versions, newest first, `limit` of them (20 by default): each with its id (the versionId of publication.activate and publication.rollbackPage), its date (`timestamp`), its status, its note and whether it is the live one (`isActive`). Read the pages of one with publication.versionPages.
+List the site's published versions, newest first, `limit` of them (20 by default): each with its id (the versionId of publication.activate and publication.rollbackPage), its shortId (the first 8 characters, the id Pubblicazione e versioni shows: name a version to the person by it), its date (`timestamp`), its status, its note and whether it is the live one (`isActive`). Read the pages of one with publication.versionPages.
 
 - permission `site.read` (admin, editor); class `read`; writes nothing.
 
@@ -151,7 +151,7 @@ List the site's published versions, newest first, `limit` of them (20 by default
 |---|---|---|
 | `limit` | integer ≥1 ≤100 |  |
 
-Output: { versions: ({ id: uuid, hash: string, timestamp: string, status: "building" \| "ready" \| "failed", isActive: boolean, note?: string, hasScreenshot?: boolean, hasMultipleScreenshots?: boolean })[] }
+Output: { versions: ({ id: uuid, shortId: string (min 8, max 8), hash: string, timestamp: string, status: "building" \| "ready" \| "failed", isActive: boolean, note?: string, hasScreenshot?: boolean, hasMultipleScreenshots?: boolean })[] }
 
 Example input:
 
@@ -181,7 +181,7 @@ Example input:
 
 ## publication.pending
 
-Say what changed since the live version, newest first: one entry per area (pages, designSystem, siteSettings, navigation, collections, fonts, ...) with the date of its latest draft edit and, for pages and collections, the changed rows. A changed page whose status is draft stays out of publication.publish until it is published itself; mark it with page.update.
+Say what changed since the live version, newest first: one entry per area (pages, designSystem, siteSettings, navigation, collections, fonts, ...) with the date of its latest draft edit and, for pages and collections, the changed rows. A changed page whose status is draft stays out of publication.publish until it is published itself; mark it with page.update. `publishBaseRevisions` is the baseRevisions record a publication.publish batch needs, as it is now: pass it unchanged, and a draft edit made after this read refuses the publish as stale.
 
 - permission `site.read` (admin, editor); class `read`; writes nothing.
 - Input: `{}`.

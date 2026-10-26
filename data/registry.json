@@ -691,36 +691,6 @@
               "type": "string",
               "pattern": "^\\/presets\\/[a-z0-9-]+\\/[a-z][a-z0-9-]{0,63}\\.png$"
             },
-            "page": {
-              "type": "object",
-              "properties": {
-                "scroll": {
-                  "type": "object",
-                  "properties": {
-                    "mode": {
-                      "type": "string",
-                      "const": "snap-y"
-                    },
-                    "snapType": {
-                      "type": "string",
-                      "enum": [
-                        "mandatory",
-                        "proximity"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "mode",
-                    "snapType"
-                  ],
-                  "additionalProperties": false
-                }
-              },
-              "required": [
-                "scroll"
-              ],
-              "additionalProperties": false
-            },
             "scenes": {
               "maxItems": 20,
               "type": "array",
@@ -4953,36 +4923,6 @@
             "type": "string",
             "pattern": "^\\/presets\\/[a-z0-9-]+\\/[a-z][a-z0-9-]{0,63}\\.png$"
           },
-          "page": {
-            "type": "object",
-            "properties": {
-              "scroll": {
-                "type": "object",
-                "properties": {
-                  "mode": {
-                    "type": "string",
-                    "const": "snap-y"
-                  },
-                  "snapType": {
-                    "type": "string",
-                    "enum": [
-                      "mandatory",
-                      "proximity"
-                    ]
-                  }
-                },
-                "required": [
-                  "mode",
-                  "snapType"
-                ],
-                "additionalProperties": false
-              }
-            },
-            "required": [
-              "scroll"
-            ],
-            "additionalProperties": false
-          },
           "scenes": {
             "maxItems": 20,
             "type": "array",
@@ -7290,36 +7230,6 @@
           "thumbnail": {
             "type": "string",
             "pattern": "^\\/presets\\/[a-z0-9-]+\\/[a-z][a-z0-9-]{0,63}\\.png$"
-          },
-          "page": {
-            "type": "object",
-            "properties": {
-              "scroll": {
-                "type": "object",
-                "properties": {
-                  "mode": {
-                    "type": "string",
-                    "const": "snap-y"
-                  },
-                  "snapType": {
-                    "type": "string",
-                    "enum": [
-                      "mandatory",
-                      "proximity"
-                    ]
-                  }
-                },
-                "required": [
-                  "mode",
-                  "snapType"
-                ],
-                "additionalProperties": false
-              }
-            },
-            "required": [
-              "scroll"
-            ],
-            "additionalProperties": false
           },
           "scenes": {
             "maxItems": 20,
@@ -51801,7 +51711,7 @@
     },
     {
       "name": "publication.publish",
-      "description": "Publish the site: snapshot the draft (pages whose status is published, their trees, menus, collections with their published items, design system, settings, fonts) into a new live version, so the public site serves it. Run it alone in a batch with `confirmed: [\"publish\"]` and the site_context baseRevisions (history included); it cannot be dry-run. External effects (cache purge, screenshots) run after the commit.",
+      "description": "Publish the site: snapshot the draft (pages whose status is published, their trees, menus, collections with their published items, design system, settings, fonts) into a new live version, so the public site serves it. Run it alone in a batch with `confirmed: [\"publish\"]` and, as `baseRevisions`, the `publishBaseRevisions` of publication.pending (read the pending changes first, and publish what you read; a change after that read refuses it as stale); it cannot be dry-run. External effects (cache purge, screenshots) run after the commit.",
       "example": {
         "note": "Opening section and team page"
       },
@@ -51827,6 +51737,11 @@
                 "type": "string",
                 "format": "uuid",
                 "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "shortId": {
+                "type": "string",
+                "minLength": 8,
+                "maxLength": 8
               },
               "hash": {
                 "type": "string"
@@ -51857,6 +51772,7 @@
             },
             "required": [
               "id",
+              "shortId",
               "hash",
               "timestamp",
               "status",
@@ -117277,36 +117193,6 @@
             "type": "string",
             "pattern": "^\\/presets\\/[a-z0-9-]+\\/[a-z][a-z0-9-]{0,63}\\.png$"
           },
-          "page": {
-            "type": "object",
-            "properties": {
-              "scroll": {
-                "type": "object",
-                "properties": {
-                  "mode": {
-                    "type": "string",
-                    "const": "snap-y"
-                  },
-                  "snapType": {
-                    "type": "string",
-                    "enum": [
-                      "mandatory",
-                      "proximity"
-                    ]
-                  }
-                },
-                "required": [
-                  "mode",
-                  "snapType"
-                ],
-                "additionalProperties": false
-              }
-            },
-            "required": [
-              "scroll"
-            ],
-            "additionalProperties": false
-          },
           "scenes": {
             "maxItems": 20,
             "type": "array",
@@ -119540,7 +119426,7 @@
     },
     {
       "name": "publication.versions",
-      "description": "List the site's published versions, newest first, `limit` of them (20 by default): each with its id (the versionId of publication.activate and publication.rollbackPage), its date (`timestamp`), its status, its note and whether it is the live one (`isActive`). Read the pages of one with publication.versionPages.",
+      "description": "List the site's published versions, newest first, `limit` of them (20 by default): each with its id (the versionId of publication.activate and publication.rollbackPage), its shortId (the first 8 characters, the id Pubblicazione e versioni shows: name a version to the person by it), its date (`timestamp`), its status, its note and whether it is the live one (`isActive`). Read the pages of one with publication.versionPages.",
       "example": {
         "limit": 10
       },
@@ -119571,6 +119457,11 @@
                   "format": "uuid",
                   "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                 },
+                "shortId": {
+                  "type": "string",
+                  "minLength": 8,
+                  "maxLength": 8
+                },
                 "hash": {
                   "type": "string"
                 },
@@ -119600,6 +119491,7 @@
               },
               "required": [
                 "id",
+                "shortId",
                 "hash",
                 "timestamp",
                 "status",
@@ -119747,7 +119639,7 @@
     },
     {
       "name": "publication.pending",
-      "description": "Say what changed since the live version, newest first: one entry per area (pages, designSystem, siteSettings, navigation, collections, fonts, ...) with the date of its latest draft edit and, for pages and collections, the changed rows. A changed page whose status is draft stays out of publication.publish until it is published itself; mark it with page.update.",
+      "description": "Say what changed since the live version, newest first: one entry per area (pages, designSystem, siteSettings, navigation, collections, fonts, ...) with the date of its latest draft edit and, for pages and collections, the changed rows. A changed page whose status is draft stays out of publication.publish until it is published itself; mark it with page.update. `publishBaseRevisions` is the baseRevisions record a publication.publish batch needs, as it is now: pass it unchanged, and a draft edit made after this read refuses the publish as stale.",
       "example": {},
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -119906,12 +119798,25 @@
               ],
               "additionalProperties": false
             }
+          },
+          "publishBaseRevisions": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-z][a-zA-Z]*(?::[a-zA-Z0-9_-]{1,100})?$"
+            },
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
           }
         },
         "required": [
           "neverPublished",
           "publishedAt",
-          "areas"
+          "areas",
+          "publishBaseRevisions"
         ],
         "additionalProperties": false
       },
