@@ -7,7 +7,7 @@ description: Read and change a Libretto site's design system through the librett
 
 The design system is where a site's appearance lives. Pages point at it (tokens in node styles, a component's variant, a mixin, a theme), so one change here updates every page that uses it. Prefer a change here to a local style on a node whenever the user means "everywhere".
 
-Use the editing loop of the `libretto-editing` skill: `site_context`, read, `dry_run_ops`, `apply_ops` with a fresh `requestId`, verify, `history.undo` to go back. Every operation below goes in a `libretto.batch`; its input is in the table below and in the [design-system reference](../../reference/operations/design-system.md) (`Grep` `^## designSystem.setTokens` with about 40 lines after it). Call `discover_operations` only for a shape you still lack, one name at a time: four names with `schemas: true` answered 31,000 characters in a real session.
+Use the editing loop of the `libretto-editing` skill (with its "Which site" rules on a token of several sites): `site_context`, read, `dry_run_ops`, `apply_ops` with a fresh `requestId`, verify, `history.undo` to go back. Every operation below goes in a `libretto.batch`; its input is in the table below and in the [design-system reference](../../reference/operations/design-system.md) (`Grep` `^## designSystem.setTokens` with about 40 lines after it). Call `discover_operations` only for a shape you still lack, one name at a time: four names with `schemas: true` answered 31,000 characters in a real session.
 
 ## One user-visible change per batch
 

@@ -23,9 +23,9 @@ Il plugin contiene:
 
 - [Claude Code](https://code.claude.com/docs) installato.
 - Un account su Libretto con accesso al sito, come editor (anche proprietario dello spazio di lavoro) o amministratore.
-- Un token del sito. Nell'admin, nella barra laterale, apri **Persone e accessi** › **Agenti e accessi MCP**, dai un nome al token (per esempio `Claude Code, portatile`), scegli il sito e la durata (30 o 90 giorni) e copia il token: viene mostrato una volta sola.
+- Un token. Nell'admin, nella barra laterale, apri **Persone e accessi** › **Agenti e accessi MCP**, dai un nome al token (per esempio `Claude Code, portatile`), scegli per cosa vale (un sito, i siti che scegli o tutti i siti del tuo spazio di lavoro, anche quelli creati dopo) e la durata (30 o 90 giorni), e copia il token: viene mostrato una volta sola.
 
-Il token agisce per te, su quel sito, con il tuo ruolo (mai più alto di quello che hai oggi).
+Il token agisce per te, sui siti che raggiunge, con il tuo ruolo su ciascuno (mai più alto di quello che hai oggi). Con un token di più siti, Claude ti chiede su quale lavorare se non l'hai detto, indica il sito a ogni chiamata e ogni risposta lo ripete.
 
 ### Installazione
 
@@ -141,9 +141,9 @@ The plugin holds:
 
 - [Claude Code](https://code.claude.com/docs) installed.
 - An account on Libretto with access to the site, as an editor (a workspace owner too) or an admin.
-- A site token. In the admin sidebar, open **Persone e accessi** (People & access) › **Agenti e accessi MCP**, name the token (for example `Claude Code, laptop`), pick the site and how long it lasts (30 or 90 days), and copy the token: it is shown once.
+- A token. In the admin sidebar, open **Persone e accessi** (People & access) › **Agenti e accessi MCP**, name the token (for example `Claude Code, laptop`), choose what it reaches (one site, the sites you pick, or every site of your workspace, including ones made later) and how long it lasts (30 or 90 days), and copy the token: it is shown once.
 
-The token acts for you, on that site, with your role (never above the role you have now).
+The token acts for you, on the sites it reaches, with your role on each (never above the role you have now). With a token of several sites, Claude asks which site to work on unless you named it, names the site on every call, and every answer names it back.
 
 ### Install
 

@@ -83,6 +83,15 @@ The person you work for is a designer, not a developer. They read your answers, 
 - **Keep the receipts yourself.** Remember each applied batch's `requestId` and what it did, so "annulla il pulsante" undoes exactly that; do not ask the user for it.
 - **Links only from Libretto.** Give links only from `site_context`'s `urls`: `admin` (the site in the admin), `editor` (add `?pageId=<id>` to open a page), `draftPreview` (the draft for a signed-in person; put the page path before the `?`, such as `…/servizi?site=…`) and `publicSite` (the live site; `null` when it has no address yet). For another of the site's languages, `urls.locales["<code>"]` gives its `draftPreview` and `publicSite` (`urls.locales["en-US"].draftPreview`); put the page path after the language's home the same way. An older Libretto without `locales`: the locale in lower case before the page path (`…/en-us/servizi?site=…`; the default language has no prefix). Never build another link and never guess `librettocms.com`. An older Libretto without `urls`: ask the user for their admin address, or tell them where to click (**Pubblicazione e versioni** in the sidebar).
 
+## Which site
+
+A token reaches one site, the sites its maker chose, or every site of a workspace.
+
+- **One site**: `site_context` answers that site's context. Leave `siteId` out of every call.
+- **Several sites**: `site_context` without `siteId` answers `sites` (each `id`, `name`, `host`, `primaryDomain`, `workspace`) instead of a context. Pick the site the user named, by its name or its address; if they named none, or two sites could match, show the list and ask. Never guess, and never take an id that is not in the list: a call on an id the token does not reach answers `site_unknown`, with the list. Then call `site_context` with that `siteId`, and pass the same `siteId` on every call that works on the site (`discover_operations`, `apply_ops`, `dry_run_ops`, `render_preview`, `compare_reference`, `report_issue`, and the `libretto-files` uploads). A call without it answers `site_required`. `read_resources` takes the site from each URI, `libretto://site/<siteId>/…`.
+- **Check every answer's `site`** (id, name and address): it is the site the call worked on. If it is not the site the user means, stop and say so before anything else.
+- **Switching site** mid-conversation: say so ("now on <name>"), call `site_context` with the new `siteId`, and use its `baseRevisions`: each site has its own, and a batch built on one site's revisions is refused on another (`stale_revision`).
+
 ## The loop
 
 1. **Context.** Call `site_context` once per conversation (it answers about 20 KB). Keep the site id, the page list (id, slug, title, status) and `baseRevisions`. After each apply, the answer's `revisions` are your new base revisions: call `site_context` again only after a `409` or in a new conversation.

@@ -56,6 +56,7 @@ const TOOLS = [
         path: { type: 'string', minLength: 1, description: 'The file to upload.' },
         folderId: { type: ['string', 'null'], description: 'A media folder id (media.list answers folders); null or absent for the root.' },
         dryRun: { type: 'boolean', description: 'Check the upload without storing it.' },
+        siteId: { type: 'string', minLength: 1, description: 'The site to upload to, one of the ids libretto\'s site_context lists: needed with a token of several sites, left out with a one-site token.' },
       },
       required: ['path'],
       additionalProperties: false,
@@ -75,6 +76,7 @@ const TOOLS = [
         folderId: { type: ['string', 'null'], description: 'A media folder id (media.list answers folders); null or absent for the root.' },
         skipExisting: { type: 'boolean', description: 'Skip a file whose name and size match one in the library; true when absent.' },
         dryRun: { type: 'boolean', description: 'Check everything without storing anything.' },
+        siteId: { type: 'string', minLength: 1, description: 'The site to upload to, one of the ids libretto\'s site_context lists: needed with a token of several sites, left out with a one-site token.' },
       },
       additionalProperties: false,
     },
@@ -95,6 +97,7 @@ const TOOLS = [
         licence: { type: ['string', 'null'], minLength: 1, maxLength: 2000, description: 'The licence the face is used under.' },
         replace: { type: 'boolean', description: 'Replace a face the library already holds with this name, weight and style.' },
         dryRun: { type: 'boolean', description: 'Check the upload without storing it.' },
+        siteId: { type: 'string', minLength: 1, description: 'The site to upload to, one of the ids libretto\'s site_context lists: needed with a token of several sites, left out with a one-site token.' },
       },
       required: ['path', 'name', 'weight', 'style'],
       additionalProperties: false,
@@ -110,8 +113,8 @@ function endpoint() {
   return { url: `${base}/api/mcp`, token }
 }
 
-/** A short JSON-RPC session with the remote Libretto MCP server. */
-async function remoteSession() {
+/** A short JSON-RPC session with the remote Libretto MCP server; every tool call names `siteId` when one is given (a token of several sites needs it). */
+async function remoteSession(siteId) {
   const { url, token } = endpoint()
   const headers = new Headers({
     'content-type': 'application/json',
@@ -125,7 +128,7 @@ async function remoteSession() {
     if (session) headers.set('mcp-session-id', session)
     const text = await response.text()
     if (response.status === 401) throw new TokenRefusal('Libretto refused the token (401): it is wrong, expired, revoked, or made before the Libretto was reset. Make a new one in the admin (Persone e accessi > Agenti e accessi MCP), set it with /plugin configure libretto@libretti and start a new session.', text.slice(0, 500))
-    if (response.status === 403) throw new TokenRefusal('Libretto accepted the token, but the person who made it can no longer work on this site (403: site or workspace access, role or password). The workspace owner restores the access first; then make a new token in the admin (Persone e accessi > Agenti e accessi MCP), set it with /plugin configure libretto@libretti and start a new session.', text.slice(0, 500))
+    if (response.status === 403) throw new TokenRefusal('Libretto accepted the token, but the person who made it can no longer work on its sites (403: site or workspace access, role or password). The workspace owner restores the access first; then make a new token in the admin (Persone e accessi > Agenti e accessi MCP), set it with /plugin configure libretto@libretti and start a new session.', text.slice(0, 500))
     if (!response.ok) throw new LibrettoError(`Libretto answered ${response.status} at ${url}`, text.slice(0, 500))
     if (!text) return null
     const type = response.headers.get('content-type') ?? ''
@@ -136,7 +139,7 @@ async function remoteSession() {
     return JSON.parse(json)
   }
   const call = async (name, args) => {
-    const answer = await send({ jsonrpc: '2.0', id: nextId++, method: 'tools/call', params: { name, arguments: args } })
+    const answer = await send({ jsonrpc: '2.0', id: nextId++, method: 'tools/call', params: { name, arguments: siteId === undefined ? args : { siteId, ...args } } })
     if (answer?.error) throw new LibrettoError(`Libretto refused ${name}: ${answer.error.message}`, answer.error)
     const result = answer?.result
     // Libretto answers tools as JSON text; older servers also sent structuredContent.
@@ -189,8 +192,8 @@ async function sendBatch(remote, name, input, revisionKey, revision, dryRun) {
 }
 
 /** One operation alone in a batch, on the current revision of the document it writes, dry-run or applied. */
-async function sendOperation(name, input, revisionKey, dryRun) {
-  const remote = await remoteSession()
+async function sendOperation(name, input, revisionKey, dryRun, siteId) {
+  const remote = await remoteSession(siteId)
   const context = await remote.call('site_context', {})
   return sendBatch(remote, name, input, revisionKey, context.baseRevisions[revisionKey], dryRun)
 }
@@ -203,11 +206,11 @@ function mediaTypeOf(file, bytes) {
   return contentType
 }
 
-async function uploadMediaFile({ path, folderId = null, dryRun = false }) {
+async function uploadMediaFile({ path, folderId = null, dryRun = false, siteId }) {
   const { file, bytes } = await localFile(path)
   const contentType = mediaTypeOf(file, bytes)
   const data = (await readFile(file)).toString('base64')
-  const { requestId, answer } = await sendOperation('media.upload', { filename: basename(file), contentType, data, folderId }, 'media', dryRun)
+  const { requestId, answer } = await sendOperation('media.upload', { filename: basename(file), contentType, data, folderId }, 'media', dryRun, siteId)
   return { dryRun, requestId, file, bytes, contentType, answer }
 }
 
@@ -248,7 +251,7 @@ async function libraryIndex(remote, revision) {
   return { index: null, quota }
 }
 
-async function uploadMediaFiles({ paths = [], directory, pattern, recursive = false, folderId = null, skipExisting = true, dryRun = false }) {
+async function uploadMediaFiles({ paths = [], directory, pattern, recursive = false, folderId = null, skipExisting = true, dryRun = false, siteId }) {
   const base = directory === undefined ? null : absolutePath(directory)
   const listed = base === null ? [] : await filesIn(base, pattern ? nameMatcher(pattern) : name => CONTENT_TYPES.has(extname(name).toLowerCase()), recursive)
   const files = [...new Set([...paths.map(absolutePath), ...listed])]
@@ -268,7 +271,7 @@ async function uploadMediaFiles({ paths = [], directory, pattern, recursive = fa
     }
   }
 
-  const remote = await remoteSession()
+  const remote = await remoteSession(siteId)
   let revision = (await remote.call('site_context', {})).baseRevisions.media
   const skipped = {}
   const library = await libraryIndex(remote, revision)
@@ -316,7 +319,7 @@ async function uploadMediaFiles({ paths = [], directory, pattern, recursive = fa
   }
 }
 
-async function uploadFontFile({ path, name, weight, style, display, fallbackStack, licence, replace, dryRun = false }) {
+async function uploadFontFile({ path, name, weight, style, display, fallbackStack, licence, replace, dryRun = false, siteId }) {
   const { file, bytes } = await localFile(path)
   if (extname(file).toLowerCase() !== '.woff2') throw new LibrettoError(`${basename(file)} is not a .woff2 file; Libretto takes WOFF2 faces only. Convert it first, if its licence allows it.`)
   const data = (await readFile(file)).toString('base64')
@@ -328,7 +331,7 @@ async function uploadFontFile({ path, name, weight, style, display, fallbackStac
     ...(licence === undefined ? {} : { licence }),
     ...(replace === undefined ? {} : { replace }),
   }
-  const { requestId, answer } = await sendOperation('font.upload', input, 'fonts', dryRun)
+  const { requestId, answer } = await sendOperation('font.upload', input, 'fonts', dryRun, siteId)
   return { dryRun, requestId, file, bytes, answer }
 }
 

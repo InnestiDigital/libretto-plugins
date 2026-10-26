@@ -82,13 +82,14 @@
     "intro": "Scenes animate nodes on scroll, on load or on interaction. Prefer recipes (`motion.listRecipes`, `motion.applyRecipe`) to hand-written scenes, and read `motion.diagnose` findings after every change."
   },
   "site-and-settings": {
-    "title": "Site, settings, languages, access and domains",
+    "title": "Site, settings, languages, redirects, access and domains",
     "prefixes": [
       "site",
       "settings",
       "access",
       "breakpoints",
       "layout",
+      "redirects",
       "apiConfig",
       "environment",
       "domain",

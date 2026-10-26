@@ -26135,7 +26135,8 @@
                       "enum": [
                         "scale-order",
                         "family-literal",
-                        "unused-token"
+                        "unused-token",
+                        "large-text-role-small"
                       ]
                     },
                     "path": {
@@ -41263,7 +41264,7 @@
     },
     {
       "name": "settings.read",
-      "description": "Read the draft site settings, key by key: the theme's setting fields (`companyName`, `legalLine`, `supportEmail`, `logoWidth`, `socialImage`, `favicon`, the analytics and consent keys `analyticsProvider`, `analyticsSiteId`, `analyticsHost`, `consentPolicyVersion`, ...), `blockReveal` (the reveal every block of the page's sections, or the footer's, plays) and `styleBreakpoints` (the list breakpoints.update replaces; absent while the site keeps the defaults).",
+      "description": "Read the draft site settings, key by key: the theme's setting fields (`companyName`, `legalLine`, `supportEmail`, `logoWidth`, `socialImage`, `favicon`, the analytics and consent keys `analyticsProvider`, `analyticsSiteId`, `analyticsHost`, `consentPolicyVersion`, ...), `blockReveal` (the reveal every block of the page's sections, or the footer's, plays), `styleBreakpoints` (the list breakpoints.update replaces; absent while the site keeps the defaults) and `redirects` (the list redirects.update replaces).",
       "example": {},
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -41335,7 +41336,7 @@
     },
     {
       "name": "settings.update",
-      "description": "Write site settings key by key: each key of the input replaces that setting and the others stay. The analytics and consent keys are checked together on the result (an unknown provider, a site id of the wrong shape is refused), and `blockReveal` against its contract (null clears it). `styleBreakpoints` and the layout frames are refused here: use breakpoints.update and layout.update. Settings are versioned: the public site serves them after the next publish; undo restores the previous values.",
+      "description": "Write site settings key by key: each key of the input replaces that setting and the others stay. The analytics and consent keys are checked together on the result (an unknown provider, a site id of the wrong shape is refused), and `blockReveal` against its contract (null clears it). `styleBreakpoints`, the layout frames and `redirects` are refused here: use breakpoints.update, layout.update and redirects.update. Settings are versioned: the public site serves them after the next publish; undo restores the previous values.",
       "example": {
         "siteTitle": "Studio"
       },
@@ -41811,8 +41812,692 @@
       "undoable": true
     },
     {
+      "name": "layout.read",
+      "description": "Read the site's layout frames as its draft resolves them: with `layoutId` (the frame a page names in `frame`, such as `default` or `scale-canvas`) that frame, without it every frame of the theme. Each comes as `{ layoutId, source, layout }`: `layout` is the whole frame object layout.update takes (its `frame` with `responsiveMode`, `designWidth` and `scaleFromWidth`, and the `header`, `footer`, `background`, `scroll`, `chrome` and `overridePolicy` layers), `source` is `site` when the site already replaced it with layout.update and `theme` when it is the theme's. Change the frame you read and send it whole to layout.update. A page may still override some layers for itself in `meta.layoutOverrides`; an unknown `layoutId` is layout_not_found (404).",
+      "example": {
+        "layoutId": "default"
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "layoutId": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "layouts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "layoutId": {
+                  "type": "string"
+                },
+                "source": {
+                  "type": "string",
+                  "enum": [
+                    "theme",
+                    "site"
+                  ]
+                },
+                "layout": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "label": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    "chrome": {
+                      "type": "object",
+                      "properties": {
+                        "elements": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/$defs/__schema0"
+                          }
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "frame": {
+                      "type": "object",
+                      "properties": {
+                        "responsiveMode": {
+                          "type": "string",
+                          "enum": [
+                            "breakpoint",
+                            "scale"
+                          ]
+                        },
+                        "scaleOrigin": {
+                          "type": "string",
+                          "enum": [
+                            "top-left",
+                            "top-center"
+                          ]
+                        },
+                        "containerMode": {
+                          "type": "string",
+                          "enum": [
+                            "measure",
+                            "content",
+                            "wide",
+                            "full-bleed"
+                          ]
+                        },
+                        "sectionSpacingDefault": {
+                          "type": "string",
+                          "enum": [
+                            "none",
+                            "sm",
+                            "md",
+                            "lg",
+                            "xl"
+                          ]
+                        },
+                        "designWidth": {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        },
+                        "maxWidth": {
+                          "type": "string"
+                        },
+                        "insetX": {
+                          "type": "string"
+                        },
+                        "minHeight": {
+                          "type": "string"
+                        },
+                        "overflowX": {
+                          "type": "string",
+                          "enum": [
+                            "visible",
+                            "hidden",
+                            "clip"
+                          ]
+                        },
+                        "minScale": {
+                          "type": "number"
+                        },
+                        "maxScale": {
+                          "type": "number"
+                        },
+                        "scaleFromWidth": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 10000
+                        },
+                        "scaleRegions": {
+                          "type": "boolean"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "canvasPreset": {},
+                    "header": {
+                      "type": "object",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "variant": {
+                          "type": "string",
+                          "pattern": "^[a-z][a-z0-9-]*$"
+                        },
+                        "palette": {
+                          "type": "object",
+                          "properties": {
+                            "bgColor": {
+                              "type": "string"
+                            },
+                            "textColor": {
+                              "type": "string"
+                            },
+                            "navLinkColor": {
+                              "type": "string"
+                            },
+                            "navLinkHoverColor": {
+                              "type": "string"
+                            },
+                            "accentBarColor": {
+                              "type": "string"
+                            },
+                            "scrollFade": {
+                              "type": "boolean"
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "footer": {
+                      "type": "object",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "position": {
+                          "type": "string",
+                          "enum": [
+                            "normal",
+                            "sticky-bottom"
+                          ]
+                        },
+                        "palette": {
+                          "type": "object",
+                          "properties": {
+                            "bgColor": {
+                              "type": "string"
+                            },
+                            "textColor": {
+                              "type": "string"
+                            },
+                            "linkColor": {
+                              "type": "string"
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "background": {
+                      "type": "object",
+                      "properties": {
+                        "color": {
+                          "type": "string"
+                        },
+                        "image": {
+                          "type": "object",
+                          "properties": {
+                            "src": {
+                              "type": "string"
+                            },
+                            "repeat": {
+                              "type": "string",
+                              "enum": [
+                                "none",
+                                "repeat",
+                                "repeat-x",
+                                "repeat-y"
+                              ]
+                            },
+                            "size": {
+                              "type": "string"
+                            },
+                            "position": {
+                              "type": "string"
+                            },
+                            "attachment": {
+                              "type": "string",
+                              "enum": [
+                                "scroll",
+                                "fixed"
+                              ]
+                            },
+                            "opacity": {
+                              "type": "number"
+                            }
+                          },
+                          "additionalProperties": false
+                        },
+                        "overlay": {
+                          "type": "object",
+                          "properties": {
+                            "color": {
+                              "type": "string"
+                            },
+                            "opacity": {
+                              "type": "number"
+                            },
+                            "blendMode": {
+                              "type": "string"
+                            }
+                          },
+                          "additionalProperties": false
+                        },
+                        "texture": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "noise",
+                                "grain"
+                              ]
+                            },
+                            "opacity": {
+                              "type": "number"
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "scroll": {
+                      "type": "object",
+                      "properties": {
+                        "mode": {
+                          "type": "string",
+                          "enum": [
+                            "normal",
+                            "snap-y",
+                            "magnet"
+                          ]
+                        },
+                        "magnet": {
+                          "type": "object",
+                          "properties": {
+                            "idleMs": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 5000
+                            },
+                            "coarseIdleMs": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 5000
+                            },
+                            "windowVh": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 100
+                            },
+                            "minPx": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 500
+                            },
+                            "exclude": {
+                              "type": "string",
+                              "enum": [
+                                "first",
+                                "none"
+                              ]
+                            },
+                            "includeFooter": {
+                              "type": "boolean"
+                            }
+                          },
+                          "additionalProperties": false
+                        },
+                        "snapType": {
+                          "type": "string",
+                          "enum": [
+                            "mandatory",
+                            "proximity"
+                          ]
+                        },
+                        "snapAlign": {
+                          "type": "string",
+                          "enum": [
+                            "start",
+                            "center"
+                          ]
+                        },
+                        "smoothScroll": {
+                          "type": "boolean"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "overridePolicy": {
+                      "type": "object",
+                      "properties": {
+                        "allowPageHeaderOverride": {
+                          "type": "boolean"
+                        },
+                        "allowPageFooterOverride": {
+                          "type": "boolean"
+                        },
+                        "allowPageBackgroundOverride": {
+                          "type": "boolean"
+                        },
+                        "allowPageChromeOverride": {
+                          "type": "boolean"
+                        },
+                        "allowPageChromeAdditions": {
+                          "type": "boolean"
+                        },
+                        "allowPageScrollOverride": {
+                          "type": "boolean"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "layoutId",
+                "source",
+                "layout"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "layouts"
+        ],
+        "additionalProperties": false,
+        "$defs": {
+          "__schema0": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/__schema1"
+              },
+              "type": {
+                "$ref": "#/$defs/__schema2"
+              },
+              "enabled": {
+                "$ref": "#/$defs/__schema3"
+              },
+              "position": {
+                "$ref": "#/$defs/__schema4"
+              },
+              "coordSpace": {
+                "$ref": "#/$defs/__schema5"
+              },
+              "anchor": {
+                "$ref": "#/$defs/__schema6"
+              },
+              "offsetX": {
+                "$ref": "#/$defs/__schema7"
+              },
+              "offsetY": {
+                "$ref": "#/$defs/__schema8"
+              },
+              "zIndex": {
+                "$ref": "#/$defs/__schema9"
+              },
+              "opacity": {
+                "$ref": "#/$defs/__schema10"
+              },
+              "blendMode": {
+                "$ref": "#/$defs/__schema11"
+              },
+              "pointerEvents": {
+                "$ref": "#/$defs/__schema12"
+              },
+              "hideBelow": {
+                "$ref": "#/$defs/__schema13"
+              },
+              "layer": {
+                "$ref": "#/$defs/__schema14"
+              },
+              "positionMode": {
+                "$ref": "#/$defs/__schema15"
+              },
+              "orientation": {
+                "$ref": "#/$defs/__schema16"
+              },
+              "color": {
+                "$ref": "#/$defs/__schema17"
+              },
+              "thickness": {
+                "$ref": "#/$defs/__schema18"
+              },
+              "length": {
+                "$ref": "#/$defs/__schema19"
+              },
+              "shape": {
+                "$ref": "#/$defs/__schema20"
+              },
+              "width": {
+                "$ref": "#/$defs/__schema21"
+              },
+              "height": {
+                "$ref": "#/$defs/__schema22"
+              },
+              "radius": {
+                "$ref": "#/$defs/__schema23"
+              },
+              "rotation": {
+                "$ref": "#/$defs/__schema24"
+              },
+              "src": {
+                "$ref": "#/$defs/__schema25"
+              },
+              "alt": {
+                "$ref": "#/$defs/__schema26"
+              },
+              "objectFit": {
+                "$ref": "#/$defs/__schema27"
+              },
+              "text": {
+                "$ref": "#/$defs/__schema28"
+              },
+              "indicator": {
+                "$ref": "#/$defs/__schema29"
+              },
+              "trackColor": {
+                "$ref": "#/$defs/__schema30"
+              },
+              "edge": {
+                "$ref": "#/$defs/__schema31"
+              },
+              "size": {
+                "$ref": "#/$defs/__schema32"
+              },
+              "showLabel": {
+                "$ref": "#/$defs/__schema33"
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "enabled",
+              "position"
+            ],
+            "additionalProperties": false
+          },
+          "__schema1": {
+            "type": "string",
+            "minLength": 1
+          },
+          "__schema2": {
+            "type": "string",
+            "enum": [
+              "line",
+              "shape",
+              "image",
+              "text",
+              "progress"
+            ]
+          },
+          "__schema3": {
+            "type": "boolean"
+          },
+          "__schema4": {
+            "type": "string",
+            "enum": [
+              "fixed",
+              "absolute"
+            ]
+          },
+          "__schema5": {
+            "type": "string",
+            "enum": [
+              "viewport",
+              "design"
+            ]
+          },
+          "__schema6": {
+            "type": "string",
+            "enum": [
+              "top-left",
+              "top-right",
+              "bottom-left",
+              "bottom-right",
+              "center"
+            ]
+          },
+          "__schema7": {
+            "type": "string"
+          },
+          "__schema8": {
+            "type": "string"
+          },
+          "__schema9": {
+            "type": "number"
+          },
+          "__schema10": {
+            "type": "number"
+          },
+          "__schema11": {
+            "type": "string"
+          },
+          "__schema12": {
+            "type": "string",
+            "enum": [
+              "none",
+              "auto"
+            ]
+          },
+          "__schema13": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "sm",
+                  "md",
+                  "lg"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "__schema14": {
+            "type": "string",
+            "enum": [
+              "background",
+              "foreground"
+            ]
+          },
+          "__schema15": {
+            "type": "string",
+            "enum": [
+              "viewport-fixed",
+              "flow"
+            ]
+          },
+          "__schema16": {
+            "type": "string",
+            "enum": [
+              "vertical",
+              "horizontal"
+            ]
+          },
+          "__schema17": {
+            "type": "string"
+          },
+          "__schema18": {
+            "type": "string"
+          },
+          "__schema19": {
+            "type": "string"
+          },
+          "__schema20": {
+            "type": "string",
+            "enum": [
+              "rectangle",
+              "circle",
+              "pill"
+            ]
+          },
+          "__schema21": {
+            "type": "string"
+          },
+          "__schema22": {
+            "type": "string"
+          },
+          "__schema23": {
+            "type": "string"
+          },
+          "__schema24": {
+            "type": "string"
+          },
+          "__schema25": {
+            "type": "string"
+          },
+          "__schema26": {
+            "type": "string"
+          },
+          "__schema27": {
+            "type": "string",
+            "enum": [
+              "contain",
+              "cover"
+            ]
+          },
+          "__schema28": {
+            "type": "string"
+          },
+          "__schema29": {
+            "type": "string",
+            "enum": [
+              "bar",
+              "ring"
+            ]
+          },
+          "__schema30": {
+            "type": "string"
+          },
+          "__schema31": {
+            "type": "string",
+            "enum": [
+              "top",
+              "bottom"
+            ]
+          },
+          "__schema32": {
+            "type": "string"
+          },
+          "__schema33": {
+            "type": "boolean"
+          }
+        }
+      },
+      "reads": [
+        "settings"
+      ],
+      "writes": [],
+      "permission": "site.read",
+      "mutationClass": "read",
+      "confirm": "none",
+      "conflictPolicy": "none",
+      "undoable": false
+    },
+    {
       "name": "layout.update",
-      "description": "Replace this site's version of one of the theme's layout frames (`layoutId`, the frame a page names in `frame`, such as `default` or `scale-canvas`) with `layout`, the whole frame object (its `id` is `layoutId`; settings.read answers the frames the site already replaced under `__siteLayoutOverrides`, and any other frame is the theme's). `frame.responsiveMode` decides how its pages fit the window: `breakpoint` reflows them at the site breakpoints, with fluid tokens growing with the window; `scale` lays them out at `designWidth` and scales the whole canvas to the window from `scaleFromWidth` (769 px by default) up, reflowing below it. The other layers are `header`, `footer`, `background`, `scroll`, `chrome` and `overridePolicy` (which `meta.layoutOverrides` layers a page may apply). Answers the frame as the site now resolves it, with warnings.",
+      "description": "Replace this site's version of one of the theme's layout frames (`layoutId`, the frame a page names in `frame`, such as `default` or `scale-canvas`) with `layout`, the whole frame object (its `id` is `layoutId`; read it first with layout.read, which answers it as the site resolves it now). `frame.responsiveMode` decides how its pages fit the window: `breakpoint` reflows them at the site breakpoints, with fluid tokens growing with the window; `scale` lays them out at `designWidth` and scales the whole canvas to the window from `scaleFromWidth` (769 px by default) up, reflowing below it. The other layers are `header`, `footer`, `background`, `scroll`, `chrome` and `overridePolicy` (which `meta.layoutOverrides` layers a page may apply). Answers the frame as the site now resolves it, with warnings.",
       "example": {
         "layoutId": "default",
         "layout": {
@@ -43097,6 +43782,205 @@
         "settings"
       ],
       "permission": "site.structure",
+      "mutationClass": "transaction",
+      "confirm": "none",
+      "conflictPolicy": "revision",
+      "undoable": true
+    },
+    {
+      "name": "redirects.read",
+      "description": "Read the draft redirects of the site: the list redirects.update replaces, each `{ from, to, status }`. The public site answers the redirects of its published version.",
+      "example": {},
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "redirects": {
+            "maxItems": 500,
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/__schema0"
+            }
+          }
+        },
+        "required": [
+          "redirects"
+        ],
+        "additionalProperties": false,
+        "$defs": {
+          "__schema0": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "string",
+                "maxLength": 2048
+              },
+              "to": {
+                "type": "string",
+                "maxLength": 2048
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "const": 301
+                  },
+                  {
+                    "type": "number",
+                    "const": 302
+                  }
+                ]
+              }
+            },
+            "required": [
+              "from",
+              "to",
+              "status"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "reads": [
+        "settings"
+      ],
+      "writes": [],
+      "permission": "site.read",
+      "mutationClass": "read",
+      "confirm": "none",
+      "conflictPolicy": "none",
+      "undoable": false
+    },
+    {
+      "name": "redirects.update",
+      "description": "Replace the site's redirects with `redirects`, the whole list (at most 500; an empty list removes them all). Each rule is `{ from, to, status }`: `from` a path of this site, matched exactly with or without a trailing slash, or ending in `/*` to take that path and every path under it (`/old/*` takes `/old` and `/old/a/b`; an exact rule wins over a prefix, a longer prefix over a shorter one); `to` a path of this site (a query or a hash may follow; a request's query is kept when `to` has none) or an `https://` address; `status` 301 (moved for good) or 302 (moved for now). A locale's paths carry its prefix (`/en/old`). Refused with 422 `redirects_invalid`, every problem named: two rules with the same `from`, a loop (a target that a rule of the chain redirects again), or a rule that adds or changes a `from` on the path of a published page (unpublish the page or change its address first; an item path of a collection page is not checked). The platform's own paths (`/admin`, `/api`, `/_…`) are refused. Redirects are versioned: the public site answers them, before any page renders, after the next publish; undo restores the previous list.",
+      "example": {
+        "redirects": [
+          {
+            "from": "/old-about",
+            "to": "/about",
+            "status": 301
+          },
+          {
+            "from": "/shop/*",
+            "to": "https://shop.example.com/",
+            "status": 302
+          }
+        ]
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "redirects": {
+            "maxItems": 500,
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/__schema0"
+            }
+          }
+        },
+        "required": [
+          "redirects"
+        ],
+        "additionalProperties": false,
+        "$defs": {
+          "__schema0": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "string",
+                "maxLength": 2048
+              },
+              "to": {
+                "type": "string",
+                "maxLength": 2048
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "const": 301
+                  },
+                  {
+                    "type": "number",
+                    "const": 302
+                  }
+                ]
+              }
+            },
+            "required": [
+              "from",
+              "to",
+              "status"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "redirects": {
+            "maxItems": 500,
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/__schema0"
+            }
+          }
+        },
+        "required": [
+          "redirects"
+        ],
+        "additionalProperties": false,
+        "$defs": {
+          "__schema0": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "string",
+                "maxLength": 2048
+              },
+              "to": {
+                "type": "string",
+                "maxLength": 2048
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "const": 301
+                  },
+                  {
+                    "type": "number",
+                    "const": 302
+                  }
+                ]
+              }
+            },
+            "required": [
+              "from",
+              "to",
+              "status"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "reads": [
+        "settings"
+      ],
+      "writes": [
+        "settings"
+      ],
+      "permission": "site.edit",
       "mutationClass": "transaction",
       "confirm": "none",
       "conflictPolicy": "revision",
@@ -44843,7 +45727,8 @@
                       "enum": [
                         "scale-order",
                         "family-literal",
-                        "unused-token"
+                        "unused-token",
+                        "large-text-role-small"
                       ]
                     },
                     "path": {
@@ -70782,7 +71667,8 @@
                       "enum": [
                         "scale-order",
                         "family-literal",
-                        "unused-token"
+                        "unused-token",
+                        "large-text-role-small"
                       ]
                     },
                     "path": {
@@ -73395,7 +74281,8 @@
                       "enum": [
                         "scale-order",
                         "family-literal",
-                        "unused-token"
+                        "unused-token",
+                        "large-text-role-small"
                       ]
                     },
                     "path": {
@@ -76020,7 +76907,8 @@
                       "enum": [
                         "scale-order",
                         "family-literal",
-                        "unused-token"
+                        "unused-token",
+                        "large-text-role-small"
                       ]
                     },
                     "path": {
@@ -78610,7 +79498,8 @@
                       "enum": [
                         "scale-order",
                         "family-literal",
-                        "unused-token"
+                        "unused-token",
+                        "large-text-role-small"
                       ]
                     },
                     "path": {
@@ -81227,7 +82116,8 @@
                       "enum": [
                         "scale-order",
                         "family-literal",
-                        "unused-token"
+                        "unused-token",
+                        "large-text-role-small"
                       ]
                     },
                     "path": {
@@ -83803,7 +84693,8 @@
                       "enum": [
                         "scale-order",
                         "family-literal",
-                        "unused-token"
+                        "unused-token",
+                        "large-text-role-small"
                       ]
                     },
                     "path": {
@@ -86378,7 +87269,8 @@
                       "enum": [
                         "scale-order",
                         "family-literal",
-                        "unused-token"
+                        "unused-token",
+                        "large-text-role-small"
                       ]
                     },
                     "path": {
@@ -89132,7 +90024,8 @@
                       "enum": [
                         "scale-order",
                         "family-literal",
-                        "unused-token"
+                        "unused-token",
+                        "large-text-role-small"
                       ]
                     },
                     "path": {
@@ -91777,7 +92670,8 @@
                       "enum": [
                         "scale-order",
                         "family-literal",
-                        "unused-token"
+                        "unused-token",
+                        "large-text-role-small"
                       ]
                     },
                     "path": {
@@ -94342,7 +95236,8 @@
                       "enum": [
                         "scale-order",
                         "family-literal",
-                        "unused-token"
+                        "unused-token",
+                        "large-text-role-small"
                       ]
                     },
                     "path": {
@@ -96905,7 +97800,8 @@
                       "enum": [
                         "scale-order",
                         "family-literal",
-                        "unused-token"
+                        "unused-token",
+                        "large-text-role-small"
                       ]
                     },
                     "path": {
@@ -99488,7 +100384,8 @@
                       "enum": [
                         "scale-order",
                         "family-literal",
-                        "unused-token"
+                        "unused-token",
+                        "large-text-role-small"
                       ]
                     },
                     "path": {
@@ -102112,7 +103009,8 @@
                       "enum": [
                         "scale-order",
                         "family-literal",
-                        "unused-token"
+                        "unused-token",
+                        "large-text-role-small"
                       ]
                     },
                     "path": {
@@ -104702,7 +105600,8 @@
                       "enum": [
                         "scale-order",
                         "family-literal",
-                        "unused-token"
+                        "unused-token",
+                        "large-text-role-small"
                       ]
                     },
                     "path": {
@@ -107278,7 +108177,8 @@
                       "enum": [
                         "scale-order",
                         "family-literal",
-                        "unused-token"
+                        "unused-token",
+                        "large-text-role-small"
                       ]
                     },
                     "path": {
@@ -109875,7 +110775,8 @@
                       "enum": [
                         "scale-order",
                         "family-literal",
-                        "unused-token"
+                        "unused-token",
+                        "large-text-role-small"
                       ]
                     },
                     "path": {
@@ -112446,7 +113347,8 @@
                       "enum": [
                         "scale-order",
                         "family-literal",
-                        "unused-token"
+                        "unused-token",
+                        "large-text-role-small"
                       ]
                     },
                     "path": {

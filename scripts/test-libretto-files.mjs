@@ -145,7 +145,7 @@ try {
   mkdirSync(join(photos, 'sotto'))
   writeFileSync(join(photos, 'sotto', 'c.jpg'), 'c')
 
-  const fake = { revision: 7, stored: [], staleOnce: false }
+  const fake = { revision: 7, stored: [], staleOnce: false, siteIds: [] }
   const http = createServer(async (request, response) => {
     let body = ''
     for await (const chunk of request) body += chunk
@@ -158,6 +158,7 @@ try {
     if (message.method === 'initialize') return answer({ protocolVersion: '2025-06-18', capabilities: { tools: {} }, serverInfo: { name: 'libretto', version: 'test' } })
     if (message.id === undefined) return response.writeHead(202).end()
     const { name, arguments: args } = message.params
+    fake.siteIds.push(args.siteId)
     if (name === 'site_context') return text({ baseRevisions: { media: fake.revision } })
     const [operation] = args.operations
     assert.equal(args.format, 'libretto.batch')
@@ -204,6 +205,15 @@ try {
     const answer = await remote.call('upload_media_files', { paths: [join(photos, 'b.png'), join(photos, 'gia.jpg')] })
     assert.deepEqual(answer.skipped, { [join(photos, 'gia.jpg')]: 'm-existing' })
     assert.deepEqual(Object.keys(answer.uploaded), [join(photos, 'b.png')])
+  })
+  await check('a siteId reaches every call to Libretto, for a token of several sites', async () => {
+    fake.siteIds = []
+    await remote.call('upload_media_files', { paths: [join(photos, 'b.png')], skipExisting: false, siteId: 'site-b' })
+    assert.ok(fake.siteIds.length > 0)
+    assert.deepEqual([...new Set(fake.siteIds)], ['site-b'])
+    fake.siteIds = []
+    await remote.call('upload_media_files', { paths: [join(photos, 'b.png')], skipExisting: false })
+    assert.deepEqual([...new Set(fake.siteIds)], [undefined])
   })
   await check('more files than a call takes are refused before anything is sent', async () => {
     const many = Array.from({ length: 101 }, (_, i) => join(photos, `f${i}.jpg`))
