@@ -93,7 +93,7 @@ Example input:
 {"filename":"studio.jpg","contentType":"image/jpeg","data":"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="}
 ```
 
-> The file travels as base64 inside the tool call (images up to 5 MB). For a file on the user's computer, call `upload_media_file` of the plugin's `libretto-files` server with the path: it sends this operation without the bytes passing through the conversation. Write the base64 yourself only for a tiny file. The answer's `id` is the media id to place with `{ "$media": "<id>" }`.
+> The file travels as base64 inside the tool call (images up to 5 MB). For a file on the user's computer, call `upload_media_file` of the plugin's `libretto-files` server with the path: it sends this operation without the bytes passing through the conversation; for many files, `upload_media_files` with a folder or a list (up to 100 a call). Write the base64 yourself only for a tiny file. The answer's `id` is the media id to place with `{ "$media": "<id>" }`.
 
 ## media.replace
 

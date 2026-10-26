@@ -78,6 +78,15 @@ L'app desktop legge il token solo dalle impostazioni del plugin. Una variabile i
 
 Il token è sbagliato, scaduto, revocato o creato prima che il tuo Libretto venisse azzerato. Creane uno nuovo nella barra laterale dell'admin, **Persone e accessi** › **Agenti e accessi MCP**, sostituiscilo nelle impostazioni del plugin (`/plugin configure libretto@libretti`, o `/plugin` › **libretto** › **Configure** nell'app desktop) e apri una nuova sessione. Se usi `LIBRETTO_MCP_TOKEN` in un terminale, sostituiscilo lì: vale di più.
 
+### Se `libretto-files` non si collega
+
+`libretto` funziona ma `libretto-files` risulta non collegato (nell'app desktop: "connessione fallita"), e Claude non riesce a caricare immagini o font: il plugin non trova Node.js. Un'app aperta dal Dock o dal Finder non vede il `PATH` del terminale. Il plugin cerca Node anche dove lo mettono di solito Homebrew, l'installer di nodejs.org, nvm, Volta, fnm, mise e asdf; se non lo trova:
+
+- installa la versione **LTS** da [nodejs.org](https://nodejs.org) (va in `/usr/local/bin`, dove il plugin la trova sempre), poi riavvia l'app;
+- oppure, se avvii Claude Code da un terminale, imposta `LIBRETTO_NODE` con il percorso di un Node 18 o successivo (`export LIBRETTO_NODE="$(command -v node)"`).
+
+**Windows.** Il plugin avvia `libretto-files` con `sh`, che c'è se hai installato Git for Windows con i suoi strumenti Unix nel `PATH`. Altrimenti imposta una volta la variabile utente `LIBRETTO_NODE` a `node` (`[Environment]::SetEnvironmentVariable("LIBRETTO_NODE", "node", "User")`) e riapri l'app.
+
 ### Un primo prompt
 
 ```
@@ -93,7 +102,7 @@ Con l'estensione Claude in Chrome collegata, Claude apre l'anteprima della bozza
 
 ### Immagini
 
-Indica a Claude il file sul tuo computer ("metti la foto ~/Immagini/foto.jpg nella sezione Restauro"): il server `libretto-files` la carica nella libreria Media (fino a 5 MB), poi Claude la usa e scrive il testo alternativo. Puoi anche caricare le immagini nell'admin (Media) e dire a Claude il nome del file.
+Indica a Claude il file sul tuo computer ("metti la foto ~/Immagini/foto.jpg nella sezione Restauro"): il server `libretto-files` la carica nella libreria Media (fino a 5 MB), poi Claude la usa e scrive il testo alternativo. Anche una cartella intera ("carica le foto di ~/Immagini/cantiere"): Claude le carica a gruppi di 100, salta quelle già nella libreria e ti dice quali non sono passate. Puoi anche caricare le immagini nell'admin (Media) e dire a Claude il nome del file.
 
 ### Segnalazioni
 
@@ -187,6 +196,15 @@ The desktop app reads the token only from the plugin settings. A variable in `~/
 
 The token is wrong, expired, revoked, or was made before your Libretto was reset. Make a new one in the admin sidebar, **Persone e accessi** (People & access) › **Agenti e accessi MCP**, replace it in the plugin settings (`/plugin configure libretto@libretti`, or `/plugin` › **libretto** › **Configure** in the desktop app) and start a new session. If you use `LIBRETTO_MCP_TOKEN` in a terminal, replace it there: it wins.
 
+### If `libretto-files` does not connect
+
+`libretto` works but `libretto-files` shows as not connected (in the desktop app: "connection failed"), and Claude cannot upload images or fonts: the plugin cannot find Node.js. An app opened from the Dock or Finder does not see your terminal's `PATH`. The plugin also looks where Homebrew, the nodejs.org installer, nvm, Volta, fnm, mise and asdf usually put Node; if it still finds none:
+
+- install the **LTS** from [nodejs.org](https://nodejs.org) (it goes to `/usr/local/bin`, where the plugin always finds it), then restart the app;
+- or, if you start Claude Code from a terminal, set `LIBRETTO_NODE` to the path of a Node 18 or later (`export LIBRETTO_NODE="$(command -v node)"`).
+
+**Windows.** The plugin starts `libretto-files` with `sh`, which is there when Git for Windows is installed with its Unix tools on the `PATH`. Otherwise set the user variable `LIBRETTO_NODE` to `node` once (`[Environment]::SetEnvironmentVariable("LIBRETTO_NODE", "node", "User")`) and reopen the app.
+
 ### A first prompt
 
 ```
@@ -202,7 +220,7 @@ With the Claude in Chrome extension connected, Claude opens the draft preview an
 
 ### Images
 
-Point Claude at the file on your computer ("put ~/Pictures/photo.jpg in the Restauro section"): the `libretto-files` server uploads it into the Media library (up to 5 MB), then Claude places it and writes its alt text. You can also upload images in the admin (Media) and give Claude the file name.
+Point Claude at the file on your computer ("put ~/Pictures/photo.jpg in the Restauro section"): the `libretto-files` server uploads it into the Media library (up to 5 MB), then Claude places it and writes its alt text. A whole folder works too ("upload the photos in ~/Pictures/site"): Claude uploads them 100 at a time, skips the ones already in the library and tells you which did not go through. You can also upload images in the admin (Media) and give Claude the file name.
 
 ### Tickets
 
@@ -232,6 +250,7 @@ The layout follows the Claude Code documentation (checked 2026-10-25):
 plugins/libretto/.claude-plugin/plugin.json  manifest and userConfig (libretto_token, sensitive; libretto_url)
 plugins/libretto/.mcp.json                 libretto (HTTP) and libretto-files (stdio)
 plugins/libretto/server/libretto-files.mjs the local upload server, no dependencies
+plugins/libretto/server/run-node.sh        starts it with a Node 18+ wherever Node is installed (sh, or node on Windows)
 plugins/libretto/skills/*/SKILL.md         the six skills
 plugins/libretto/reference/recipes/        hand-written recipes, one per job
 plugins/libretto/reference/operations/     GENERATED from data/ by scripts/build-reference.mjs
@@ -245,7 +264,7 @@ Maintenance:
 ```bash
 node scripts/build-reference.mjs --sync ../splash-cms   # copy the registry and tool catalogue from a Libretto checkout, regenerate
 node scripts/build-reference.mjs --check                # fails on a stale file, an uncovered operation, an unknown name or a broken link
-node scripts/test-libretto-files.mjs                    # how libretto-files resolves paths (~/, relative, absolute); needs no server
+node scripts/test-libretto-files.mjs                    # the launcher on an app's PATH, path resolution, bulk upload against a fake Libretto
 LIBRETTO_URL=... LIBRETTO_MCP_TOKEN=... node scripts/build-reference.mjs --live   # compare with a running server
 claude plugin validate .
 ```

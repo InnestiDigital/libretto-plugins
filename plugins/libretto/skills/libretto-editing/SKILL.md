@@ -7,7 +7,7 @@ description: Edit or read a Libretto site through the libretto MCP server - text
 
 You work on one site: the one the token was made for (the plugin's **Token del sito Libretto** setting, or `LIBRETTO_MCP_TOKEN`, which wins). Every write goes through the same operation registry the admin uses, so it is validated, audited and undoable. Your changes land in the **draft**; nothing is public until someone publishes (see the `libretto-publish` skill).
 
-Tools of the `libretto` MCP server: `site_context`, `discover_operations`, `read_resources`, `dry_run_ops`, `apply_ops`, `render_preview`, `compare_reference`, `report_issue` (and `job_next_step` / `job_report_step` when you were handed an assistant job id). The plugin's local `libretto-files` server adds `upload_media_file`.
+Tools of the `libretto` MCP server: `site_context`, `discover_operations`, `read_resources`, `dry_run_ops`, `apply_ops`, `render_preview`, `compare_reference`, `report_issue` (and `job_next_step` / `job_report_step` when you were handed an assistant job id). The plugin's local `libretto-files` server adds `upload_media_file`, `upload_media_files` (a folder or a list, up to 100 a call) and `upload_font_file`.
 
 ## When Libretto does not connect
 
@@ -23,6 +23,8 @@ For a new token, tell the person these three steps, in their language, with the 
 3. Start a new session.
 
 For example: "Libretto non accetta più il token di Claude: forse è stato revocato o è scaduto. Crea un nuovo token nell'admin, in Persone e accessi › Agenti e accessi MCP, poi scrivi `/plugin configure libretto@libretti`, incollalo e apri una nuova sessione."
+
+**Only the file tools are missing** (`upload_media_file`, `upload_media_files`, `upload_font_file`; `/mcp` shows `libretto-files` failed, or the desktop app says the connection failed and will retry) while the other Libretto tools work: the token is fine, the plugin cannot find Node.js. An app opened from the Dock or Finder does not see the terminal's `PATH`; the plugin looks in the usual places, and found none. Tell the person: install Node.js **LTS** from nodejs.org (it goes to `/usr/local/bin`, where the plugin always finds it) and restart the app; or, if they start Claude Code from a terminal, set `LIBRETTO_NODE` to the path of a Node 18 or later. On Windows: Git for Windows with its Unix tools, or the user variable `LIBRETTO_NODE` set to `node`. Meanwhile, photos can go up in the admin (Media), and you place them by file name.
 
 Never talk about the `Authorization` header, HTTP, the cause codes, the plugin's `.mcp.json` or configuration files: the person cannot act on them. Only if they start Claude Code from a terminal with `LIBRETTO_MCP_TOKEN` set does the new token go there (it wins). Never suggest `export LIBRETTO_MCP_TOKEN` in `~/.zshrc` or `~/.bashrc` to someone using the desktop app: an app opened from the Dock, Finder or Start menu does not read them.
 
@@ -57,7 +59,7 @@ Every operation, its input, permission and typical errors: [operations reference
 5. **Dry run first, then apply.** Always `dry_run_ops` the exact batch, read its answer, then `apply_ops`.
 6. **One user-visible change per batch, always.** A batch is the unit of undo: `history.undo` takes back a whole batch, never part of it. So before you compose anything, list the changes the user would name on their own ("the accent colour", "the hero title", "the button", "the footer text") and give each its own batch, even when they all came in one message with "dry run, then apply". Everything one change needs goes in its batch (the palette steps and the roles on them; a new token and the nodes re-pointed at it); anything the user could want back alone goes in another. Dry-run each batch, then apply them one after another, each on the `revisions` of the previous answer. Tell the user that each change can be undone alone, and never claim that one undo takes back several. Undo the same way: one `history.undo` per batch, newest change first. Two undos in one batch trip over each other, because the second one targets a state the first one just changed.
 7. **Never publish on your own.** Publishing makes changes public: only on the human's explicit go.
-8. **Images go through the media library.** A file on this computer: `upload_media_file` with its path (dry run first), then use the media id; see [images](../../reference/recipes/images.md). Never paste a photo's base64 into `media.upload` yourself.
+8. **Images go through the media library.** A file on this computer: `upload_media_file` with its path (dry run first), then use the media id; many files: `upload_media_files` with the folder or the list, once per 100 files, never one call per photo; see [images](../../reference/recipes/images.md). Never paste a photo's base64 into `media.upload` yourself.
 9. **MCP first.** Use an operation whenever one exists. The admin in Chrome (`libretto-admin-browser`) is only for what MCP lacks.
 10. **Look at the result** before saying it is done (`libretto-visual-check`).
 11. **Blocked?** Tell the user, do what you can, and open a ticket when Libretto is at fault (`libretto-report-issue`). Never work around a refusal.

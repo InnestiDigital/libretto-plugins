@@ -85,7 +85,7 @@
       "`acknowledgeContrast: true` saves a brand whose pairs fail AA. Set it only when the user explicitly says to save anyway."
     ],
     "media.upload": [
-      "The file travels as base64 inside the tool call (images up to 5 MB). For a file on the user's computer, call `upload_media_file` of the plugin's `libretto-files` server with the path: it sends this operation without the bytes passing through the conversation. Write the base64 yourself only for a tiny file. The answer's `id` is the media id to place with `{ \"$media\": \"<id>\" }`."
+      "The file travels as base64 inside the tool call (images up to 5 MB). For a file on the user's computer, call `upload_media_file` of the plugin's `libretto-files` server with the path: it sends this operation without the bytes passing through the conversation; for many files, `upload_media_files` with a folder or a list (up to 100 a call). Write the base64 yourself only for a tiny file. The answer's `id` is the media id to place with `{ \"$media\": \"<id>\" }`."
     ],
     "media.list": [
       "Find an image by file name, then reference it in an image node as `{ \"src\": { \"$media\": \"<id>\" } }`."

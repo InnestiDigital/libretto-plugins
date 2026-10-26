@@ -10,8 +10,9 @@ Operations: [site and settings](../operations/site-and-settings.md) (`layout.upd
 2. Decide which kind of reference it is:
    - **fluid**: sizes use `clamp()` or `vw`, and the layout reflows at its breakpoints (columns collapse at 767 px, a tablet layout at 1023 px, a cap at 1920 px);
    - **fixed-width**: one design at one width (say 1440 px) meant to scale down as a picture.
-3. Take reference screenshots of each section at 1440 and 390 px wide (the `libretto-visual-check` skill's Chrome, or the user's files). `compare_reference` takes an image today (step 5).
+3. Take reference screenshots of each section at 1440 and 390 px wide (the `libretto-visual-check` skill's Chrome, or the user's files). `compare_reference` takes an image today (section 5).
 4. Write the user the plan in their words: frame, tokens, component looks, header and footer, then the pages section by section. Each step below is at least one batch (rule 6).
+5. Bring its images into the media library once, before the sections: `upload_media_files` of the plugin's `libretto-files` server with the reference's image folder (`{ "directory": "<the folder>", "dryRun": true }`, then without `dryRun`; up to 100 files a call, call again for the rest: what is already in the library is skipped). A reference often ships each picture in several widths (`hero-480.jpg`, `hero-960.jpg`, `hero-1920.jpg`, or the files of a `srcset`): upload only the largest of each, with `paths`. Libretto renders its own sizes and formats from it (`srcset`, AVIF and WebP), so the smaller copies only fill the library. Keep the answer's map from file to media id: the sections use it.
 
 ## 1. The layout frame first
 
