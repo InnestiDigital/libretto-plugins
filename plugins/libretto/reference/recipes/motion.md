@@ -57,6 +57,11 @@ An entry: `{ "id": "<uuid>", "sceneId": "<scene>", "target": { "nodeId": "<svg o
 - A step on the wrong kind of node is refused: `INVALID_EFFECT_TARGET` (422 `scene_target_invalid`). A text with no number, or a drawing with no stroke, plays nothing (the runtime reports it).
 - Reduced motion shows the markup at once: nothing to set.
 
+Two keyframe patterns that go with them:
+
+- **Bars that grow from the bottom, in turn:** one entry on the bars' container, `keyframes: [{ "offset": 0, "transform": { "scaleY": 0 } }, { "offset": 1, "transform": { "scaleY": 1 } }]`, `"transformOrigin": "50% 100%"`, `"stagger": 35`, on an `intersection` trigger with `once`.
+- **A ratchet that turns one tooth per value:** a `rotate` entry (`"0deg"` to the angle of n - 1 teeth) with `"easing": "steps(n, jump-none)"` beside a `countTo` with n - 1 `values`, at the same `position` and `duration`, in a `scroll` scene with `scrub` and `pin`. Both hold n positions and jump together.
+
 ## Hover and transitions
 
 A transition is a style: `set_style` in the node's state scope (for example `s::hover`) with `transition` and the properties that change, durations as tokens (`{motion.duration.fast}`, `{motion.duration.base}`, `{motion.duration.slow}`).
