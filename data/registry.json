@@ -51738,7 +51738,7 @@
     },
     {
       "name": "font.recordUpload",
-      "description": "Record a WOFF2 face the admin staged through its upload endpoint (`id`, `storageKey`, and the face's family name, weight, style, display and fallback stack) after checking its bytes again. With the bytes in hand, upload with font.upload instead. Undo restores the library; its files are kept.",
+      "description": "Record a WOFF2 face the admin staged through its upload endpoint (`id`, `storageKey`, and the face's family name, weight (one weight, a variable file's `[min, max]`, or none: the file's own wght range), style, display and fallback stack) after checking its bytes again. With the bytes in hand, upload with font.upload instead. Undo restores the library; its files are kept.",
       "example": {
         "id": "7a8b9c0d-1e2f-4a3b-9c4d-5e6f7a8b9c0d",
         "storageKey": "fonts/dm-sans-400.woff2",
@@ -51779,9 +51779,22 @@
             "maxLength": 100
           },
           "weight": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 1000
+            "anyOf": [
+              {
+                "$ref": "#/$defs/__schema0"
+              },
+              {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "$ref": "#/$defs/__schema0"
+                  },
+                  {
+                    "$ref": "#/$defs/__schema0"
+                  }
+                ]
+              }
+            ]
           },
           "style": {
             "type": "string",
@@ -51820,12 +51833,18 @@
           "fileName",
           "mimeType",
           "name",
-          "weight",
           "style",
           "display",
           "fallbackStack"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "$defs": {
+          "__schema0": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          }
+        }
       },
       "outputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -52010,7 +52029,7 @@
     },
     {
       "name": "font.upload",
-      "description": "Upload a font face from its base64 bytes: a WOFF2 file (the bytes decide, by their signature), checked like the admin upload (file size, the site's font quota, the family name) and stored with its family name, weight, style, display, fallback stack and licence note. Record the licence the face is used under in `licence` (for example the foundry's terms or the licence file's name); the library shows it with the face. A face the library already holds is refused (409 `font_face_exists`) unless `replace` is set. The face is in the draft at once; the public site draws it after the next publish. Undo restores the library; its files are kept.",
+      "description": "Upload a font face from its base64 bytes: a WOFF2 file (the bytes decide, by their signature), checked like the admin upload (file size, the site's font quota, the family name) and stored with its family name, weight, style, display, fallback stack and licence note. A variable file draws a range of weights: give `weight: [200, 800]`, or leave `weight` out and the range comes from the file's own wght axis; its @font-face declares `font-weight: 200 800`, and a type style may then use any weight inside it, such as 370. A range on a static file, or past the file's axis, is refused; a static file without a weight is 400. A type style set to a weight no face of its family draws is refused (422 `font-weight`). Record the licence the face is used under in `licence` (for example the foundry's terms or the licence file's name); the library shows it with the face. A face the library already holds is refused (409 `font_face_exists`) unless `replace` is set. The face is in the draft at once; the public site draws it after the next publish. Undo restores the library; its files are kept.",
       "example": {
         "fileName": "inter-400.woff2",
         "name": "Inter",
@@ -52036,9 +52055,22 @@
             "maxLength": 100
           },
           "weight": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 1000
+            "anyOf": [
+              {
+                "$ref": "#/$defs/__schema0"
+              },
+              {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "$ref": "#/$defs/__schema0"
+                  },
+                  {
+                    "$ref": "#/$defs/__schema0"
+                  }
+                ]
+              }
+            ]
           },
           "style": {
             "type": "string",
@@ -52092,11 +52124,17 @@
         "required": [
           "fileName",
           "name",
-          "weight",
           "style",
           "data"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "$defs": {
+          "__schema0": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          }
+        }
       },
       "outputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -72281,6 +72319,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -74895,6 +74934,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -76198,7 +76238,7 @@
     },
     {
       "name": "designSystem.setComponentCell",
-      "description": "Set cells of one design-system component in one save: each `{ cell, value }`, the cell key `<variant>.<size>.<state>.<part>.<breakpoint>.<property>` (`primary.all.hover.container.base.background`: `all` when the value does not vary by size, `base` or a breakpoint id). A value is a token alias such as `{color.bg.accent}` (a semantic or foundation token, never a palette step or a raw literal), a bare keyword for a property whose values are modes (a link underline's `none`, `always`, `hover`), or `{ component, variant }` for a part that embeds another component. Read the cell keys of a component with the `component/<key>` resource (designSystem.readComponent) and the segments with designSystem.read `components: true`. The menu dialog's drawer is the `drawer-nav` component: its `overlay` cells (`background`, `opacity`, `blur`), `panel` cells (`background`, `width`, `padding`, `shadow`, `z`, `radius`, `offset-x`, `offset-y`, `fit`) and `motion` cells (`delay`, `duration`, `easing`, `fade`) style it, such as `full.all.default.overlay.base.blur`. Every save runs the AA contrast gate.",
+      "description": "Set cells of one design-system component in one save: each `{ cell, value }`, the cell key `<variant>.<size>.<state>.<part>.<breakpoint>.<property>` (`primary.all.hover.container.base.background`: `all` when the value does not vary by size, `base` or a breakpoint id). A value is a token alias such as `{color.bg.accent}` (a semantic or foundation token, never a palette step or a raw literal), a bare keyword for a property whose values are modes (a link underline's `none`, `always`, `hover`), or `{ component, variant }` for a part that embeds another component. Read the cell keys of a component with the `component/<key>` resource (designSystem.readComponent) and the segments with designSystem.read `components: true`. The menu dialog's drawer is the `drawer-nav` component: its `overlay` cells (`background`, `opacity`, `blur`), `panel` cells (`background`, `width`, `padding`, `shadow`, `z`, `radius`, `offset-x`, `offset-y`, `fit`) and `motion` cells (`delay`, `duration`, `easing`, `fade`) style it, such as `full.all.default.overlay.base.blur`. The AA contrast gate judges the end state of the whole batch, so a colour token and a cell that pairs with it may change in two operations of one batch.",
       "example": {
         "component": "button",
         "cells": [
@@ -77521,6 +77561,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
