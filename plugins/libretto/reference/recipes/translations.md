@@ -18,7 +18,8 @@ A text is either a plain string (the same in every language) or a **locale map**
 |---|---|---|
 | Node texts (headings, paragraphs, buttons, alt) | `props` in the page or region tree | `tree.commit` `set_props` `{ id, patch: { "text": { "it": "...", "en": "..." } } }` |
 | Rich text | a `richtext` node | `content.importMarkdown` `{ pageId, nodeId, locale, markdown }`: one language at a time, the others keep theirs |
-| Page title, SEO title and description, slug | page fields | `page.update` `{ pageId, patch: { "title": { ... } } }` (fields from `page.read`) |
+| Page title, SEO title and description | page fields | `page.update` `{ pageId, patch: { "title": { ... } } }` (fields from `page.read`) |
+| Page address in a language | `slugs` of a page, an article or a blog index | `page.update` `{ pageId, patch: { "slugs": { "en-US": "method" } } }`; `article.update` / `blog.update` take `patch.slugs` the same way ([Its address](#its-address-in-that-language)) |
 | Menu labels | menus | `navigation.upsert` with locale-map labels ([menus](header-footer-and-menus.md)) |
 | Collection values | items | `item.update` with locale maps on `localized` fields |
 | Image alt, caption | media | `media.update` `{ mediaId, alt: { ... } }` |
@@ -31,7 +32,19 @@ A text is either a plain string (the same in every language) or a **locale map**
 2. Translate them; show the user the list (node, original, translation) for a page of any length before writing.
 3. One `tree.commit` with a `set_props` per node; change only the language asked, keep the others.
 4. Dry run: `translation.missing` findings list texts that still lack the language. Apply, then translate the page's title and SEO fields with `page.update`, and the menu labels.
-5. Look at the page in that language at tablet and phone width: `render_preview` `{ pageId, mode: "screenshot", device: "tablet", locale: "en-US", crop: { nodeId } }` for the sections you translated, or in Chrome the language's `draftPreview` from `site_context`'s `urls.locales` ([preview and visual check](preview-and-verify.md)).
+5. Give the page its address in that language: see [Its address](#its-address-in-that-language).
+6. Look at the page in that language at tablet and phone width: `render_preview` `{ pageId, mode: "screenshot", device: "tablet", locale: "en-US", crop: { nodeId } }` for the sections you translated, or in Chrome the language's `draftPreview` from `site_context`'s `urls.locales` ([preview and visual check](preview-and-verify.md)).
+
+## Its address in that language
+
+A page, an article or a blog index can answer its own slug in each language that is not the default: `/metodo` in Italian, `/en/method` in English. Without one, the language answers the default slug (`/en/metodo`). Menus, links, the language switcher, canonical, hreflang and the sitemap follow it by themselves.
+
+1. Read the page's current `slugs` (`page.read`, or its line in the `pages` resource): never overwrite one the user chose.
+2. Derive the slug from the translated title: lower case, digits and hyphens only, no accents (`Il nostro metodo` → `our-method`). The key is the locale code as the texts use it (`en-US`), never the default language: its slug is the page's `slug`.
+3. One batch per page: `page.update` `{ pageId, patch: { "slugs": { "en-US": "our-method" } } }` (an article: `article.update`, a blog index: `blog.update`, same `patch.slugs`). The patch merges by language: a value sets it, `null` removes it, a language left out keeps its own. `page.create`, `article.create` and `blog.create` take `slugs` directly.
+4. A refusal names the field (`slugs.en-US`): the slug is taken by a sibling page in some language (a slug names one page under its parent in every language), or a top-level slug is a locale code of the site or `api` / `admin`. Pick another slug; never rename the sibling to make room.
+
+Changing a slug of a **published** page (or its `slug`, or moving it) adds a 301 from each old address to the new one in the site's redirects, live with the next publish: tell the user, in their words ("il vecchio indirizzo porterà a quello nuovo dopo la pubblicazione"). A wrong-language address (`/en/metodo` once `/en/method` exists) also answers a 301, never a 404.
 
 ## Rules
 

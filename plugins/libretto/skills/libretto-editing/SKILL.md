@@ -39,7 +39,7 @@ Never talk about the `Authorization` header, HTTP, the cause codes, the plugin's
 | A blog, articles, or a page on a template | [blogs and templates](../../reference/recipes/blogs-and-templates.md): read the `templates` resource before you build |
 | Header, footer, menus | [header, footer and menus](../../reference/recipes/header-footer-and-menus.md) |
 | Projects, events, team: repeated content | [collections and items](../../reference/recipes/collections-and-items.md) |
-| Another language | [translations](../../reference/recipes/translations.md) |
+| Another language | [translations](../../reference/recipes/translations.md): after the texts and the title, give the page its slug in that language (`slugs`) |
 | Things that move | [motion](../../reference/recipes/motion.md) |
 | Pictures | [images](../../reference/recipes/images.md) |
 | "Is it readable / accessible" | [contrast and accessibility](../../reference/recipes/contrast-and-a11y.md) |
