@@ -34,10 +34,10 @@ Write the user the change as a list of node edits before building it: "move sect
 
 Rules: tokens for every colour, size and space (`{space.4}`, not `16px`); a section belongs directly under the page root; keep one intent per batch.
 
-## 4. Dry run, apply, verify
+## 4. Apply, verify
 
-1. `dry_run_ops`, read `findings` for the nodes you touched (`design.detached`, `a11y.heading-order`, `structure.empty-section`, `design.contrast-aa`) and errors.
-2. `apply_ops` with a fresh `requestId`.
+1. `apply_ops` with a fresh `requestId` (a dry run first only in the cases of rule 5 in `libretto-editing`).
+2. Read the receipt's `findings` for the nodes you touched (`a11y.heading-order`, `structure.empty-section`, `design.contrast-aa`) and its errors; `findingsByRule` counts the info ones (`design.detached`). Fix with the next batch, or undo.
 3. Read the outline again; look at it ([preview and visual check](preview-and-verify.md)).
 4. Tell the user what changed, in their words; keep each `requestId` to undo with `history.undo`.
 
