@@ -62,6 +62,10 @@ Two keyframe patterns that go with them:
 - **Bars that grow from the bottom, in turn:** one entry on the bars' container, `keyframes: [{ "offset": 0, "transform": { "scaleY": 0 } }, { "offset": 1, "transform": { "scaleY": 1 } }]`, `"transformOrigin": "50% 100%"`, `"stagger": 35`, on an `intersection` trigger with `once`.
 - **A ratchet that turns one tooth per value:** a `rotate` entry (`"0deg"` to the angle of n - 1 teeth) with `"easing": "steps(n, jump-none)"` beside a `countTo` with n - 1 `values`, at the same `position` and `duration`, in a `scroll` scene with `scrub` and `pin`. Both hold n positions and jump together.
 
+**Parts of a drawing.** An element the SVG file marks `data-part="<name>"` (lower-case letters, digits, hyphens; not `root`) is a part of the svg node: the `media` resource lists each SVG's `parts`. Target it as `{ "nodeId": "<svg node>", "part": "wheel" }` to turn the wheel without the pawl, `"part": "bars"` with a `stagger` to grow the bars one by one, or give `drawPath` a `part` and one entry per layer (construction, subject, signal, labels), each at a later `position`, to draw an illustration layer by layer. A part turns and scales about its own centre unless the entry sets `transformOrigin`. Name the parts in the file before uploading; a row uploaded before has no parts: replace it with the same file. A bad name refuses the inline drawing with the name in the reason.
+
+**Text steps on a component.** `countTo` and `scrambleText` also play on a part of a component that holds text only, such as a stat's `{ "part": "value" }`. A refusal (`motion_invalid`) now says why in its message: the code, the node, and the parts the node offers.
+
 ## Hover and transitions
 
 A transition is a style: `set_style` in the node's state scope (for example `s::hover`) with `transition` and the properties that change, durations as tokens (`{motion.duration.fast}`, `{motion.duration.base}`, `{motion.duration.slow}`).
