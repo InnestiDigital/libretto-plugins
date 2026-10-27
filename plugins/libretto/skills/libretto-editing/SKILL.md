@@ -38,6 +38,7 @@ Never talk about the `Authorization` header, HTTP, the cause codes, the plugin's
 | A new section | [sections from presets](../../reference/recipes/sections-from-presets.md) |
 | A blog, articles, or a page on a template | [blogs and templates](../../reference/recipes/blogs-and-templates.md): read the `templates` resource before you build |
 | Header, footer, menus | [header, footer and menus](../../reference/recipes/header-footer-and-menus.md) |
+| The page an address that does not exist shows (404) | `settings.setNotFoundPage` naming a published static page, not the home page (`{ "notFoundPage": { "pageId": "<page id>", "locales": { "en": "<page id>" } } }`; `locales` only for a different page in that language; null goes back to the theme's own); it goes live with the next publish (`libretto-publish`) |
 | Projects, events, team: repeated content | [collections and items](../../reference/recipes/collections-and-items.md) |
 | Another language | [translations](../../reference/recipes/translations.md): after the texts and the title, give the page its slug in that language (`slugs`) |
 | Things that move | [motion](../../reference/recipes/motion.md) |
