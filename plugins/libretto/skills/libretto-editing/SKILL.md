@@ -43,6 +43,7 @@ Never talk about the `Authorization` header, HTTP, the cause codes, the plugin's
 | Another language | [translations](../../reference/recipes/translations.md): after the texts and the title, give the page its slug in that language (`slugs`) |
 | Things that move | [motion](../../reference/recipes/motion.md) |
 | Pictures | [images](../../reference/recipes/images.md) |
+| A contact form: its fields, error messages, error summary, required marks, consent sentence or send button | [forms](../../reference/recipes/forms.md) |
 | "Is it readable / accessible" | [contrast and accessibility](../../reference/recipes/contrast-and-a11y.md) |
 | To see the result | the `libretto-visual-check` skill, [preview and verify](../../reference/recipes/preview-and-verify.md) |
 | The live site as a visitor sees it | `render_preview` with `"target": "live"` ([preview and verify](../../reference/recipes/preview-and-verify.md)) |
