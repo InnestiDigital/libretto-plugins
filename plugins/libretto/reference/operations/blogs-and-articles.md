@@ -152,7 +152,7 @@ List the page templates of the site's theme: the `templateId` blog.create, artic
 - permission `site.read` (admin, editor); class `read`; writes nothing.
 - Input: `{}`.
 
-Output: { theme: string, templates: ({ id: string, label: string, appliesTo: "static" \| "blog-index" \| "article", layout: string, source: "theme" \| "site", forkPageId?: string, pages: integer ≥0, parts: ({ node: string, name?: string, role: "outlet" \| "locked", binds?: …[], feed?: … \| … \| …, components?: …[] })[] })[], configu… (full schema: discover_operations)
+Output: { theme: string, templates: ({ id: string, label: string, appliesTo: "static" \| "blog-index" \| "article", layout: string, source: "theme" \| "site", forkPageId?: string, pages: integer ≥0, parts: ({ node: string, name?: string, role: "outlet" \| "locked", binds?: …[], feed?: { kind: "articles", … } \| { kind: "collection"… (full schema: discover_operations)
 
 Example input:
 

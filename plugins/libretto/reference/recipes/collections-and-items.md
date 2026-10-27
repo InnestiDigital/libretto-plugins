@@ -12,7 +12,16 @@ Operations: [collections](../operations/collections.md), [pages and trees](../op
 
 ## Add or change items
 
-- One item: `item.create` `{ collectionId, slug, values }`. `values` follow the fields: a localized field is a locale map (`{ "it": "...", "en": "..." }`), a `media` field a media id, a `mediaList` an array of ids, a `reference` the id of an item of the referenced collection, a `date` `YYYY-MM-DD`.
+- One item: `item.create` `{ collectionId, slug, values }`. `values` follow the fields, one value per field type:
+  - `text`: a string (`multiline: true` keeps line breaks);
+  - `richText`: a Tiptap document (`{ "type": "doc", "content": [...] }`);
+  - `url`: a link, as a link's or a button's `href` takes it: `https://…`, `mailto:`, `tel:`, a site path (`/contatti`) or `#anchor`. An `href` binds only to a `url` field, a `file` field or `item.$url`: bound to a `text` field it is refused (`I6.bind_type`);
+  - `number`: a finite number; `date`: `YYYY-MM-DD`;
+  - `media` and `file`: a media id; `mediaList`: an array of media ids;
+  - `reference`: the id of an item of the referenced collection, an array of ids when `multiple`;
+  - `select`: one option `value`; `list`: an array of objects of its sub-fields.
+
+  A localized field takes a plain value or a locale map (`{ "it": "...", "en": "..." }`). A required field must be filled in, in the default locale for a locale map.
 - Many items: `item.import` `{ collectionId, rows: [{ slug?, values }] }`, all or none. Media values may be the exact file name of a file already in the media library.
 - Change: `item.update` `{ collectionId, itemId, slug?, values }` merges key by key; `null` removes a value.
 - Order: `item.reorder` `{ collectionId, itemIds }` names every item once.

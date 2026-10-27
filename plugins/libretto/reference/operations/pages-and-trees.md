@@ -33,7 +33,7 @@ Read a site region and its editable page identity.
 |---|---|---|
 | `region` | "header" \| "footer" \| "above" \| "below" | yes |
 
-Output: { region: "header" \| "footer" \| "above" \| "below", pageId: string (min 1), tree: { format: "splash.tree", v: 3, revision: integer ≥0, root: { meta?: { canvas?: boolean, attributes?: Record<string, …>, reveal?: … \| …, showOn?: "list" \| "item" }, styles?: { mixins: …[], sheet: Record<string, …> }, variant?: string[], the… (full schema: discover_operations)
+Output: { region: "header" \| "footer" \| "above" \| "below", pageId: string (min 1), tree: { format: "splash.tree", v: 3, revision: integer ≥0, root: { meta?: { canvas?: boolean, attributes?: Record<string, …>, reveal?: { mode: "enter", … } \| { mode: "scroll", … }, showOn?: "list" \| "item" }, styles?: { mixins: …[], sheet: Recor… (full schema: discover_operations)
 
 Example input:
 
@@ -71,6 +71,7 @@ Apply an invertible batch of splash.ops/2 ops to a page tree. Each op names its 
 |---|---|---|
 | `pageId` | string (min 1) | yes |
 | `ops` | ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { meta?: …, styles?: …, variant?: …, theme?: …, visibility?: …, attrs?: …, id: …, kind: …, type: …, children: … } \| { meta?: …, styles?: …, variant?: …, theme?: …, visibility?: …, attrs?: …, id: …, slot?: …, name?: …, anchor?: …, locked?: …, pro… (full schema: discover_operations) | yes |
+| `ops[].op` | "insert" \| "set_style" \| "remove" \| "move" \| "set_props" \| "set_mixins" \| "set_variant" \| "set_theme" \| "set_visibility" \| "set_type" \| "set_meta" \| "set_attrs" \| "set_override" | yes |
 
 Output: { revision: integer ≥0, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { meta?: …, styles?: …, variant?: …, theme?: …, visibility?: …, attrs?: …, id: …, kind: …, type: …, children: … } \| { meta?: …, styles?: …, variant?: …, theme?: …, visibility?: …, attrs?: …, id: …, slot?: …, name… (full schema: discover_operations)
 

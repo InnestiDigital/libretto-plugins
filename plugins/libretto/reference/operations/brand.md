@@ -25,7 +25,7 @@ Set the site's brand from three colours, a type pairing, a type ratio and base s
 | `radius` | "sharp" \| "soft" \| "round" \| "pill" | yes |
 | `acknowledgeContrast` | true |  |
 
-Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: … \| … \| … \| … \| … \| … \| … } \| { op: "remove", id: nodeId } \| { op: "move", id: nodeId, parentId: nodeId, slot?: string, index: integer ≥0 } \| { op: "set_props", id: nodeId… (full schema: discover_operations)
+Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { kind: "root", … } \| { kind: "section", … } \| { kind: "repeater", … } \| { kind: "outlet", … } \| { kind: "primitive", … } \| { kind: "component", … } \| { kind: "instance", … (full schema: discover_operations)
 
 Example input:
 

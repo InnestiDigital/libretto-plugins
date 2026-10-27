@@ -42,6 +42,7 @@ A design-system write (in `dry_run_ops` or `apply_ops`) answers its change, not 
 ## How it is built
 
 - **Sets** hold token values: `core` (palette and raw scales), `semantic-light` and `semantic-dark` (roles such as `color.text.accent`, usually aliases of palette steps like `{color.palette.brand.500}`).
+- **Page and link roles.** `color.bg.page` paints the whole page, to its end, behind sections that have no background of their own. `color.text.link` and `color.text.link-hover` are optional: add them to `semantic-light` and `semantic-dark` and every link with no variant of its own (a link node, the wordmark, a form's consent link) takes them; each is checked as body text on `color.bg.section` and `color.bg.page`. Without them such links take `color.bg.accent`.
 - **Themes** stack sets: `light` = `core` + `semantic-light`; `dark` adds `semantic-dark`. A node or section takes a theme with `set_theme` or `designSystem.setScheme`.
 - **Components** (`button`, `card`, `navbar`, ...) have variants, sizes and states. A **cell** is one property of one part, named `<variant>.<size or all>.<state>.<part>.base.<property>`, for example `primary.all.hover.container.base.background`. Copy cell names from the component resource.
 - **Mixins** are named style sheets a node can carry (`set_mixins`), built from tokens.

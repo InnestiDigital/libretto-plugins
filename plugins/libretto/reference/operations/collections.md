@@ -13,7 +13,7 @@ List the draft collections of the site, in order, each with its fields and its n
 - permission `site.read` (admin, editor); class `read`; writes nothing.
 - Input: `{}`.
 
-Output: { collections: ({ collection: { uid: uuid, key: string (max 40), label: string (min 1, max 80) \| Record<locale, …>, fields: (… \| … \| … \| … \| … \| … \| … \| … \| … \| … \| …)[] (≤40), titleField: string, slugField: string, position: integer ≥0 }, itemCount: integer ≥0 })[] }
+Output: { collections: ({ collection: { uid: uuid, key: string (max 40), label: string (min 1, max 80) \| Record<locale, …>, fields: ({ type: "text", … } \| { type: "richText", … } \| { type: "url", … } \| { type: "number", … } \| { type: "date", … } \| { type: "media", … } \| { type: "mediaList", … } \| { type: "file", … } \| { type: … (full schema: discover_operations)
 
 Example input:
 
@@ -51,6 +51,7 @@ Create a collection with its typed fields. The key is unique on the site and nev
 | `collection.key` | string (max 40) | yes |
 | `collection.label` | string (min 1, max 80) \| Record<locale, string (min 1, max 80)> | yes |
 | `collection.fields` | ({ key: string, label: string (min 1, max 80) \| Record<locale, string (min 1, max 80)>, localized?: boolean, required?: boolean, help?: string (min 1, max 240), type: "text", multiline?: boolean } \| { key: string, label: string (min 1, max 80) \| Record<locale, string (min 1, max 80)>, localized?: boolean, required?: bo… (full schema: discover_operations) | yes |
+| `collection.fields[].type` | "text" \| "richText" \| "url" \| "number" \| "date" \| "media" \| "mediaList" \| "file" \| "reference" \| "select" \| "list" | yes |
 | `collection.titleField` | string | yes |
 | `collection.slugField` | string | yes |
 
@@ -74,6 +75,7 @@ Patch the label, fields, title field or slug field of a collection. A field remo
 | `patch` | object | yes |
 | `patch.label` | string (min 1, max 80) \| Record<locale, string (min 1, max 80)> |  |
 | `patch.fields` | ({ key: string, label: string (min 1, max 80) \| Record<locale, string (min 1, max 80)>, localized?: boolean, required?: boolean, help?: string (min 1, max 240), type: "text", multiline?: boolean } \| { key: string, label: string (min 1, max 80) \| Record<locale, string (min 1, max 80)>, localized?: boolean, required?: bo… (full schema: discover_operations) |  |
+| `patch.fields[].type` | "text" \| "richText" \| "url" \| "number" \| "date" \| "media" \| "mediaList" \| "file" \| "reference" \| "select" \| "list" | yes |
 | `patch.titleField` | string |  |
 | `patch.slugField` | string |  |
 

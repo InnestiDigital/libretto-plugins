@@ -185,10 +185,27 @@ function describeFields(schema) {
       const nested = depth < 1 && target.type === 'object' && target.properties && Object.keys(target.properties).length <= 12
       rows.push({ path, type: nested ? 'object' : typeText(child, defs, 0), required: (resolved.required ?? []).includes(name) })
       if (nested) walk(target, path, depth + 1)
+      // A union of variants (a collection field by its `type`): its whole type is cut short, so the variants get their own row.
+      const variants = discriminantOf(target, defs)
+      if (variants) rows.push({ path: `${path}${target.type === 'array' ? '[]' : ''}.${variants.key}`, type: variants.values.map(value => JSON.stringify(value)).join(' | '), required: true })
     }
   }
   walk(schema, '', 0)
   return rows
+}
+
+/**
+ * The discriminant of a union of objects, or of an array of them: the
+ * property every member fixes to a constant, with each member's value; null
+ * for anything else.
+ */
+function discriminantOf(node, defs) {
+  const target = node.type === 'array' ? resolve(node.items ?? {}, defs) : node
+  const members = (target.anyOf ?? target.oneOf ?? []).map(member => resolve(member, defs))
+  if (members.length < 2 || !members.every(member => member.properties)) return null
+  const constant = (member, key) => member.properties[key] && 'const' in resolve(member.properties[key], defs)
+  const key = Object.keys(members[0].properties).find(name => members.every(member => constant(member, name)))
+  return key ? { key, values: members.map(member => resolve(member.properties[key], defs).const) } : null
 }
 
 function resolve(node, defs) {
@@ -205,9 +222,19 @@ function typeText(node, defs, depth) {
   return text.length > MAX_TYPE ? `${text.slice(0, MAX_TYPE)}… (full schema: discover_operations)` : text
 }
 
+/**
+ * A node past the depth limit: its discriminant when it has one (a property
+ * whose value is a constant, like a collection field's `type`), so the members
+ * of a deep union stay named; else an ellipsis.
+ */
+function tagOf(s, defs) {
+  const tag = Object.entries(s.properties ?? {}).find(([, value]) => 'const' in resolve(value, defs))
+  return tag ? `{ ${tag[0]}: ${JSON.stringify(resolve(tag[1], defs).const)}, … }` : '…'
+}
+
 function typeOf(node, defs, depth) {
   const s = resolve(node, defs)
-  if (depth > 5) return '…'
+  if (depth > 5) return tagOf(s, defs)
   if ('const' in s) return JSON.stringify(s.const)
   if (s.enum) return s.enum.map(v => JSON.stringify(v)).join(' | ')
   const union = s.anyOf ?? s.oneOf

@@ -19,7 +19,7 @@ Promote authored component overrides to a reusable variant and reattach the node
 | `variant` | string | yes |
 | `label` | string (min 1, max 120) | yes |
 
-Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: … \| … \| … \| … \| … \| … \| … } \| { op: "remove", id: nodeId } \| { op: "move", id: nodeId, parentId: nodeId, slot?: string, index: integer ≥0 } \| { op: "set_props", id: nodeId… (full schema: discover_operations)
+Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { kind: "root", … } \| { kind: "section", … } \| { kind: "repeater", … } \| { kind: "outlet", … } \| { kind: "primitive", … } \| { kind: "component", … } \| { kind: "instance", … (full schema: discover_operations)
 
 Example input:
 
@@ -42,7 +42,7 @@ Write one token ({ set, path, type, value }), under the AA contrast gate and the
 | `value` | any | yes |
 | `description` | string |  |
 
-Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: … \| … \| … \| … \| … \| … \| … } \| { op: "remove", id: nodeId } \| { op: "move", id: nodeId, parentId: nodeId, slot?: string, index: integer ≥0 } \| { op: "set_props", id: nodeId… (full schema: discover_operations)
+Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { kind: "root", … } \| { kind: "section", … } \| { kind: "repeater", … } \| { kind: "outlet", … } \| { kind: "primitive", … } \| { kind: "component", … } \| { kind: "instance", … (full schema: discover_operations)
 
 Example input:
 
@@ -62,7 +62,7 @@ Write many tokens as one change, gated once for AA contrast on the end state, so
 |---|---|---|
 | `writes` | ({ layer?: "site" \| "blueprint", set: string (min 1), path: string (min 1), type: string (min 1), value: any, description?: string })[] | yes |
 
-Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: … \| … \| … \| … \| … \| … \| … } \| { op: "remove", id: nodeId } \| { op: "move", id: nodeId, parentId: nodeId, slot?: string, index: integer ≥0 } \| { op: "set_props", id: nodeId… (full schema: discover_operations)
+Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { kind: "root", … } \| { kind: "section", … } \| { kind: "repeater", … } \| { kind: "outlet", … } \| { kind: "primitive", … } \| { kind: "component", … } \| { kind: "instance", … (full schema: discover_operations)
 
 Example input:
 
@@ -86,7 +86,7 @@ Set cells of one design-system component in one save: each `{ cell, value }`, th
 | `component` | string (min 1) | yes |
 | `cells` | ({ cell: string (min 1), value: string (min 1) \| { component: string (min 1), variant: string (min 1) } })[] | yes |
 
-Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: … \| … \| … \| … \| … \| … \| … } \| { op: "remove", id: nodeId } \| { op: "move", id: nodeId, parentId: nodeId, slot?: string, index: integer ≥0 } \| { op: "set_props", id: nodeId… (full schema: discover_operations)
+Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { kind: "root", … } \| { kind: "section", … } \| { kind: "repeater", … } \| { kind: "outlet", … } \| { kind: "primitive", … } \| { kind: "component", … } \| { kind: "instance", … (full schema: discover_operations)
 
 Example input:
 
@@ -108,7 +108,7 @@ Add a variant to a design-system component, such as a light or a small button, a
 | `label` | string (min 1) | yes |
 | `from` | string (min 1) | yes |
 
-Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: … \| … \| … \| … \| … \| … \| … } \| { op: "remove", id: nodeId } \| { op: "move", id: nodeId, parentId: nodeId, slot?: string, index: integer ≥0 } \| { op: "set_props", id: nodeId… (full schema: discover_operations)
+Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { kind: "root", … } \| { kind: "section", … } \| { kind: "repeater", … } \| { kind: "outlet", … } \| { kind: "primitive", … } \| { kind: "component", … } \| { kind: "instance", … (full schema: discover_operations)
 
 Example input:
 
@@ -133,7 +133,7 @@ Add a theme ({ key, label, sets in precedence order, activation? }) as a draft, 
 | `activation.hostname` | string |  |
 | `activation.pathPrefix` | string |  |
 
-Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: … \| … \| … \| … \| … \| … \| … } \| { op: "remove", id: nodeId } \| { op: "move", id: nodeId, parentId: nodeId, slot?: string, index: integer ≥0 } \| { op: "set_props", id: nodeId… (full schema: discover_operations)
+Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { kind: "root", … } \| { kind: "section", … } \| { kind: "repeater", … } \| { kind: "outlet", … } \| { kind: "primitive", … } \| { kind: "component", … } \| { kind: "instance", … (full schema: discover_operations)
 
 Example input:
 
@@ -153,7 +153,7 @@ Add a token set to the sets of a theme (`theme`, `set`): the set takes its place
 | `theme` | string (min 1) | yes |
 | `set` | string (min 1) | yes |
 
-Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: … \| … \| … \| … \| … \| … \| … } \| { op: "remove", id: nodeId } \| { op: "move", id: nodeId, parentId: nodeId, slot?: string, index: integer ≥0 } \| { op: "set_props", id: nodeId… (full schema: discover_operations)
+Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { kind: "root", … } \| { kind: "section", … } \| { kind: "repeater", … } \| { kind: "outlet", … } \| { kind: "primitive", … } \| { kind: "component", … } \| { kind: "instance", … (full schema: discover_operations)
 
 Example input:
 
@@ -173,7 +173,7 @@ Set the design-system theme a page node and its subtree draw in (`pageId`, `node
 | `nodeId` | nodeId | yes |
 | `theme` | string \| null | yes |
 
-Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: … \| … \| … \| … \| … \| … \| … } \| { op: "remove", id: nodeId } \| { op: "move", id: nodeId, parentId: nodeId, slot?: string, index: integer ≥0 } \| { op: "set_props", id: nodeId… (full schema: discover_operations)
+Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { kind: "root", … } \| { kind: "section", … } \| { kind: "repeater", … } \| { kind: "outlet", … } \| { kind: "primitive", … } \| { kind: "component", … } \| { kind: "instance", … (full schema: discover_operations)
 
 Example input:
 
@@ -192,7 +192,7 @@ Remove site overrides so the blueprint's values apply again, in one revision. `s
 | `layer` | "site" \| "blueprint" |  |
 | `scope` | { kind: "all" } \| { kind: "token", set: string (min 1), path: string (min 1) } \| { kind: "prefix", prefix: string (min 1) } \| { kind: "component", component: string (min 1) } \| { kind: "cells", component: string (min 1), cells: string (min 1)[] } \| { kind: "variant", component: string (min 1), variant: string (min 1) }… (full schema: discover_operations) | yes |
 
-Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: … \| … \| … \| … \| … \| … \| … } \| { op: "remove", id: nodeId } \| { op: "move", id: nodeId, parentId: nodeId, slot?: string, index: integer ≥0 } \| { op: "set_props", id: nodeId… (full schema: discover_operations)
+Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { kind: "root", … } \| { kind: "section", … } \| { kind: "repeater", … } \| { kind: "outlet", … } \| { kind: "primitive", … } \| { kind: "component", … } \| { kind: "instance", … (full schema: discover_operations)
 
 Example input:
 
@@ -215,7 +215,7 @@ Import tokens from DTCG files in the Tokens Studio layout (one file per set plus
 | `files` | ({ name: string (min 1), text: string } \| { name: string (min 1), base64: string (min 1) })[] | yes |
 | `mapping` | Record<string, string (min 1)> |  |
 
-Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: … \| … \| … \| … \| … \| … \| … } \| { op: "remove", id: nodeId } \| { op: "move", id: nodeId, parentId: nodeId, slot?: string, index: integer ≥0 } \| { op: "set_props", id: nodeId… (full schema: discover_operations)
+Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { kind: "root", … } \| { kind: "section", … } \| { kind: "repeater", … } \| { kind: "outlet", … } \| { kind: "primitive", … } \| { kind: "component", … } \| { kind: "instance", … (full schema: discover_operations)
 
 Example input:
 
@@ -234,7 +234,7 @@ Read every override the draft holds over its blueprint (tokens, cells, variants,
 | `layer` | "site" \| "blueprint" |  |
 | `full` | boolean |  |
 
-Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: … \| … \| … \| … \| … \| … \| … } \| { op: "remove", id: nodeId } \| { op: "move", id: nodeId, parentId: nodeId, slot?: string, index: integer ≥0 } \| { op: "set_props", id: nodeId… (full schema: discover_operations)
+Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { kind: "root", … } \| { kind: "section", … } \| { kind: "repeater", … } \| { kind: "outlet", … } \| { kind: "primitive", … } \| { kind: "component", … } \| { kind: "instance", … (full schema: discover_operations)
 
 Example input:
 
@@ -255,7 +255,7 @@ Check the draft design system: every contrast pair below AA or AAA, the pairs th
 | `layer` | "site" \| "blueprint" |  |
 | `full` | boolean |  |
 
-Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: … \| … \| … \| … \| … \| … \| … } \| { op: "remove", id: nodeId } \| { op: "move", id: nodeId, parentId: nodeId, slot?: string, index: integer ≥0 } \| { op: "set_props", id: nodeId… (full schema: discover_operations)
+Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { kind: "root", … } \| { kind: "section", … } \| { kind: "repeater", … } \| { kind: "outlet", … } \| { kind: "primitive", … } \| { kind: "component", … } \| { kind: "instance", … (full schema: discover_operations)
 
 Example input:
 
@@ -278,7 +278,7 @@ Add an empty token set `key` after set `after` in the precedence order. No theme
 | `label` | string (min 1) | yes |
 | `after` | string (min 1) | yes |
 
-Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: … \| … \| … \| … \| … \| … \| … } \| { op: "remove", id: nodeId } \| { op: "move", id: nodeId, parentId: nodeId, slot?: string, index: integer ≥0 } \| { op: "set_props", id: nodeId… (full schema: discover_operations)
+Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { kind: "root", … } \| { kind: "section", … } \| { kind: "repeater", … } \| { kind: "outlet", … } \| { kind: "primitive", … } \| { kind: "component", … } \| { kind: "instance", … (full schema: discover_operations)
 
 Example input:
 
@@ -305,7 +305,7 @@ Edit a theme: its label, its sets in precedence order, its activation rule, `isD
 | `activation.hostname` | string |  |
 | `activation.pathPrefix` | string |  |
 
-Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: … \| … \| … \| … \| … \| … \| … } \| { op: "remove", id: nodeId } \| { op: "move", id: nodeId, parentId: nodeId, slot?: string, index: integer ≥0 } \| { op: "set_props", id: nodeId… (full schema: discover_operations)
+Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { kind: "root", … } \| { kind: "section", … } \| { kind: "repeater", … } \| { kind: "outlet", … } \| { kind: "primitive", … } \| { kind: "component", … } \| { kind: "instance", … (full schema: discover_operations)
 
 Example input:
 
@@ -327,7 +327,7 @@ Relabel a component variant or hide it (`hidden: true`): a hidden variant still 
 | `label` | string (min 1) |  |
 | `hidden` | boolean |  |
 
-Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: … \| … \| … \| … \| … \| … \| … } \| { op: "remove", id: nodeId } \| { op: "move", id: nodeId, parentId: nodeId, slot?: string, index: integer ≥0 } \| { op: "set_props", id: nodeId… (full schema: discover_operations)
+Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { kind: "root", … } \| { kind: "section", … } \| { kind: "repeater", … } \| { kind: "outlet", … } \| { kind: "primitive", … } \| { kind: "component", … } \| { kind: "instance", … (full schema: discover_operations)
 
 Example input:
 
@@ -347,7 +347,7 @@ Delete a variant the site added, with its cells. A variant the blueprint ships i
 | `component` | string (min 1) | yes |
 | `variant` | string (min 1) | yes |
 
-Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: … \| … \| … \| … \| … \| … \| … } \| { op: "remove", id: nodeId } \| { op: "move", id: nodeId, parentId: nodeId, slot?: string, index: integer ≥0 } \| { op: "set_props", id: nodeId… (full schema: discover_operations)
+Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { kind: "root", … } \| { kind: "section", … } \| { kind: "repeater", … } \| { kind: "outlet", … } \| { kind: "primitive", … } \| { kind: "component", … } \| { kind: "instance", … (full schema: discover_operations)
 
 Example input:
 
@@ -370,7 +370,7 @@ Create or update a mixin, a surface nodes apply by key with tree.commit `set_mix
 | `label` | string (min 1) | yes |
 | `sheet` | Record<string, string> | yes |
 
-Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: … \| … \| … \| … \| … \| … \| … } \| { op: "remove", id: nodeId } \| { op: "move", id: nodeId, parentId: nodeId, slot?: string, index: integer ≥0 } \| { op: "set_props", id: nodeId… (full schema: discover_operations)
+Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { kind: "root", … } \| { kind: "section", … } \| { kind: "repeater", … } \| { kind: "outlet", … } \| { kind: "primitive", … } \| { kind: "component", … } \| { kind: "instance", … (full schema: discover_operations)
 
 Example input:
 
@@ -389,7 +389,7 @@ Delete a mixin the site added. A mixin the blueprint ships is refused, and so is
 | `layer` | "site" \| "blueprint" |  |
 | `key` | string | yes |
 
-Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: … \| … \| … \| … \| … \| … \| … } \| { op: "remove", id: nodeId } \| { op: "move", id: nodeId, parentId: nodeId, slot?: string, index: integer ≥0 } \| { op: "set_props", id: nodeId… (full schema: discover_operations)
+Output: { tree?: { pageId: string, revision: integer ≥-9007199254740991, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { kind: "root", … } \| { kind: "section", … } \| { kind: "repeater", … } \| { kind: "outlet", … } \| { kind: "primitive", … } \| { kind: "component", … } \| { kind: "instance", … (full schema: discover_operations)
 
 Example input:
 

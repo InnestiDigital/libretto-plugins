@@ -17,7 +17,7 @@ List the presets the site can insert, theme presets first, then the site library
 | `kind` | "section" \| "box" \| "element" |  |
 | `source` | "theme" \| "site" |  |
 
-Output: ({ source: "theme" \| "site", id: string, kind: "section" \| "box" \| "element", label: string (min 1, max 80), keywords?: string (min 1, max 40)[] (≤16), category: string, description?: string (max 280), thumbnail?: string, scenes?: ({ trigger: { type: …, anchor: …, start: …, end?: …, endAnchor?: …, scrub?: …, pin?: … } … (full schema: discover_operations)
+Output: ({ source: "theme" \| "site", id: string, kind: "section" \| "box" \| "element", label: string (min 1, max 80), keywords?: string (min 1, max 40)[] (≤16), category: string, description?: string (max 280), thumbnail?: string, scenes?: ({ trigger: { type: …, anchor: …, start: { belowHeader: true, … }, end?: { belowHeader: t… (full schema: discover_operations)
 
 Example input:
 
