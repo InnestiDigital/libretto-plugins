@@ -41,6 +41,22 @@ Three layers, from the simplest:
 5. A tuned scene set the user wants elsewhere: `motion.saveRecipe` `{ pageId, sceneIds, label }`.
 6. `motion.replace` writes the page's scenes by hand; prefer recipes. `motion.delete` removes scenes (ask first).
 
+## Draw, count and scramble
+
+Three effect entries play on what a node shows: a chart line or an illustration that draws itself, a figure that counts, a status line that decodes. No recipe builds them: write them with `motion.replace` (read the page's scenes first and send them all, yours added), on any trigger.
+
+| `effect` | Target | What it does |
+|---|---|---|
+| `{ "kind": "drawPath", "part": "accent", "from": { "start": 50, "end": 50 } }` (both optional) | an `svg` node (an inline drawing) | Draws every stroke of the drawing, or only its `part`'s, from the segment `from` (in % of each stroke; nothing by default, `{ 50, 50 }` grows from the middle, `{ 100, 100 }` from the end) to the whole stroke. The entry's `stagger` (ms) draws one stroke after another. |
+| `{ "kind": "countTo", "from": 0 }` or `{ "kind": "countTo", "values": [1200, 980, 640] }` | a `text` node whose text holds a number | Counts from `from` (0 by default) to the number the text shows, or shows `values` in turn, each for an equal share, then the text's number. Read and written at the page's locale, in the text's shape (`1.234` in Italian, `2026` stays ungrouped), the words around it kept. |
+| `{ "kind": "scrambleText", "chars": "0123456789", "revealDelayMs": 300, "speed": 0.5 }` (all optional) | a `text` node | Reveals the text's own letters out of random `chars` (or `upperCase`, the default, `lowerCase`, `upperAndLowerCase`). |
+
+An entry: `{ "id": "<uuid>", "sceneId": "<scene>", "target": { "nodeId": "<svg or text node>", "part": "root" }, "keyframes": [], "effect": { ... }, "position": { "type": "absolute", "ms": 200 }, "duration": 2600, "easing": "power1.inOut" }`. Play it when it comes into view with `{ "type": "intersection", "anchor": <ref>, "threshold": 0.25, "once": true }`, or drive it by the scroll with a `scroll` trigger, `scrub` and `pin`: a counter stepping through `values` while a line draws, both entries in one scene.
+
+- Each ends on the page's markup. To change the number a counter reaches, change the text (in every language).
+- A step on the wrong kind of node is refused: `INVALID_EFFECT_TARGET` (422 `scene_target_invalid`). A text with no number, or a drawing with no stroke, plays nothing (the runtime reports it).
+- Reduced motion shows the markup at once: nothing to set.
+
 ## Hover and transitions
 
 A transition is a style: `set_style` in the node's state scope (for example `s::hover`) with `transition` and the properties that change, durations as tokens (`{motion.duration.fast}`, `{motion.duration.base}`, `{motion.duration.slow}`).
