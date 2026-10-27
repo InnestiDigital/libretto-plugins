@@ -55,6 +55,7 @@ For each page, top to bottom, one section per batch:
 1. Insert the closest preset ([sections from presets](sections-from-presets.md)) or build the section from boxes, texts and images (`insert`), then set its geometry with `set_style` (the table below).
 2. Compare it with the reference at desktop and at mobile: `compare_reference` `{ "pageId", "device": "desktop", "crop": { "nodeId": "<the section>" }, "referenceMediaId": "<the reference section's screenshot>" }`, then `"device": "mobile"` (390 px). The reference is an image: upload your screenshot of that section with `upload_media_file`, or give `referenceUrl`, a public https address of an image.
    TODO (A3): compare against the reference page URL + selector once `compare_reference` takes `referencePageUrl`/`referenceSelector`.
+   Compare one section at a time, one call after the other: parallel lanes share the server's capture slots. A `render_busy` answer (503) carries `retryAfter`: wait that many seconds and call again, rather than counting it as a failed comparison.
 3. Read `ratio` and `heightMismatch`. Fix the largest difference first (a wrong frame or token shows on every section; fix it there, not per node), then compare again.
 4. Stop when the ratio is below what the user accepts for that section, and tell them what still differs. Never loosen a check or fake a match (an image of the reference placed on the page is not a rebuild).
 
