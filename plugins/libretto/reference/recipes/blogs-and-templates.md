@@ -46,6 +46,8 @@ The locked parts' fields come from the page row, not the tree:
 - The page's `publishedAt`: `article.publish`, which sets the first publication date.
 - An `item.*` path in a feed: the same fields of each listed article.
 
+Search engines read every article as a schema.org `BlogPosting` (`headline`, `datePublished`, `dateModified`, `image` from its share or featured image, `author` a Person by its `authorName`, else the site's Organization, `publisher` the Organization). Set `authorName` so the article is signed. A note or a post built as a plain page (no blog) gets the same with `page.update` `{ "patch": { "meta": { ...its meta, "seo": { "subject": { "type": "BlogPosting" } } } } }` (read the page's `meta` first: `patch.meta` replaces it). The Organization's legal name, VAT number, address, profiles elsewhere and logo are site settings (`settings.update`: `organizationLegalName`, `organizationVatId`, `organizationStreetAddress`, `organizationPostalCode`, `organizationLocality`, `organizationRegion`, `organizationCountry`, `organizationSameAs` one https address a line, `organizationLogo` a media id).
+
 ## 4. Change a locked part (every page of the template)
 
 Only when the user agrees that every page of that template changes:
