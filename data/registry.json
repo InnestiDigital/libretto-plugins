@@ -33496,7 +33496,7 @@
     },
     {
       "name": "page.forkTemplate",
-      "description": "Fork a theme template into an editable site page row. Page validation and ownership checks apply.",
+      "description": "Fork a theme template (`templateId`, one template.index lists) into an editable site page row, once per template: the answer is the fork's page, whose tree (the template's, same node ids) you then change with tree.commit. Every page of that template renders through the fork from then on. Page validation and ownership checks apply.",
       "example": {
         "templateId": "page"
       },
@@ -38277,7 +38277,7 @@
     },
     {
       "name": "blog.create",
-      "description": "Create a blog index page from its `title` (in `locale`), an optional `slug` and `templateId`, the theme template it renders with; articles go under it with article.create. Answers the new page's id and slug. Entry validation (page type, template, slug) and ownership checks apply.",
+      "description": "Create a blog index page from its `title` (in `locale`), an optional `slug` and `templateId`, the theme template it renders with (template.index lists the `blog-index` ones and what each draws around the page's own tree); articles go under it with article.create. Answers the new page's id and slug. Entry validation (page type, template, slug) and ownership checks apply.",
       "example": {
         "title": "Journal",
         "templateId": "blog-index-editorial-grid"
@@ -38348,7 +38348,7 @@
     },
     {
       "name": "article.create",
-      "description": "Create a draft article under a blog index (`blogId`, the blog index page id) from its `title`, an optional `slug` and `templateId`, the article template it renders with. Its content is its tree: fill it with tree.commit on the answered id; it stays off the public site until article.publish. Entry validation (page type, template, slug) and ownership checks apply.",
+      "description": "Create a draft article under a blog index (`blogId`, the blog index page id) from its `title`, an optional `slug` and `templateId`, the article template it renders with (template.index lists the `article` ones). Its content is its tree: fill it with tree.commit on the answered id; it stays off the public site until article.publish. Entry validation (page type, template, slug) and ownership checks apply.",
       "example": {
         "title": "A house on the hill",
         "templateId": "article-gallery-sticky",
@@ -117937,6 +117937,665 @@
         }
       },
       "reads": [],
+      "writes": [],
+      "permission": "site.read",
+      "mutationClass": "read",
+      "confirm": "none",
+      "conflictPolicy": "none",
+      "undoable": false
+    },
+    {
+      "name": "template.index",
+      "description": "List the page templates of the site's theme: the `templateId` blog.create, article.create, blog.update and article.update take. Each with its id, label, the page type it serves (`appliesTo`), its layout frame, whether the site forked it (`source`, `forkPageId`), how many pages use it and its top-level parts: the outlet the page's own tree fills and the locked parts the template draws on every page of it, with the fields they bind (`page.title`, `item.featuredImageId`), the list they repeat and the props it sets on its components. `configure` says how to change each kind of part. Read one template's outline with template.read.",
+      "example": {},
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "theme": {
+            "$ref": "#/$defs/__schema0"
+          },
+          "templates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/__schema0"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "appliesTo": {
+                  "type": "string",
+                  "enum": [
+                    "static",
+                    "blog-index",
+                    "article"
+                  ]
+                },
+                "layout": {
+                  "$ref": "#/$defs/__schema0"
+                },
+                "source": {
+                  "type": "string",
+                  "enum": [
+                    "theme",
+                    "site"
+                  ]
+                },
+                "forkPageId": {
+                  "type": "string"
+                },
+                "pages": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "parts": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "node": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "role": {
+                        "type": "string",
+                        "enum": [
+                          "outlet",
+                          "locked"
+                        ]
+                      },
+                      "binds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "feed": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string",
+                                "const": "articles"
+                              },
+                              "blog": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "const": "self"
+                                  },
+                                  {
+                                    "type": "string",
+                                    "pattern": "^[0-9a-f-]{36}$"
+                                  }
+                                ]
+                              },
+                              "limit": {
+                                "$ref": "#/$defs/__schema1"
+                              }
+                            },
+                            "required": [
+                              "kind",
+                              "blog",
+                              "limit"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string",
+                                "const": "collection"
+                              },
+                              "collection": {
+                                "type": "string",
+                                "maxLength": 40,
+                                "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+                              },
+                              "filter": {
+                                "minItems": 1,
+                                "maxItems": 8,
+                                "type": "array",
+                                "items": {
+                                  "$ref": "#/$defs/__schema2"
+                                }
+                              },
+                              "sort": {
+                                "minItems": 1,
+                                "maxItems": 3,
+                                "type": "array",
+                                "items": {
+                                  "$ref": "#/$defs/__schema5"
+                                }
+                              },
+                              "limit": {
+                                "$ref": "#/$defs/__schema1"
+                              },
+                              "offset": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 1000
+                              }
+                            },
+                            "required": [
+                              "kind",
+                              "collection",
+                              "limit"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string",
+                                "const": "field"
+                              },
+                              "field": {
+                                "$ref": "#/$defs/__schema3"
+                              },
+                              "limit": {
+                                "$ref": "#/$defs/__schema1"
+                              }
+                            },
+                            "required": [
+                              "kind",
+                              "field"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ]
+                      },
+                      "components": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "node",
+                      "role"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "label",
+                "appliesTo",
+                "layout",
+                "source",
+                "pages",
+                "parts"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "configure": {
+            "type": "object",
+            "properties": {
+              "outlet": {
+                "type": "string"
+              },
+              "binds": {
+                "type": "string"
+              },
+              "locked": {
+                "type": "string"
+              },
+              "layout": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "outlet",
+              "binds",
+              "locked",
+              "layout"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "theme",
+          "templates",
+          "configure"
+        ],
+        "additionalProperties": false,
+        "$defs": {
+          "__schema0": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+          },
+          "__schema1": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 48
+          },
+          "__schema2": {
+            "type": "object",
+            "properties": {
+              "field": {
+                "$ref": "#/$defs/__schema3"
+              },
+              "op": {
+                "type": "string",
+                "enum": [
+                  "eq",
+                  "neq",
+                  "in",
+                  "contains"
+                ]
+              },
+              "value": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/__schema4"
+                  },
+                  {
+                    "minItems": 1,
+                    "maxItems": 50,
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/__schema4"
+                    }
+                  }
+                ]
+              }
+            },
+            "required": [
+              "field",
+              "op",
+              "value"
+            ],
+            "additionalProperties": false
+          },
+          "__schema3": {
+            "type": "string",
+            "pattern": "^[a-zA-Z][a-zA-Z0-9_]{0,63}$"
+          },
+          "__schema4": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "number"
+              }
+            ]
+          },
+          "__schema5": {
+            "type": "object",
+            "properties": {
+              "field": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/__schema3"
+                  },
+                  {
+                    "type": "string",
+                    "const": "$position"
+                  }
+                ]
+              },
+              "dir": {
+                "type": "string",
+                "enum": [
+                  "asc",
+                  "desc"
+                ]
+              }
+            },
+            "required": [
+              "field",
+              "dir"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "reads": [
+        "pages"
+      ],
+      "writes": [],
+      "permission": "site.read",
+      "mutationClass": "read",
+      "confirm": "none",
+      "conflictPolicy": "none",
+      "undoable": false
+    },
+    {
+      "name": "template.read",
+      "description": "Read one page template by its id: its summary as template.index lists it and the outline of the tree that draws its pages (the site's fork once it has one), one line per node with its id, type and name. Refused with 404 template_not_found, naming the valid ids, for an id template.index does not list.",
+      "example": {
+        "templateId": "blog-index-editorial-grid"
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "templateId": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "templateId"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "template": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/__schema0"
+              },
+              "label": {
+                "type": "string"
+              },
+              "appliesTo": {
+                "type": "string",
+                "enum": [
+                  "static",
+                  "blog-index",
+                  "article"
+                ]
+              },
+              "layout": {
+                "$ref": "#/$defs/__schema0"
+              },
+              "source": {
+                "type": "string",
+                "enum": [
+                  "theme",
+                  "site"
+                ]
+              },
+              "forkPageId": {
+                "type": "string"
+              },
+              "pages": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "parts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "node": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "outlet",
+                        "locked"
+                      ]
+                    },
+                    "binds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "feed": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "articles"
+                            },
+                            "blog": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "const": "self"
+                                },
+                                {
+                                  "type": "string",
+                                  "pattern": "^[0-9a-f-]{36}$"
+                                }
+                              ]
+                            },
+                            "limit": {
+                              "$ref": "#/$defs/__schema1"
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "blog",
+                            "limit"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "collection"
+                            },
+                            "collection": {
+                              "type": "string",
+                              "maxLength": 40,
+                              "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+                            },
+                            "filter": {
+                              "minItems": 1,
+                              "maxItems": 8,
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/$defs/__schema2"
+                              }
+                            },
+                            "sort": {
+                              "minItems": 1,
+                              "maxItems": 3,
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/$defs/__schema5"
+                              }
+                            },
+                            "limit": {
+                              "$ref": "#/$defs/__schema1"
+                            },
+                            "offset": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 1000
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "collection",
+                            "limit"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "const": "field"
+                            },
+                            "field": {
+                              "$ref": "#/$defs/__schema3"
+                            },
+                            "limit": {
+                              "$ref": "#/$defs/__schema1"
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "field"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "components": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "node",
+                    "role"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "appliesTo",
+              "layout",
+              "source",
+              "pages",
+              "parts"
+            ],
+            "additionalProperties": false
+          },
+          "outline": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "template",
+          "outline"
+        ],
+        "additionalProperties": false,
+        "$defs": {
+          "__schema0": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+          },
+          "__schema1": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 48
+          },
+          "__schema2": {
+            "type": "object",
+            "properties": {
+              "field": {
+                "$ref": "#/$defs/__schema3"
+              },
+              "op": {
+                "type": "string",
+                "enum": [
+                  "eq",
+                  "neq",
+                  "in",
+                  "contains"
+                ]
+              },
+              "value": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/__schema4"
+                  },
+                  {
+                    "minItems": 1,
+                    "maxItems": 50,
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/__schema4"
+                    }
+                  }
+                ]
+              }
+            },
+            "required": [
+              "field",
+              "op",
+              "value"
+            ],
+            "additionalProperties": false
+          },
+          "__schema3": {
+            "type": "string",
+            "pattern": "^[a-zA-Z][a-zA-Z0-9_]{0,63}$"
+          },
+          "__schema4": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "number"
+              }
+            ]
+          },
+          "__schema5": {
+            "type": "object",
+            "properties": {
+              "field": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/__schema3"
+                  },
+                  {
+                    "type": "string",
+                    "const": "$position"
+                  }
+                ]
+              },
+              "dir": {
+                "type": "string",
+                "enum": [
+                  "asc",
+                  "desc"
+                ]
+              }
+            },
+            "required": [
+              "field",
+              "dir"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "reads": [
+        "pages"
+      ],
       "writes": [],
       "permission": "site.read",
       "mutationClass": "read",

@@ -2,7 +2,7 @@
 
 # Libretto operations
 
-164 operations, from Libretto's operation registry. Each runs inside a `libretto.batch` sent to `dry_run_ops` or `apply_ops` (see [mcp-tools.md](mcp-tools.md)). `discover_operations` with the name gives the live schema; this reference is the same registry, written for reading.
+166 operations, from Libretto's operation registry. Each runs inside a `libretto.batch` sent to `dry_run_ops` or `apply_ops` (see [mcp-tools.md](mcp-tools.md)). `discover_operations` with the name gives the live schema; this reference is the same registry, written for reading.
 
 | Domain | Operations |
 |---|---|
@@ -11,7 +11,7 @@
 | [Design system](design-system.md) | `designSystem.promoteVariant`, `designSystem.setToken`, `designSystem.setTokens`, `designSystem.setComponentCell`, `designSystem.createVariant`, `designSystem.createTheme`, `designSystem.activateSet`, `designSystem.setScheme`, `designSystem.resetToBlueprint`, `designSystem.importTokens`, `designSystem.diff`, `designSystem.lint`, `designSystem.createSet`, `designSystem.updateTheme`, `designSystem.updateVariant`, `designSystem.deleteVariant`, `designSystem.setMixin`, `designSystem.deleteMixin`, `designSystem.read`, `designSystem.readComponent` |
 | [Brand setup, identity and brand formats](brand.md) | `brand.setup`, `brand.presets`, `brand.templates`, `brand.updateIdentity`, `brand.createPreset`, `brand.renamePreset`, `brand.deletePreset`, `brand.createTemplate`, `brand.updateTemplate`, `brand.deleteTemplate`, `brand.rebuildTemplate`, `brand.render`, `brand.save` |
 | [Menus](navigation.md) | `navigation.read`, `navigation.anchors`, `navigation.upsert`, `navigation.delete`, `navigation.reorder` |
-| [Blogs and articles](blogs-and-articles.md) | `blog.create`, `article.create`, `blog.update`, `article.update`, `article.publish`, `article.unpublish` |
+| [Blogs, articles and page templates](blogs-and-articles.md) | `blog.create`, `article.create`, `blog.update`, `article.update`, `article.publish`, `article.unpublish`, `template.index`, `template.read` |
 | [Collections and items](collections.md) | `collection.list`, `collection.read`, `collection.create`, `collection.update`, `collection.delete`, `item.list`, `item.read`, `item.history`, `item.create`, `item.update`, `item.delete`, `item.reorder`, `item.import`, `item.rollback`, `item.setStatus` |
 | [Forms, submissions and members](forms-and-members.md) | `form.list`, `form.read`, `form.create`, `form.update`, `form.delete`, `submission.list`, `submission.setStatus`, `submission.delete`, `member.list`, `member.invite`, `member.setStatus`, `member.setRoles`, `member.delete`, `member.signOutAll`, `memberRole.list`, `memberRole.create`, `memberRole.delete`, `form.sendTest` |
 | [Media library and fonts](media-and-fonts.md) | `media.list`, `media.usage`, `media.recordUpload`, `media.upload`, `media.replace`, `media.delete`, `media.update`, `media.move`, `media.createFolder`, `media.renameFolder`, `media.deleteFolder`, `font.list`, `font.recordUpload`, `font.upload`, `font.delete`, `font.importGoogle` |

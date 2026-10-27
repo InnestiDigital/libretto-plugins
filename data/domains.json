@@ -41,12 +41,13 @@
     "intro": "Menus are keyed lists of items that target a page, an anchor on a page, or a URL. Navbar and footer components show a menu by its key."
   },
   "blogs-and-articles": {
-    "title": "Blogs and articles",
+    "title": "Blogs, articles and page templates",
     "prefixes": [
+      "template",
       "blog",
       "article"
     ],
-    "intro": "A blog is an index page with its articles; an article is a page with its own publish state."
+    "intro": "A blog is an index page with its articles; an article is a page with its own publish state. Both render through a page template: `template.index` (the `templates` resource) lists the `templateId`s, what each template draws around the page's own tree and which parts it locks."
   },
   "collections": {
     "title": "Collections and items",

@@ -210,7 +210,7 @@ Example input:
 
 ## page.forkTemplate
 
-Fork a theme template into an editable site page row. Page validation and ownership checks apply.
+Fork a theme template (`templateId`, one template.index lists) into an editable site page row, once per template: the answer is the fork's page, whose tree (the template's, same node ids) you then change with tree.commit. Every page of that template renders through the fork from then on. Page validation and ownership checks apply.
 
 - permission `site.structure` (admin, workspace owner); class `transaction`; writes `pages`; undoable with `history.undo`.
 
