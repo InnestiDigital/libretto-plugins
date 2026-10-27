@@ -1997,6 +1997,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -3846,6 +3847,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -6228,6 +6230,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -8536,6 +8539,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -10772,6 +10776,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -13102,6 +13107,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -14969,6 +14975,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -17431,6 +17438,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -18801,6 +18809,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -20722,6 +20731,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -22618,6 +22628,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -24499,6 +24510,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -26749,6 +26761,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -28054,7 +28067,7 @@
     },
     {
       "name": "page.read",
-      "description": "Read a page row: slug, title, status, frame and SEO fields. Page validation and ownership checks apply.",
+      "description": "Read a page row: slug, its slug per locale (`slugs`), title, status, frame and SEO fields. Page validation and ownership checks apply.",
       "example": {
         "pageId": "6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f"
       },
@@ -28082,6 +28095,15 @@
               "slug": {
                 "type": "string",
                 "minLength": 1
+              },
+              "slugs": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": "string"
+                }
               },
               "title": {
                 "$ref": "#/$defs/__schema0"
@@ -28749,6 +28771,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -29681,7 +29704,7 @@
     },
     {
       "name": "page.create",
-      "description": "Create a page (`slug`, `title` per locale, and optionally `frame`, the theme layout frame it renders in, `parentId`, `pageType`, SEO and members-only fields) with an empty tree. `status` defaults to draft; a draft page stays out of the site publish, so pass `status: \"published\"` for a page the next publication.publish should serve. Fill the tree with tree.commit in the same batch: read the new root id with tree.read through a $ref to this operation's page.id. A section's anchor is the node field `anchor` in that tree, not a page field, `meta.anchor` or `props.anchor`. A `pageType: \"dynamic\"` page names a collection in `collectionKey` and is the detail page of its items: it answers `/<slug>/<item slug>` in each locale, and its tree binds the item. Page validation and ownership checks apply.",
+      "description": "Create a page (`slug`, `title` per locale, and optionally `slugs`, its slug in each other locale such as `{ \"en\": \"method\" }`, `frame`, the theme layout frame it renders in, `parentId`, `pageType`, SEO and members-only fields) with an empty tree. `status` defaults to draft; a draft page stays out of the site publish, so pass `status: \"published\"` for a page the next publication.publish should serve. Fill the tree with tree.commit in the same batch: read the new root id with tree.read through a $ref to this operation's page.id. A section's anchor is the node field `anchor` in that tree, not a page field, `meta.anchor` or `props.anchor`. A `pageType: \"dynamic\"` page names a collection in `collectionKey` and is the detail page of its items: it answers `/<slug>/<item slug>` in each locale, and its tree binds the item. Page validation and ownership checks apply.",
       "example": {
         "slug": "studio",
         "title": {
@@ -29696,71 +29719,74 @@
           "slug": {
             "$ref": "#/$defs/__schema0"
           },
-          "title": {
+          "slugs": {
             "$ref": "#/$defs/__schema1"
           },
-          "frame": {
+          "title": {
             "$ref": "#/$defs/__schema2"
           },
-          "dynamic": {
+          "frame": {
             "$ref": "#/$defs/__schema3"
           },
-          "position": {
+          "dynamic": {
             "$ref": "#/$defs/__schema4"
           },
-          "parentId": {
+          "position": {
             "$ref": "#/$defs/__schema5"
           },
-          "requireAuth": {
+          "parentId": {
             "$ref": "#/$defs/__schema6"
           },
-          "requiredRoles": {
+          "requireAuth": {
             "$ref": "#/$defs/__schema7"
           },
+          "requiredRoles": {
+            "$ref": "#/$defs/__schema8"
+          },
           "meta": {
-            "$ref": "#/$defs/__schema9"
+            "$ref": "#/$defs/__schema10"
           },
           "pageType": {
-            "$ref": "#/$defs/__schema11"
-          },
-          "templateId": {
-            "$ref": "#/$defs/__schema5"
-          },
-          "collectionKey": {
             "$ref": "#/$defs/__schema12"
           },
-          "status": {
+          "templateId": {
+            "$ref": "#/$defs/__schema6"
+          },
+          "collectionKey": {
             "$ref": "#/$defs/__schema13"
           },
-          "authorUserId": {
-            "$ref": "#/$defs/__schema5"
-          },
-          "authorName": {
+          "status": {
             "$ref": "#/$defs/__schema14"
           },
-          "featuredImageId": {
-            "$ref": "#/$defs/__schema5"
+          "authorUserId": {
+            "$ref": "#/$defs/__schema6"
           },
-          "excerpt": {
+          "authorName": {
             "$ref": "#/$defs/__schema15"
           },
-          "metaTitle": {
+          "featuredImageId": {
+            "$ref": "#/$defs/__schema6"
+          },
+          "excerpt": {
             "$ref": "#/$defs/__schema16"
           },
-          "metaDescription": {
+          "metaTitle": {
             "$ref": "#/$defs/__schema17"
           },
-          "ogImageId": {
-            "$ref": "#/$defs/__schema5"
-          },
-          "noIndex": {
+          "metaDescription": {
             "$ref": "#/$defs/__schema18"
           },
-          "canonicalUrl": {
+          "ogImageId": {
+            "$ref": "#/$defs/__schema6"
+          },
+          "noIndex": {
             "$ref": "#/$defs/__schema19"
           },
-          "publishedAt": {
+          "canonicalUrl": {
             "$ref": "#/$defs/__schema20"
+          },
+          "publishedAt": {
+            "$ref": "#/$defs/__schema21"
           }
         },
         "required": [
@@ -29779,21 +29805,37 @@
               "type": "string"
             },
             "additionalProperties": {
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
             }
           },
           "__schema2": {
-            "type": "string"
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string"
+            }
           },
           "__schema3": {
-            "type": "boolean"
+            "type": "string"
           },
           "__schema4": {
+            "type": "boolean"
+          },
+          "__schema5": {
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "__schema5": {
+          "__schema6": {
             "anyOf": [
               {
                 "type": "string",
@@ -29804,31 +29846,31 @@
               }
             ]
           },
-          "__schema6": {
+          "__schema7": {
             "type": "boolean"
           },
-          "__schema7": {
+          "__schema8": {
             "maxItems": 50,
             "type": "array",
             "items": {
-              "$ref": "#/$defs/__schema8"
+              "$ref": "#/$defs/__schema9"
             }
           },
-          "__schema8": {
+          "__schema9": {
             "type": "string",
             "maxLength": 40,
             "pattern": "^[a-z][a-z0-9-]*$"
           },
-          "__schema9": {
+          "__schema10": {
             "type": "object",
             "propertyNames": {
               "type": "string"
             },
             "additionalProperties": {
-              "$ref": "#/$defs/__schema10"
+              "$ref": "#/$defs/__schema11"
             }
           },
-          "__schema10": {
+          "__schema11": {
             "anyOf": [
               {
                 "type": "string"
@@ -29845,7 +29887,7 @@
               {
                 "type": "array",
                 "items": {
-                  "$ref": "#/$defs/__schema10"
+                  "$ref": "#/$defs/__schema11"
                 }
               },
               {
@@ -29854,12 +29896,12 @@
                   "type": "string"
                 },
                 "additionalProperties": {
-                  "$ref": "#/$defs/__schema10"
+                  "$ref": "#/$defs/__schema11"
                 }
               }
             ]
           },
-          "__schema11": {
+          "__schema12": {
             "type": "string",
             "enum": [
               "static",
@@ -29868,7 +29910,7 @@
               "dynamic"
             ]
           },
-          "__schema12": {
+          "__schema13": {
             "anyOf": [
               {
                 "type": "string",
@@ -29880,27 +29922,17 @@
               }
             ]
           },
-          "__schema13": {
+          "__schema14": {
             "type": "string",
             "enum": [
               "draft",
               "published"
             ]
           },
-          "__schema14": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "__schema15": {
             "anyOf": [
               {
-                "$ref": "#/$defs/__schema1"
+                "type": "string"
               },
               {
                 "type": "null"
@@ -29910,7 +29942,7 @@
           "__schema16": {
             "anyOf": [
               {
-                "$ref": "#/$defs/__schema1"
+                "$ref": "#/$defs/__schema2"
               },
               {
                 "type": "null"
@@ -29920,7 +29952,7 @@
           "__schema17": {
             "anyOf": [
               {
-                "$ref": "#/$defs/__schema1"
+                "$ref": "#/$defs/__schema2"
               },
               {
                 "type": "null"
@@ -29928,9 +29960,19 @@
             ]
           },
           "__schema18": {
-            "type": "boolean"
+            "anyOf": [
+              {
+                "$ref": "#/$defs/__schema2"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "__schema19": {
+            "type": "boolean"
+          },
+          "__schema20": {
             "anyOf": [
               {
                 "type": "string"
@@ -29940,7 +29982,7 @@
               }
             ]
           },
-          "__schema20": {
+          "__schema21": {
             "anyOf": [
               {
                 "type": "string",
@@ -29964,6 +30006,15 @@
               "slug": {
                 "type": "string",
                 "minLength": 1
+              },
+              "slugs": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": "string"
+                }
               },
               "title": {
                 "$ref": "#/$defs/__schema0"
@@ -30631,6 +30682,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -31565,12 +31617,16 @@
     },
     {
       "name": "page.update",
-      "description": "Patch a page's fields as { pageId, patch }: slug, title, `frame` (the theme layout frame it renders in, such as `default`, which reflows at the site breakpoints, or a scaled canvas such as `scale-canvas`; layout.update edits a frame), status, SEO, members-only access or `meta`. `patch.status: \"published\"` marks a draft page for the next site publish. `patch.meta` replaces the page's whole meta, so read the page first (page.read) and send its meta back with your change. `meta.layoutOverrides` overrides the frame for this page alone, layer by layer, where the frame's `overridePolicy` allows it: `background` ({ color, image, overlay, texture }: the page's own background colour, as raw CSS such as `var(--ds-color-bg-inverse)`), `header`, `footer`, `scroll` and `chrome`. Page validation and ownership checks apply.",
+      "description": "Patch a page's fields as { pageId, patch }: slug, `slugs` names the page's slug in each other locale, as `{ \"en\": \"method\" }`: the page answers `/en/method` in English (a page under it reads `/en/method/<its English slug>`) and its `slug` in the default locale; a locale without one answers `slug`. A `slugs` value sets that locale's slug, `null` removes it, a locale left out keeps its own; no sibling page may answer the same slug in any locale. Renaming a published page (its slug, a slug per locale or its parent) adds a 301 from each old address to the new one to the site's redirects (redirects.read). Also title, `frame` (the theme layout frame it renders in, such as `default`, which reflows at the site breakpoints, or a scaled canvas such as `scale-canvas`; layout.update edits a frame), status, SEO, members-only access or `meta`. `patch.status: \"published\"` marks a draft page for the next site publish. `patch.meta` replaces the page's whole meta, so read the page first (page.read) and send its meta back with your change. `meta.layoutOverrides` overrides the frame for this page alone, layer by layer, where the frame's `overridePolicy` allows it: `background` ({ color, image, overlay, texture }: the page's own background colour, as raw CSS such as `var(--ds-color-bg-inverse)`), `header`, `footer`, `scroll` and `chrome`. Page validation and ownership checks apply.",
       "example": {
         "pageId": "6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f",
         "patch": {
           "title": {
-            "en-US": "Studio and team"
+            "en-US": "Studio and team",
+            "it": "Lo studio"
+          },
+          "slugs": {
+            "it": "studio-e-squadra"
           },
           "status": "published"
         }
@@ -31589,68 +31645,71 @@
               "slug": {
                 "$ref": "#/$defs/__schema0"
               },
-              "title": {
+              "slugs": {
                 "$ref": "#/$defs/__schema1"
               },
-              "frame": {
+              "title": {
                 "$ref": "#/$defs/__schema2"
               },
-              "dynamic": {
+              "frame": {
                 "$ref": "#/$defs/__schema3"
               },
-              "position": {
+              "dynamic": {
                 "$ref": "#/$defs/__schema4"
               },
-              "parentId": {
+              "position": {
                 "$ref": "#/$defs/__schema5"
               },
-              "requireAuth": {
+              "parentId": {
                 "$ref": "#/$defs/__schema6"
               },
-              "requiredRoles": {
+              "requireAuth": {
                 "$ref": "#/$defs/__schema7"
               },
+              "requiredRoles": {
+                "$ref": "#/$defs/__schema8"
+              },
               "meta": {
-                "$ref": "#/$defs/__schema9"
+                "$ref": "#/$defs/__schema10"
               },
               "pageType": {
-                "$ref": "#/$defs/__schema11"
-              },
-              "templateId": {
-                "$ref": "#/$defs/__schema5"
-              },
-              "collectionKey": {
                 "$ref": "#/$defs/__schema12"
               },
-              "status": {
+              "templateId": {
+                "$ref": "#/$defs/__schema6"
+              },
+              "collectionKey": {
                 "$ref": "#/$defs/__schema13"
               },
-              "authorUserId": {
-                "$ref": "#/$defs/__schema5"
-              },
-              "authorName": {
+              "status": {
                 "$ref": "#/$defs/__schema14"
               },
-              "featuredImageId": {
-                "$ref": "#/$defs/__schema5"
+              "authorUserId": {
+                "$ref": "#/$defs/__schema6"
               },
-              "excerpt": {
+              "authorName": {
                 "$ref": "#/$defs/__schema15"
               },
-              "metaTitle": {
+              "featuredImageId": {
+                "$ref": "#/$defs/__schema6"
+              },
+              "excerpt": {
                 "$ref": "#/$defs/__schema16"
               },
-              "metaDescription": {
+              "metaTitle": {
                 "$ref": "#/$defs/__schema17"
               },
-              "ogImageId": {
-                "$ref": "#/$defs/__schema5"
-              },
-              "noIndex": {
+              "metaDescription": {
                 "$ref": "#/$defs/__schema18"
               },
-              "canonicalUrl": {
+              "ogImageId": {
+                "$ref": "#/$defs/__schema6"
+              },
+              "noIndex": {
                 "$ref": "#/$defs/__schema19"
+              },
+              "canonicalUrl": {
+                "$ref": "#/$defs/__schema20"
               }
             },
             "additionalProperties": false
@@ -31672,21 +31731,37 @@
               "type": "string"
             },
             "additionalProperties": {
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
             }
           },
           "__schema2": {
-            "type": "string"
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string"
+            }
           },
           "__schema3": {
-            "type": "boolean"
+            "type": "string"
           },
           "__schema4": {
+            "type": "boolean"
+          },
+          "__schema5": {
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "__schema5": {
+          "__schema6": {
             "anyOf": [
               {
                 "type": "string",
@@ -31697,31 +31772,31 @@
               }
             ]
           },
-          "__schema6": {
+          "__schema7": {
             "type": "boolean"
           },
-          "__schema7": {
+          "__schema8": {
             "maxItems": 50,
             "type": "array",
             "items": {
-              "$ref": "#/$defs/__schema8"
+              "$ref": "#/$defs/__schema9"
             }
           },
-          "__schema8": {
+          "__schema9": {
             "type": "string",
             "maxLength": 40,
             "pattern": "^[a-z][a-z0-9-]*$"
           },
-          "__schema9": {
+          "__schema10": {
             "type": "object",
             "propertyNames": {
               "type": "string"
             },
             "additionalProperties": {
-              "$ref": "#/$defs/__schema10"
+              "$ref": "#/$defs/__schema11"
             }
           },
-          "__schema10": {
+          "__schema11": {
             "anyOf": [
               {
                 "type": "string"
@@ -31738,7 +31813,7 @@
               {
                 "type": "array",
                 "items": {
-                  "$ref": "#/$defs/__schema10"
+                  "$ref": "#/$defs/__schema11"
                 }
               },
               {
@@ -31747,12 +31822,12 @@
                   "type": "string"
                 },
                 "additionalProperties": {
-                  "$ref": "#/$defs/__schema10"
+                  "$ref": "#/$defs/__schema11"
                 }
               }
             ]
           },
-          "__schema11": {
+          "__schema12": {
             "type": "string",
             "enum": [
               "static",
@@ -31765,7 +31840,7 @@
               "component"
             ]
           },
-          "__schema12": {
+          "__schema13": {
             "anyOf": [
               {
                 "type": "string",
@@ -31777,14 +31852,14 @@
               }
             ]
           },
-          "__schema13": {
+          "__schema14": {
             "type": "string",
             "enum": [
               "draft",
               "published"
             ]
           },
-          "__schema14": {
+          "__schema15": {
             "anyOf": [
               {
                 "type": "string"
@@ -31794,20 +31869,10 @@
               }
             ]
           },
-          "__schema15": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/__schema1"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "__schema16": {
             "anyOf": [
               {
-                "$ref": "#/$defs/__schema1"
+                "$ref": "#/$defs/__schema2"
               },
               {
                 "type": "null"
@@ -31817,7 +31882,7 @@
           "__schema17": {
             "anyOf": [
               {
-                "$ref": "#/$defs/__schema1"
+                "$ref": "#/$defs/__schema2"
               },
               {
                 "type": "null"
@@ -31825,9 +31890,19 @@
             ]
           },
           "__schema18": {
-            "type": "boolean"
+            "anyOf": [
+              {
+                "$ref": "#/$defs/__schema2"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "__schema19": {
+            "type": "boolean"
+          },
+          "__schema20": {
             "anyOf": [
               {
                 "type": "string"
@@ -31849,6 +31924,15 @@
               "slug": {
                 "type": "string",
                 "minLength": 1
+              },
+              "slugs": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": "string"
+                }
               },
               "title": {
                 "$ref": "#/$defs/__schema0"
@@ -32516,6 +32600,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -33525,6 +33610,15 @@
                 "type": "string",
                 "minLength": 1
               },
+              "slugs": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
               "title": {
                 "$ref": "#/$defs/__schema0"
               },
@@ -34191,6 +34285,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -35168,6 +35263,15 @@
                 "type": "string",
                 "minLength": 1
               },
+              "slugs": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
               "title": {
                 "$ref": "#/$defs/__schema0"
               },
@@ -35834,6 +35938,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -38277,7 +38382,7 @@
     },
     {
       "name": "blog.create",
-      "description": "Create a blog index page from its `title` (in `locale`), an optional `slug` and `templateId`, the theme template it renders with (template.index lists the `blog-index` ones and what each draws around the page's own tree); articles go under it with article.create. Answers the new page's id and slug. Entry validation (page type, template, slug) and ownership checks apply.",
+      "description": "Create a blog index page from its `title` (in `locale`), an optional `slug`, optional `slugs` (its slug in each other locale, `{ \"en\": \"notes\" }`) and `templateId`, the theme template it renders with (template.index lists the `blog-index` ones and what each draws around the page's own tree); articles go under it with article.create. Answers the new page's id and slug. Entry validation (page type, template, slug) and ownership checks apply.",
       "example": {
         "title": "Journal",
         "templateId": "blog-index-editorial-grid"
@@ -38293,6 +38398,15 @@
           },
           "slug": {
             "type": "string"
+          },
+          "slugs": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string"
+            }
           },
           "templateId": {
             "type": "string",
@@ -38348,7 +38462,7 @@
     },
     {
       "name": "article.create",
-      "description": "Create a draft article under a blog index (`blogId`, the blog index page id) from its `title`, an optional `slug` and `templateId`, the article template it renders with (template.index lists the `article` ones). Its content is its tree: fill it with tree.commit on the answered id; it stays off the public site until article.publish. Entry validation (page type, template, slug) and ownership checks apply.",
+      "description": "Create a draft article under a blog index (`blogId`, the blog index page id) from its `title`, an optional `slug`, optional `slugs` (its slug in each other locale, `{ \"en\": \"a-house-on-the-hill\" }`) and `templateId`, the article template it renders with (template.index lists the `article` ones). Its content is its tree: fill it with tree.commit on the answered id; it stays off the public site until article.publish. Entry validation (page type, template, slug) and ownership checks apply.",
       "example": {
         "title": "A house on the hill",
         "templateId": "article-gallery-sticky",
@@ -38365,6 +38479,15 @@
           },
           "slug": {
             "type": "string"
+          },
+          "slugs": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string"
+            }
           },
           "templateId": {
             "type": "string",
@@ -38426,7 +38549,7 @@
     },
     {
       "name": "blog.update",
-      "description": "Patch a blog index page as { id, patch }: its slug, title, excerpt, featured image, author, canonical URL, SEO (`seo.metaTitle`, `metaDescription`, `ogImageId`, `noIndex`), template or members-only access. Its content is its tree. Entry validation (page type, template, slug) and ownership checks apply.",
+      "description": "Patch a blog index page as { id, patch }: its slug, its slug per locale (`slugs`: `{ \"en\": \"notes\" }` sets one, `null` removes it; renaming a published page keeps its old address as a 301), title, excerpt, featured image, author, canonical URL, SEO (`seo.metaTitle`, `metaDescription`, `ogImageId`, `noIndex`), template or members-only access. Its content is its tree. Entry validation (page type, template, slug) and ownership checks apply.",
       "example": {
         "id": "5f6a7b8c-9d0e-4f1a-8b2c-3d4e5f6a7b8c",
         "patch": {
@@ -38448,6 +38571,22 @@
             "properties": {
               "slug": {
                 "type": "string"
+              },
+              "slugs": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
               },
               "title": {
                 "$ref": "#/$defs/__schema0"
@@ -38609,7 +38748,7 @@
     },
     {
       "name": "article.update",
-      "description": "Patch an article as { id, patch }: its slug, title, excerpt, featured image, author, canonical URL, SEO (`seo.metaTitle`, `metaDescription`, `ogImageId`, `noIndex`), template or members-only access. Its content is its tree. Entry validation (page type, template, slug) and ownership checks apply.",
+      "description": "Patch an article as { id, patch }: its slug, its slug per locale (`slugs`: `{ \"en\": \"my-house\" }` sets one, `null` removes it; renaming a published article keeps its old address as a 301), title, excerpt, featured image, author, canonical URL, SEO (`seo.metaTitle`, `metaDescription`, `ogImageId`, `noIndex`), template or members-only access. Its content is its tree. Entry validation (page type, template, slug) and ownership checks apply.",
       "example": {
         "id": "4e5f6a7b-8c9d-4e0f-9a1b-2c3d4e5f6a7b",
         "patch": {
@@ -38634,6 +38773,22 @@
             "properties": {
               "slug": {
                 "type": "string"
+              },
+              "slugs": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
               },
               "title": {
                 "$ref": "#/$defs/__schema0"
@@ -39087,6 +39242,119 @@
                   "minimum": 1,
                   "maximum": 9007199254740991
                 },
+                "inline": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "const": "ready"
+                        },
+                        "elements": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 1500
+                        },
+                        "accent": {
+                          "type": "boolean"
+                        },
+                        "text": {
+                          "type": "boolean"
+                        },
+                        "colors": {
+                          "maxItems": 32,
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/$defs/__schema4"
+                          }
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "elements",
+                        "accent",
+                        "text",
+                        "colors"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "const": "refused"
+                        },
+                        "reason": {
+                          "type": "string",
+                          "enum": [
+                            "svg_inline_too_large",
+                            "svg_inline_too_many_elements",
+                            "svg_inline_unsupported",
+                            "svg_inline_styled",
+                            "svg_inline_no_viewbox"
+                          ]
+                        },
+                        "detail": {
+                          "type": "string",
+                          "maxLength": 500
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "reason",
+                        "detail"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "drawing": {
+                  "properties": {
+                    "t": {
+                      "type": "string",
+                      "enum": [
+                        "svg",
+                        "g",
+                        "defs",
+                        "symbol",
+                        "use",
+                        "path",
+                        "rect",
+                        "circle",
+                        "ellipse",
+                        "line",
+                        "polyline",
+                        "polygon",
+                        "text",
+                        "tspan",
+                        "linearGradient",
+                        "radialGradient",
+                        "stop",
+                        "clipPath",
+                        "mask",
+                        "pattern",
+                        "marker"
+                      ]
+                    },
+                    "a": {
+                      "$ref": "#/$defs/__schema5"
+                    },
+                    "r": {
+                      "type": "string",
+                      "const": "accent"
+                    },
+                    "c": {
+                      "maxItems": 1500,
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/$defs/__schema8"
+                      }
+                    }
+                  },
+                  "$ref": "#/$defs/__schema9"
+                },
                 "createdAt": {
                   "type": "string"
                 }
@@ -39184,6 +39452,664 @@
           "__schema3": {
             "type": "string",
             "maxLength": 1000
+          },
+          "__schema4": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "__schema5": {
+            "type": "object",
+            "propertyNames": {
+              "$ref": "#/$defs/__schema6"
+            },
+            "additionalProperties": {
+              "$ref": "#/$defs/__schema7"
+            }
+          },
+          "__schema6": {
+            "type": "string",
+            "enum": [
+              "id",
+              "href",
+              "viewBox",
+              "preserveAspectRatio",
+              "transform",
+              "d",
+              "x",
+              "y",
+              "x1",
+              "y1",
+              "x2",
+              "y2",
+              "cx",
+              "cy",
+              "r",
+              "rx",
+              "ry",
+              "fx",
+              "fy",
+              "fr",
+              "width",
+              "height",
+              "points",
+              "pathLength",
+              "offset",
+              "gradientUnits",
+              "gradientTransform",
+              "spreadMethod",
+              "patternUnits",
+              "patternContentUnits",
+              "patternTransform",
+              "clipPathUnits",
+              "maskUnits",
+              "maskContentUnits",
+              "markerWidth",
+              "markerHeight",
+              "markerUnits",
+              "refX",
+              "refY",
+              "orient",
+              "dx",
+              "dy",
+              "rotate",
+              "textLength",
+              "lengthAdjust",
+              "text-anchor",
+              "dominant-baseline",
+              "alignment-baseline",
+              "baseline-shift",
+              "font-family",
+              "font-size",
+              "font-style",
+              "font-weight",
+              "letter-spacing",
+              "word-spacing",
+              "fill",
+              "stroke",
+              "stop-color",
+              "color",
+              "fill-opacity",
+              "fill-rule",
+              "stroke-width",
+              "stroke-linecap",
+              "stroke-linejoin",
+              "stroke-miterlimit",
+              "stroke-dasharray",
+              "stroke-dashoffset",
+              "stroke-opacity",
+              "stop-opacity",
+              "opacity",
+              "clip-path",
+              "clip-rule",
+              "mask",
+              "marker-start",
+              "marker-mid",
+              "marker-end",
+              "vector-effect",
+              "visibility",
+              "display",
+              "paint-order",
+              "shape-rendering"
+            ]
+          },
+          "__schema7": {
+            "type": "string"
+          },
+          "__schema8": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/__schema9"
+              },
+              {
+                "type": "string",
+                "maxLength": 2000
+              }
+            ]
+          },
+          "__schema9": {
+            "type": "object",
+            "properties": {
+              "t": {
+                "type": "string",
+                "enum": [
+                  "svg",
+                  "g",
+                  "defs",
+                  "symbol",
+                  "use",
+                  "path",
+                  "rect",
+                  "circle",
+                  "ellipse",
+                  "line",
+                  "polyline",
+                  "polygon",
+                  "text",
+                  "tspan",
+                  "linearGradient",
+                  "radialGradient",
+                  "stop",
+                  "clipPath",
+                  "mask",
+                  "pattern",
+                  "marker"
+                ]
+              },
+              "a": {
+                "$ref": "#/$defs/__schema5"
+              },
+              "r": {
+                "type": "string",
+                "const": "accent"
+              },
+              "c": {
+                "maxItems": 1500,
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/__schema10"
+                }
+              }
+            },
+            "required": [
+              "t"
+            ],
+            "additionalProperties": false
+          },
+          "__schema10": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/__schema9"
+              },
+              {
+                "type": "string",
+                "maxLength": 2000
+              }
+            ]
+          }
+        }
+      },
+      "reads": [
+        "media"
+      ],
+      "writes": [],
+      "permission": "site.read",
+      "mutationClass": "read",
+      "confirm": "none",
+      "conflictPolicy": "none",
+      "undoable": false
+    },
+    {
+      "name": "media.read",
+      "description": "Read one media row: its kind, size, alt text and, for an SVG, whether the svg primitive draws it inline (`inline`: ready with its elements, accent part, text role and the colours left as drawn, or refused with the reason). Site ownership is checked; undo restores the media ledger.",
+      "example": {
+        "mediaId": "2c3d4e5f-6a7b-4c8d-9e0f-1a2b3c4d5e6f"
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "mediaId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "mediaId"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "image",
+              "svg",
+              "video",
+              "document"
+            ]
+          },
+          "filename": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "mime": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 127
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "width": {
+            "$ref": "#/$defs/__schema0"
+          },
+          "height": {
+            "$ref": "#/$defs/__schema0"
+          },
+          "variants": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "width": {
+                  "$ref": "#/$defs/__schema0"
+                },
+                "height": {
+                  "$ref": "#/$defs/__schema0"
+                },
+                "mime": {
+                  "type": "string",
+                  "enum": [
+                    "image/avif",
+                    "image/webp",
+                    "image/jpeg",
+                    "image/png"
+                  ]
+                },
+                "url": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2048
+                },
+                "bytes": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "width",
+                "mime",
+                "url"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "alt": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/__schema1"
+              },
+              {
+                "type": "object",
+                "propertyNames": {
+                  "$ref": "#/$defs/__schema2"
+                },
+                "additionalProperties": {
+                  "$ref": "#/$defs/__schema1"
+                }
+              }
+            ]
+          },
+          "caption": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/__schema3"
+              },
+              {
+                "type": "object",
+                "propertyNames": {
+                  "$ref": "#/$defs/__schema2"
+                },
+                "additionalProperties": {
+                  "$ref": "#/$defs/__schema3"
+                }
+              }
+            ]
+          },
+          "credit": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "folderId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pageCount": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "inline": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "const": "ready"
+                  },
+                  "elements": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1500
+                  },
+                  "accent": {
+                    "type": "boolean"
+                  },
+                  "text": {
+                    "type": "boolean"
+                  },
+                  "colors": {
+                    "maxItems": 32,
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/__schema4"
+                    }
+                  }
+                },
+                "required": [
+                  "status",
+                  "elements",
+                  "accent",
+                  "text",
+                  "colors"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "const": "refused"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "enum": [
+                      "svg_inline_too_large",
+                      "svg_inline_too_many_elements",
+                      "svg_inline_unsupported",
+                      "svg_inline_styled",
+                      "svg_inline_no_viewbox"
+                    ]
+                  },
+                  "detail": {
+                    "type": "string",
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "status",
+                  "reason",
+                  "detail"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "drawing": {
+            "properties": {
+              "t": {
+                "type": "string",
+                "enum": [
+                  "svg",
+                  "g",
+                  "defs",
+                  "symbol",
+                  "use",
+                  "path",
+                  "rect",
+                  "circle",
+                  "ellipse",
+                  "line",
+                  "polyline",
+                  "polygon",
+                  "text",
+                  "tspan",
+                  "linearGradient",
+                  "radialGradient",
+                  "stop",
+                  "clipPath",
+                  "mask",
+                  "pattern",
+                  "marker"
+                ]
+              },
+              "a": {
+                "$ref": "#/$defs/__schema5"
+              },
+              "r": {
+                "type": "string",
+                "const": "accent"
+              },
+              "c": {
+                "maxItems": 1500,
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/__schema8"
+                }
+              }
+            },
+            "$ref": "#/$defs/__schema9"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "filename",
+          "mime",
+          "size",
+          "url",
+          "variants",
+          "alt"
+        ],
+        "additionalProperties": false,
+        "$defs": {
+          "__schema0": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000
+          },
+          "__schema1": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "__schema2": {
+            "type": "string",
+            "pattern": "^[a-z]{2,3}(?:-[A-Z][a-z]{3})?(?:-(?:[A-Z]{2}|\\d{3}))?$"
+          },
+          "__schema3": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "__schema4": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "__schema5": {
+            "type": "object",
+            "propertyNames": {
+              "$ref": "#/$defs/__schema6"
+            },
+            "additionalProperties": {
+              "$ref": "#/$defs/__schema7"
+            }
+          },
+          "__schema6": {
+            "type": "string",
+            "enum": [
+              "id",
+              "href",
+              "viewBox",
+              "preserveAspectRatio",
+              "transform",
+              "d",
+              "x",
+              "y",
+              "x1",
+              "y1",
+              "x2",
+              "y2",
+              "cx",
+              "cy",
+              "r",
+              "rx",
+              "ry",
+              "fx",
+              "fy",
+              "fr",
+              "width",
+              "height",
+              "points",
+              "pathLength",
+              "offset",
+              "gradientUnits",
+              "gradientTransform",
+              "spreadMethod",
+              "patternUnits",
+              "patternContentUnits",
+              "patternTransform",
+              "clipPathUnits",
+              "maskUnits",
+              "maskContentUnits",
+              "markerWidth",
+              "markerHeight",
+              "markerUnits",
+              "refX",
+              "refY",
+              "orient",
+              "dx",
+              "dy",
+              "rotate",
+              "textLength",
+              "lengthAdjust",
+              "text-anchor",
+              "dominant-baseline",
+              "alignment-baseline",
+              "baseline-shift",
+              "font-family",
+              "font-size",
+              "font-style",
+              "font-weight",
+              "letter-spacing",
+              "word-spacing",
+              "fill",
+              "stroke",
+              "stop-color",
+              "color",
+              "fill-opacity",
+              "fill-rule",
+              "stroke-width",
+              "stroke-linecap",
+              "stroke-linejoin",
+              "stroke-miterlimit",
+              "stroke-dasharray",
+              "stroke-dashoffset",
+              "stroke-opacity",
+              "stop-opacity",
+              "opacity",
+              "clip-path",
+              "clip-rule",
+              "mask",
+              "marker-start",
+              "marker-mid",
+              "marker-end",
+              "vector-effect",
+              "visibility",
+              "display",
+              "paint-order",
+              "shape-rendering"
+            ]
+          },
+          "__schema7": {
+            "type": "string"
+          },
+          "__schema8": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/__schema9"
+              },
+              {
+                "type": "string",
+                "maxLength": 2000
+              }
+            ]
+          },
+          "__schema9": {
+            "type": "object",
+            "properties": {
+              "t": {
+                "type": "string",
+                "enum": [
+                  "svg",
+                  "g",
+                  "defs",
+                  "symbol",
+                  "use",
+                  "path",
+                  "rect",
+                  "circle",
+                  "ellipse",
+                  "line",
+                  "polyline",
+                  "polygon",
+                  "text",
+                  "tspan",
+                  "linearGradient",
+                  "radialGradient",
+                  "stop",
+                  "clipPath",
+                  "mask",
+                  "pattern",
+                  "marker"
+                ]
+              },
+              "a": {
+                "$ref": "#/$defs/__schema5"
+              },
+              "r": {
+                "type": "string",
+                "const": "accent"
+              },
+              "c": {
+                "maxItems": 1500,
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/__schema10"
+                }
+              }
+            },
+            "required": [
+              "t"
+            ],
+            "additionalProperties": false
+          },
+          "__schema10": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/__schema9"
+              },
+              {
+                "type": "string",
+                "maxLength": 2000
+              }
+            ]
           }
         }
       },
@@ -39551,6 +40477,119 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 9007199254740991
+          },
+          "inline": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "const": "ready"
+                  },
+                  "elements": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1500
+                  },
+                  "accent": {
+                    "type": "boolean"
+                  },
+                  "text": {
+                    "type": "boolean"
+                  },
+                  "colors": {
+                    "maxItems": 32,
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/__schema4"
+                    }
+                  }
+                },
+                "required": [
+                  "status",
+                  "elements",
+                  "accent",
+                  "text",
+                  "colors"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "const": "refused"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "enum": [
+                      "svg_inline_too_large",
+                      "svg_inline_too_many_elements",
+                      "svg_inline_unsupported",
+                      "svg_inline_styled",
+                      "svg_inline_no_viewbox"
+                    ]
+                  },
+                  "detail": {
+                    "type": "string",
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "status",
+                  "reason",
+                  "detail"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "drawing": {
+            "properties": {
+              "t": {
+                "type": "string",
+                "enum": [
+                  "svg",
+                  "g",
+                  "defs",
+                  "symbol",
+                  "use",
+                  "path",
+                  "rect",
+                  "circle",
+                  "ellipse",
+                  "line",
+                  "polyline",
+                  "polygon",
+                  "text",
+                  "tspan",
+                  "linearGradient",
+                  "radialGradient",
+                  "stop",
+                  "clipPath",
+                  "mask",
+                  "pattern",
+                  "marker"
+                ]
+              },
+              "a": {
+                "$ref": "#/$defs/__schema5"
+              },
+              "r": {
+                "type": "string",
+                "const": "accent"
+              },
+              "c": {
+                "maxItems": 1500,
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/__schema8"
+                }
+              }
+            },
+            "$ref": "#/$defs/__schema9"
           }
         },
         "required": [
@@ -39581,6 +40620,179 @@
           "__schema3": {
             "type": "string",
             "maxLength": 1000
+          },
+          "__schema4": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "__schema5": {
+            "type": "object",
+            "propertyNames": {
+              "$ref": "#/$defs/__schema6"
+            },
+            "additionalProperties": {
+              "$ref": "#/$defs/__schema7"
+            }
+          },
+          "__schema6": {
+            "type": "string",
+            "enum": [
+              "id",
+              "href",
+              "viewBox",
+              "preserveAspectRatio",
+              "transform",
+              "d",
+              "x",
+              "y",
+              "x1",
+              "y1",
+              "x2",
+              "y2",
+              "cx",
+              "cy",
+              "r",
+              "rx",
+              "ry",
+              "fx",
+              "fy",
+              "fr",
+              "width",
+              "height",
+              "points",
+              "pathLength",
+              "offset",
+              "gradientUnits",
+              "gradientTransform",
+              "spreadMethod",
+              "patternUnits",
+              "patternContentUnits",
+              "patternTransform",
+              "clipPathUnits",
+              "maskUnits",
+              "maskContentUnits",
+              "markerWidth",
+              "markerHeight",
+              "markerUnits",
+              "refX",
+              "refY",
+              "orient",
+              "dx",
+              "dy",
+              "rotate",
+              "textLength",
+              "lengthAdjust",
+              "text-anchor",
+              "dominant-baseline",
+              "alignment-baseline",
+              "baseline-shift",
+              "font-family",
+              "font-size",
+              "font-style",
+              "font-weight",
+              "letter-spacing",
+              "word-spacing",
+              "fill",
+              "stroke",
+              "stop-color",
+              "color",
+              "fill-opacity",
+              "fill-rule",
+              "stroke-width",
+              "stroke-linecap",
+              "stroke-linejoin",
+              "stroke-miterlimit",
+              "stroke-dasharray",
+              "stroke-dashoffset",
+              "stroke-opacity",
+              "stop-opacity",
+              "opacity",
+              "clip-path",
+              "clip-rule",
+              "mask",
+              "marker-start",
+              "marker-mid",
+              "marker-end",
+              "vector-effect",
+              "visibility",
+              "display",
+              "paint-order",
+              "shape-rendering"
+            ]
+          },
+          "__schema7": {
+            "type": "string"
+          },
+          "__schema8": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/__schema9"
+              },
+              {
+                "type": "string",
+                "maxLength": 2000
+              }
+            ]
+          },
+          "__schema9": {
+            "type": "object",
+            "properties": {
+              "t": {
+                "type": "string",
+                "enum": [
+                  "svg",
+                  "g",
+                  "defs",
+                  "symbol",
+                  "use",
+                  "path",
+                  "rect",
+                  "circle",
+                  "ellipse",
+                  "line",
+                  "polyline",
+                  "polygon",
+                  "text",
+                  "tspan",
+                  "linearGradient",
+                  "radialGradient",
+                  "stop",
+                  "clipPath",
+                  "mask",
+                  "pattern",
+                  "marker"
+                ]
+              },
+              "a": {
+                "$ref": "#/$defs/__schema5"
+              },
+              "r": {
+                "type": "string",
+                "const": "accent"
+              },
+              "c": {
+                "maxItems": 1500,
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/__schema10"
+                }
+              }
+            },
+            "required": [
+              "t"
+            ],
+            "additionalProperties": false
+          },
+          "__schema10": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/__schema9"
+              },
+              {
+                "type": "string",
+                "maxLength": 2000
+              }
+            ]
           }
         }
       },
@@ -39598,7 +40810,7 @@
     },
     {
       "name": "media.upload",
-      "description": "Upload a file from its base64 bytes: staged, checked (type, size, magic, SVG sanitiser, quota), its variants rendered, then recorded like media.recordUpload, in its folder when one is named. The same limits as the admin upload (images 5 MB). Site ownership is checked; undo restores the media ledger.",
+      "description": "Upload a file from its base64 bytes: staged, checked (type, size, magic, SVG sanitiser, quota), its variants rendered, then recorded like media.recordUpload, in its folder when one is named. The same limits as the admin upload (images 5 MB). An SVG is also made an inline drawing for the svg primitive when it fits (96 KB, 1500 elements, geometry and presentation attributes or plain class rules): svgRoles names the colour that follows the text colour and the one that becomes the accent part; the answer's inline says whether it is drawn inline. Site ownership is checked; undo restores the media ledger.",
       "example": {
         "filename": "studio.jpg",
         "contentType": "image/jpeg",
@@ -39609,21 +40821,44 @@
         "type": "object",
         "properties": {
           "filename": {
+            "$ref": "#/$defs/__schema0"
+          },
+          "contentType": {
+            "$ref": "#/$defs/__schema1"
+          },
+          "data": {
+            "$ref": "#/$defs/__schema2"
+          },
+          "folderId": {
+            "$ref": "#/$defs/__schema3"
+          },
+          "svgRoles": {
+            "$ref": "#/$defs/__schema4"
+          }
+        },
+        "required": [
+          "filename",
+          "contentType",
+          "data"
+        ],
+        "additionalProperties": false,
+        "$defs": {
+          "__schema0": {
             "type": "string",
             "minLength": 1,
             "maxLength": 255
           },
-          "contentType": {
+          "__schema1": {
             "type": "string",
             "minLength": 1,
             "maxLength": 127
           },
-          "data": {
+          "__schema2": {
             "type": "string",
             "minLength": 1,
             "maxLength": 146800640
           },
-          "folderId": {
+          "__schema3": {
             "anyOf": [
               {
                 "type": "string",
@@ -39634,14 +40869,22 @@
                 "type": "null"
               }
             ]
+          },
+          "__schema4": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string",
+                "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+              },
+              "accent": {
+                "type": "string",
+                "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+              }
+            },
+            "additionalProperties": false
           }
-        },
-        "required": [
-          "filename",
-          "contentType",
-          "data"
-        ],
-        "additionalProperties": false
+        }
       },
       "outputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -39778,6 +41021,119 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 9007199254740991
+          },
+          "inline": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "const": "ready"
+                  },
+                  "elements": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1500
+                  },
+                  "accent": {
+                    "type": "boolean"
+                  },
+                  "text": {
+                    "type": "boolean"
+                  },
+                  "colors": {
+                    "maxItems": 32,
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/__schema4"
+                    }
+                  }
+                },
+                "required": [
+                  "status",
+                  "elements",
+                  "accent",
+                  "text",
+                  "colors"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "const": "refused"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "enum": [
+                      "svg_inline_too_large",
+                      "svg_inline_too_many_elements",
+                      "svg_inline_unsupported",
+                      "svg_inline_styled",
+                      "svg_inline_no_viewbox"
+                    ]
+                  },
+                  "detail": {
+                    "type": "string",
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "status",
+                  "reason",
+                  "detail"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "drawing": {
+            "properties": {
+              "t": {
+                "type": "string",
+                "enum": [
+                  "svg",
+                  "g",
+                  "defs",
+                  "symbol",
+                  "use",
+                  "path",
+                  "rect",
+                  "circle",
+                  "ellipse",
+                  "line",
+                  "polyline",
+                  "polygon",
+                  "text",
+                  "tspan",
+                  "linearGradient",
+                  "radialGradient",
+                  "stop",
+                  "clipPath",
+                  "mask",
+                  "pattern",
+                  "marker"
+                ]
+              },
+              "a": {
+                "$ref": "#/$defs/__schema5"
+              },
+              "r": {
+                "type": "string",
+                "const": "accent"
+              },
+              "c": {
+                "maxItems": 1500,
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/__schema8"
+                }
+              }
+            },
+            "$ref": "#/$defs/__schema9"
           }
         },
         "required": [
@@ -39808,6 +41164,179 @@
           "__schema3": {
             "type": "string",
             "maxLength": 1000
+          },
+          "__schema4": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "__schema5": {
+            "type": "object",
+            "propertyNames": {
+              "$ref": "#/$defs/__schema6"
+            },
+            "additionalProperties": {
+              "$ref": "#/$defs/__schema7"
+            }
+          },
+          "__schema6": {
+            "type": "string",
+            "enum": [
+              "id",
+              "href",
+              "viewBox",
+              "preserveAspectRatio",
+              "transform",
+              "d",
+              "x",
+              "y",
+              "x1",
+              "y1",
+              "x2",
+              "y2",
+              "cx",
+              "cy",
+              "r",
+              "rx",
+              "ry",
+              "fx",
+              "fy",
+              "fr",
+              "width",
+              "height",
+              "points",
+              "pathLength",
+              "offset",
+              "gradientUnits",
+              "gradientTransform",
+              "spreadMethod",
+              "patternUnits",
+              "patternContentUnits",
+              "patternTransform",
+              "clipPathUnits",
+              "maskUnits",
+              "maskContentUnits",
+              "markerWidth",
+              "markerHeight",
+              "markerUnits",
+              "refX",
+              "refY",
+              "orient",
+              "dx",
+              "dy",
+              "rotate",
+              "textLength",
+              "lengthAdjust",
+              "text-anchor",
+              "dominant-baseline",
+              "alignment-baseline",
+              "baseline-shift",
+              "font-family",
+              "font-size",
+              "font-style",
+              "font-weight",
+              "letter-spacing",
+              "word-spacing",
+              "fill",
+              "stroke",
+              "stop-color",
+              "color",
+              "fill-opacity",
+              "fill-rule",
+              "stroke-width",
+              "stroke-linecap",
+              "stroke-linejoin",
+              "stroke-miterlimit",
+              "stroke-dasharray",
+              "stroke-dashoffset",
+              "stroke-opacity",
+              "stop-opacity",
+              "opacity",
+              "clip-path",
+              "clip-rule",
+              "mask",
+              "marker-start",
+              "marker-mid",
+              "marker-end",
+              "vector-effect",
+              "visibility",
+              "display",
+              "paint-order",
+              "shape-rendering"
+            ]
+          },
+          "__schema7": {
+            "type": "string"
+          },
+          "__schema8": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/__schema9"
+              },
+              {
+                "type": "string",
+                "maxLength": 2000
+              }
+            ]
+          },
+          "__schema9": {
+            "type": "object",
+            "properties": {
+              "t": {
+                "type": "string",
+                "enum": [
+                  "svg",
+                  "g",
+                  "defs",
+                  "symbol",
+                  "use",
+                  "path",
+                  "rect",
+                  "circle",
+                  "ellipse",
+                  "line",
+                  "polyline",
+                  "polygon",
+                  "text",
+                  "tspan",
+                  "linearGradient",
+                  "radialGradient",
+                  "stop",
+                  "clipPath",
+                  "mask",
+                  "pattern",
+                  "marker"
+                ]
+              },
+              "a": {
+                "$ref": "#/$defs/__schema5"
+              },
+              "r": {
+                "type": "string",
+                "const": "accent"
+              },
+              "c": {
+                "maxItems": 1500,
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/__schema10"
+                }
+              }
+            },
+            "required": [
+              "t"
+            ],
+            "additionalProperties": false
+          },
+          "__schema10": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/__schema9"
+              },
+              {
+                "type": "string",
+                "maxLength": 2000
+              }
+            ]
           }
         }
       },
@@ -40007,6 +41536,119 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 9007199254740991
+          },
+          "inline": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "const": "ready"
+                  },
+                  "elements": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1500
+                  },
+                  "accent": {
+                    "type": "boolean"
+                  },
+                  "text": {
+                    "type": "boolean"
+                  },
+                  "colors": {
+                    "maxItems": 32,
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/__schema4"
+                    }
+                  }
+                },
+                "required": [
+                  "status",
+                  "elements",
+                  "accent",
+                  "text",
+                  "colors"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "const": "refused"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "enum": [
+                      "svg_inline_too_large",
+                      "svg_inline_too_many_elements",
+                      "svg_inline_unsupported",
+                      "svg_inline_styled",
+                      "svg_inline_no_viewbox"
+                    ]
+                  },
+                  "detail": {
+                    "type": "string",
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "status",
+                  "reason",
+                  "detail"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "drawing": {
+            "properties": {
+              "t": {
+                "type": "string",
+                "enum": [
+                  "svg",
+                  "g",
+                  "defs",
+                  "symbol",
+                  "use",
+                  "path",
+                  "rect",
+                  "circle",
+                  "ellipse",
+                  "line",
+                  "polyline",
+                  "polygon",
+                  "text",
+                  "tspan",
+                  "linearGradient",
+                  "radialGradient",
+                  "stop",
+                  "clipPath",
+                  "mask",
+                  "pattern",
+                  "marker"
+                ]
+              },
+              "a": {
+                "$ref": "#/$defs/__schema5"
+              },
+              "r": {
+                "type": "string",
+                "const": "accent"
+              },
+              "c": {
+                "maxItems": 1500,
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/__schema8"
+                }
+              }
+            },
+            "$ref": "#/$defs/__schema9"
           }
         },
         "required": [
@@ -40037,6 +41679,179 @@
           "__schema3": {
             "type": "string",
             "maxLength": 1000
+          },
+          "__schema4": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "__schema5": {
+            "type": "object",
+            "propertyNames": {
+              "$ref": "#/$defs/__schema6"
+            },
+            "additionalProperties": {
+              "$ref": "#/$defs/__schema7"
+            }
+          },
+          "__schema6": {
+            "type": "string",
+            "enum": [
+              "id",
+              "href",
+              "viewBox",
+              "preserveAspectRatio",
+              "transform",
+              "d",
+              "x",
+              "y",
+              "x1",
+              "y1",
+              "x2",
+              "y2",
+              "cx",
+              "cy",
+              "r",
+              "rx",
+              "ry",
+              "fx",
+              "fy",
+              "fr",
+              "width",
+              "height",
+              "points",
+              "pathLength",
+              "offset",
+              "gradientUnits",
+              "gradientTransform",
+              "spreadMethod",
+              "patternUnits",
+              "patternContentUnits",
+              "patternTransform",
+              "clipPathUnits",
+              "maskUnits",
+              "maskContentUnits",
+              "markerWidth",
+              "markerHeight",
+              "markerUnits",
+              "refX",
+              "refY",
+              "orient",
+              "dx",
+              "dy",
+              "rotate",
+              "textLength",
+              "lengthAdjust",
+              "text-anchor",
+              "dominant-baseline",
+              "alignment-baseline",
+              "baseline-shift",
+              "font-family",
+              "font-size",
+              "font-style",
+              "font-weight",
+              "letter-spacing",
+              "word-spacing",
+              "fill",
+              "stroke",
+              "stop-color",
+              "color",
+              "fill-opacity",
+              "fill-rule",
+              "stroke-width",
+              "stroke-linecap",
+              "stroke-linejoin",
+              "stroke-miterlimit",
+              "stroke-dasharray",
+              "stroke-dashoffset",
+              "stroke-opacity",
+              "stop-opacity",
+              "opacity",
+              "clip-path",
+              "clip-rule",
+              "mask",
+              "marker-start",
+              "marker-mid",
+              "marker-end",
+              "vector-effect",
+              "visibility",
+              "display",
+              "paint-order",
+              "shape-rendering"
+            ]
+          },
+          "__schema7": {
+            "type": "string"
+          },
+          "__schema8": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/__schema9"
+              },
+              {
+                "type": "string",
+                "maxLength": 2000
+              }
+            ]
+          },
+          "__schema9": {
+            "type": "object",
+            "properties": {
+              "t": {
+                "type": "string",
+                "enum": [
+                  "svg",
+                  "g",
+                  "defs",
+                  "symbol",
+                  "use",
+                  "path",
+                  "rect",
+                  "circle",
+                  "ellipse",
+                  "line",
+                  "polyline",
+                  "polygon",
+                  "text",
+                  "tspan",
+                  "linearGradient",
+                  "radialGradient",
+                  "stop",
+                  "clipPath",
+                  "mask",
+                  "pattern",
+                  "marker"
+                ]
+              },
+              "a": {
+                "$ref": "#/$defs/__schema5"
+              },
+              "r": {
+                "type": "string",
+                "const": "accent"
+              },
+              "c": {
+                "maxItems": 1500,
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/__schema10"
+                }
+              }
+            },
+            "required": [
+              "t"
+            ],
+            "additionalProperties": false
+          },
+          "__schema10": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/__schema9"
+              },
+              {
+                "type": "string",
+                "maxLength": 2000
+              }
+            ]
           }
         }
       },
@@ -40350,6 +42165,119 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 9007199254740991
+          },
+          "inline": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "const": "ready"
+                  },
+                  "elements": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1500
+                  },
+                  "accent": {
+                    "type": "boolean"
+                  },
+                  "text": {
+                    "type": "boolean"
+                  },
+                  "colors": {
+                    "maxItems": 32,
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/__schema4"
+                    }
+                  }
+                },
+                "required": [
+                  "status",
+                  "elements",
+                  "accent",
+                  "text",
+                  "colors"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "const": "refused"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "enum": [
+                      "svg_inline_too_large",
+                      "svg_inline_too_many_elements",
+                      "svg_inline_unsupported",
+                      "svg_inline_styled",
+                      "svg_inline_no_viewbox"
+                    ]
+                  },
+                  "detail": {
+                    "type": "string",
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "status",
+                  "reason",
+                  "detail"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "drawing": {
+            "properties": {
+              "t": {
+                "type": "string",
+                "enum": [
+                  "svg",
+                  "g",
+                  "defs",
+                  "symbol",
+                  "use",
+                  "path",
+                  "rect",
+                  "circle",
+                  "ellipse",
+                  "line",
+                  "polyline",
+                  "polygon",
+                  "text",
+                  "tspan",
+                  "linearGradient",
+                  "radialGradient",
+                  "stop",
+                  "clipPath",
+                  "mask",
+                  "pattern",
+                  "marker"
+                ]
+              },
+              "a": {
+                "$ref": "#/$defs/__schema5"
+              },
+              "r": {
+                "type": "string",
+                "const": "accent"
+              },
+              "c": {
+                "maxItems": 1500,
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/__schema8"
+                }
+              }
+            },
+            "$ref": "#/$defs/__schema9"
           }
         },
         "required": [
@@ -40380,6 +42308,179 @@
           "__schema3": {
             "type": "string",
             "maxLength": 1000
+          },
+          "__schema4": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "__schema5": {
+            "type": "object",
+            "propertyNames": {
+              "$ref": "#/$defs/__schema6"
+            },
+            "additionalProperties": {
+              "$ref": "#/$defs/__schema7"
+            }
+          },
+          "__schema6": {
+            "type": "string",
+            "enum": [
+              "id",
+              "href",
+              "viewBox",
+              "preserveAspectRatio",
+              "transform",
+              "d",
+              "x",
+              "y",
+              "x1",
+              "y1",
+              "x2",
+              "y2",
+              "cx",
+              "cy",
+              "r",
+              "rx",
+              "ry",
+              "fx",
+              "fy",
+              "fr",
+              "width",
+              "height",
+              "points",
+              "pathLength",
+              "offset",
+              "gradientUnits",
+              "gradientTransform",
+              "spreadMethod",
+              "patternUnits",
+              "patternContentUnits",
+              "patternTransform",
+              "clipPathUnits",
+              "maskUnits",
+              "maskContentUnits",
+              "markerWidth",
+              "markerHeight",
+              "markerUnits",
+              "refX",
+              "refY",
+              "orient",
+              "dx",
+              "dy",
+              "rotate",
+              "textLength",
+              "lengthAdjust",
+              "text-anchor",
+              "dominant-baseline",
+              "alignment-baseline",
+              "baseline-shift",
+              "font-family",
+              "font-size",
+              "font-style",
+              "font-weight",
+              "letter-spacing",
+              "word-spacing",
+              "fill",
+              "stroke",
+              "stop-color",
+              "color",
+              "fill-opacity",
+              "fill-rule",
+              "stroke-width",
+              "stroke-linecap",
+              "stroke-linejoin",
+              "stroke-miterlimit",
+              "stroke-dasharray",
+              "stroke-dashoffset",
+              "stroke-opacity",
+              "stop-opacity",
+              "opacity",
+              "clip-path",
+              "clip-rule",
+              "mask",
+              "marker-start",
+              "marker-mid",
+              "marker-end",
+              "vector-effect",
+              "visibility",
+              "display",
+              "paint-order",
+              "shape-rendering"
+            ]
+          },
+          "__schema7": {
+            "type": "string"
+          },
+          "__schema8": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/__schema9"
+              },
+              {
+                "type": "string",
+                "maxLength": 2000
+              }
+            ]
+          },
+          "__schema9": {
+            "type": "object",
+            "properties": {
+              "t": {
+                "type": "string",
+                "enum": [
+                  "svg",
+                  "g",
+                  "defs",
+                  "symbol",
+                  "use",
+                  "path",
+                  "rect",
+                  "circle",
+                  "ellipse",
+                  "line",
+                  "polyline",
+                  "polygon",
+                  "text",
+                  "tspan",
+                  "linearGradient",
+                  "radialGradient",
+                  "stop",
+                  "clipPath",
+                  "mask",
+                  "pattern",
+                  "marker"
+                ]
+              },
+              "a": {
+                "$ref": "#/$defs/__schema5"
+              },
+              "r": {
+                "type": "string",
+                "const": "accent"
+              },
+              "c": {
+                "maxItems": 1500,
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/__schema10"
+                }
+              }
+            },
+            "required": [
+              "t"
+            ],
+            "additionalProperties": false
+          },
+          "__schema10": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/__schema9"
+              },
+              {
+                "type": "string",
+                "maxLength": 2000
+              }
+            ]
           }
         }
       },
@@ -42497,7 +44598,7 @@
     },
     {
       "name": "layout.update",
-      "description": "Replace this site's version of one of the theme's layout frames (`layoutId`, the frame a page names in `frame`, such as `default` or `scale-canvas`) with `layout`, the whole frame object (its `id` is `layoutId`; read it first with layout.read, which answers it as the site resolves it now). `frame.responsiveMode` decides how its pages fit the window: `breakpoint` reflows them at the site breakpoints, with fluid tokens growing with the window; `scale` lays them out at `designWidth` and scales the whole canvas to the window from `scaleFromWidth` (769 px by default) up, reflowing below it. The other layers are `header`, `footer`, `background`, `scroll`, `chrome` and `overridePolicy` (which `meta.layoutOverrides` layers a page may apply). Answers the frame as the site now resolves it, with warnings.",
+      "description": "Replace this site's version of one of the theme's layout frames (`layoutId`, the frame a page names in `frame`, such as `default` or `scale-canvas`) with `layout`, the whole frame object (its `id` is `layoutId`; read it first with layout.read, which answers it as the site resolves it now). `frame.responsiveMode` decides how its pages fit the window: `breakpoint` reflows them at the site breakpoints, with fluid tokens growing with the window; `scale` lays them out at `designWidth` and scales the whole canvas to the window from `scaleFromWidth` (769 px by default) up, reflowing below it. The other layers are `header`, `footer`, `background`, `scroll`, `chrome` and `overridePolicy` (which `meta.layoutOverrides` layers a page may apply). Colours and lengths are CSS, used as written: a token is its custom property, `var(--ds-color-bg-page)`; a `{color.bg.page}` reference is refused. Answers the frame as the site now resolves it, with warnings.",
       "example": {
         "layoutId": "default",
         "layout": {
@@ -46341,6 +48442,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -63533,6 +65635,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -65477,6 +67580,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -67052,6 +69156,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -68617,6 +70722,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -69845,6 +71951,119 @@
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 9007199254740991
+              },
+              "inline": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string",
+                        "const": "ready"
+                      },
+                      "elements": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 1500
+                      },
+                      "accent": {
+                        "type": "boolean"
+                      },
+                      "text": {
+                        "type": "boolean"
+                      },
+                      "colors": {
+                        "maxItems": 32,
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/$defs/__schema4"
+                        }
+                      }
+                    },
+                    "required": [
+                      "status",
+                      "elements",
+                      "accent",
+                      "text",
+                      "colors"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string",
+                        "const": "refused"
+                      },
+                      "reason": {
+                        "type": "string",
+                        "enum": [
+                          "svg_inline_too_large",
+                          "svg_inline_too_many_elements",
+                          "svg_inline_unsupported",
+                          "svg_inline_styled",
+                          "svg_inline_no_viewbox"
+                        ]
+                      },
+                      "detail": {
+                        "type": "string",
+                        "maxLength": 500
+                      }
+                    },
+                    "required": [
+                      "status",
+                      "reason",
+                      "detail"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "drawing": {
+                "properties": {
+                  "t": {
+                    "type": "string",
+                    "enum": [
+                      "svg",
+                      "g",
+                      "defs",
+                      "symbol",
+                      "use",
+                      "path",
+                      "rect",
+                      "circle",
+                      "ellipse",
+                      "line",
+                      "polyline",
+                      "polygon",
+                      "text",
+                      "tspan",
+                      "linearGradient",
+                      "radialGradient",
+                      "stop",
+                      "clipPath",
+                      "mask",
+                      "pattern",
+                      "marker"
+                    ]
+                  },
+                  "a": {
+                    "$ref": "#/$defs/__schema5"
+                  },
+                  "r": {
+                    "type": "string",
+                    "const": "accent"
+                  },
+                  "c": {
+                    "maxItems": 1500,
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/__schema8"
+                    }
+                  }
+                },
+                "$ref": "#/$defs/__schema9"
               }
             },
             "required": [
@@ -69911,6 +72130,179 @@
           "__schema3": {
             "type": "string",
             "maxLength": 1000
+          },
+          "__schema4": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "__schema5": {
+            "type": "object",
+            "propertyNames": {
+              "$ref": "#/$defs/__schema6"
+            },
+            "additionalProperties": {
+              "$ref": "#/$defs/__schema7"
+            }
+          },
+          "__schema6": {
+            "type": "string",
+            "enum": [
+              "id",
+              "href",
+              "viewBox",
+              "preserveAspectRatio",
+              "transform",
+              "d",
+              "x",
+              "y",
+              "x1",
+              "y1",
+              "x2",
+              "y2",
+              "cx",
+              "cy",
+              "r",
+              "rx",
+              "ry",
+              "fx",
+              "fy",
+              "fr",
+              "width",
+              "height",
+              "points",
+              "pathLength",
+              "offset",
+              "gradientUnits",
+              "gradientTransform",
+              "spreadMethod",
+              "patternUnits",
+              "patternContentUnits",
+              "patternTransform",
+              "clipPathUnits",
+              "maskUnits",
+              "maskContentUnits",
+              "markerWidth",
+              "markerHeight",
+              "markerUnits",
+              "refX",
+              "refY",
+              "orient",
+              "dx",
+              "dy",
+              "rotate",
+              "textLength",
+              "lengthAdjust",
+              "text-anchor",
+              "dominant-baseline",
+              "alignment-baseline",
+              "baseline-shift",
+              "font-family",
+              "font-size",
+              "font-style",
+              "font-weight",
+              "letter-spacing",
+              "word-spacing",
+              "fill",
+              "stroke",
+              "stop-color",
+              "color",
+              "fill-opacity",
+              "fill-rule",
+              "stroke-width",
+              "stroke-linecap",
+              "stroke-linejoin",
+              "stroke-miterlimit",
+              "stroke-dasharray",
+              "stroke-dashoffset",
+              "stroke-opacity",
+              "stop-opacity",
+              "opacity",
+              "clip-path",
+              "clip-rule",
+              "mask",
+              "marker-start",
+              "marker-mid",
+              "marker-end",
+              "vector-effect",
+              "visibility",
+              "display",
+              "paint-order",
+              "shape-rendering"
+            ]
+          },
+          "__schema7": {
+            "type": "string"
+          },
+          "__schema8": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/__schema9"
+              },
+              {
+                "type": "string",
+                "maxLength": 2000
+              }
+            ]
+          },
+          "__schema9": {
+            "type": "object",
+            "properties": {
+              "t": {
+                "type": "string",
+                "enum": [
+                  "svg",
+                  "g",
+                  "defs",
+                  "symbol",
+                  "use",
+                  "path",
+                  "rect",
+                  "circle",
+                  "ellipse",
+                  "line",
+                  "polyline",
+                  "polygon",
+                  "text",
+                  "tspan",
+                  "linearGradient",
+                  "radialGradient",
+                  "stop",
+                  "clipPath",
+                  "mask",
+                  "pattern",
+                  "marker"
+                ]
+              },
+              "a": {
+                "$ref": "#/$defs/__schema5"
+              },
+              "r": {
+                "type": "string",
+                "const": "accent"
+              },
+              "c": {
+                "maxItems": 1500,
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/__schema10"
+                }
+              }
+            },
+            "required": [
+              "t"
+            ],
+            "additionalProperties": false
+          },
+          "__schema10": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/__schema9"
+              },
+              {
+                "type": "string",
+                "maxLength": 2000
+              }
+            ]
           }
         }
       },
@@ -69931,7 +72323,7 @@
     },
     {
       "name": "domain.add",
-      "description": "Connect a hostname to the site. The platform's base domain or one plain label under it goes live at once; any other hostname waits for its DNS record (`ownershipVerification`, `dnsTarget`) and the edge provider's certificate, checked with domain.verify. The first domain that goes live becomes primary while the platform address still is. A refused hostname is domain_refused with its `reason` (invalid, too_deep, platform_address, provider_unavailable; taken is 409). Site ownership is checked.",
+      "description": "Connect a hostname to the site. The platform's base domain or one plain label under it goes live at once; any other hostname waits for its DNS record (`ownershipVerification`, `dnsTarget`) and the edge provider's certificate, checked with domain.verify. The first domain under the platform domain that goes live becomes primary while the platform address still is. With `pair: true` a registrable domain or its www (`example.com`, `www.example.com`) connects both hostnames, answered as `domain` and `paired`; each verifies on its own, and the www becomes primary once it is live unless the site already has a custom primary, the apex then redirecting to it. Any other subdomain stays one hostname. A refused hostname is domain_refused with its `reason` (invalid, too_deep, platform_address, provider_unavailable; taken is 409). Site ownership is checked.",
       "example": {
         "hostname": "www.example.com"
       },
@@ -69943,6 +72335,9 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 255
+          },
+          "pair": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -69955,6 +72350,18 @@
         "type": "object",
         "properties": {
           "domain": {
+            "$ref": "#/$defs/__schema0"
+          },
+          "paired": {
+            "$ref": "#/$defs/__schema0"
+          }
+        },
+        "required": [
+          "domain"
+        ],
+        "additionalProperties": false,
+        "$defs": {
+          "__schema0": {
             "type": "object",
             "properties": {
               "id": {
@@ -70043,7 +72450,7 @@
               "ownershipVerification": {
                 "anyOf": [
                   {
-                    "$ref": "#/$defs/__schema0"
+                    "$ref": "#/$defs/__schema1"
                   },
                   {
                     "type": "null"
@@ -70055,7 +72462,7 @@
                   {
                     "type": "array",
                     "items": {
-                      "$ref": "#/$defs/__schema0"
+                      "$ref": "#/$defs/__schema1"
                     }
                   },
                   {
@@ -70123,14 +72530,8 @@
               "updatedAt"
             ],
             "additionalProperties": false
-          }
-        },
-        "required": [
-          "domain"
-        ],
-        "additionalProperties": false,
-        "$defs": {
-          "__schema0": {
+          },
+          "__schema1": {
             "type": "object",
             "properties": {
               "type": {
@@ -70198,6 +72599,18 @@
         "type": "object",
         "properties": {
           "domain": {
+            "$ref": "#/$defs/__schema0"
+          },
+          "paired": {
+            "$ref": "#/$defs/__schema0"
+          }
+        },
+        "required": [
+          "domain"
+        ],
+        "additionalProperties": false,
+        "$defs": {
+          "__schema0": {
             "type": "object",
             "properties": {
               "id": {
@@ -70286,7 +72699,7 @@
               "ownershipVerification": {
                 "anyOf": [
                   {
-                    "$ref": "#/$defs/__schema0"
+                    "$ref": "#/$defs/__schema1"
                   },
                   {
                     "type": "null"
@@ -70298,7 +72711,7 @@
                   {
                     "type": "array",
                     "items": {
-                      "$ref": "#/$defs/__schema0"
+                      "$ref": "#/$defs/__schema1"
                     }
                   },
                   {
@@ -70366,14 +72779,8 @@
               "updatedAt"
             ],
             "additionalProperties": false
-          }
-        },
-        "required": [
-          "domain"
-        ],
-        "additionalProperties": false,
-        "$defs": {
-          "__schema0": {
+          },
+          "__schema1": {
             "type": "object",
             "properties": {
               "type": {
@@ -70441,6 +72848,18 @@
         "type": "object",
         "properties": {
           "domain": {
+            "$ref": "#/$defs/__schema0"
+          },
+          "paired": {
+            "$ref": "#/$defs/__schema0"
+          }
+        },
+        "required": [
+          "domain"
+        ],
+        "additionalProperties": false,
+        "$defs": {
+          "__schema0": {
             "type": "object",
             "properties": {
               "id": {
@@ -70529,7 +72948,7 @@
               "ownershipVerification": {
                 "anyOf": [
                   {
-                    "$ref": "#/$defs/__schema0"
+                    "$ref": "#/$defs/__schema1"
                   },
                   {
                     "type": "null"
@@ -70541,7 +72960,7 @@
                   {
                     "type": "array",
                     "items": {
-                      "$ref": "#/$defs/__schema0"
+                      "$ref": "#/$defs/__schema1"
                     }
                   },
                   {
@@ -70609,14 +73028,8 @@
               "updatedAt"
             ],
             "additionalProperties": false
-          }
-        },
-        "required": [
-          "domain"
-        ],
-        "additionalProperties": false,
-        "$defs": {
-          "__schema0": {
+          },
+          "__schema1": {
             "type": "object",
             "properties": {
               "type": {
@@ -70660,7 +73073,7 @@
     },
     {
       "name": "domain.delete",
-      "description": "Disconnect a domain from the site and release it at the edge provider; the platform address cannot be removed. When it was the primary, the platform address takes over. Site ownership is checked.",
+      "description": "Disconnect a domain from the site and release it at the edge provider; the platform address cannot be removed. With `pair: true` the other hostname of its pair (its apex or its www) goes too. When the primary goes, the platform address takes over. Site ownership is checked.",
       "example": {
         "domainId": "9c0d1e2f-3a4b-4c5d-9e6f-7a8b9c0d1e2f"
       },
@@ -70672,6 +73085,9 @@
             "type": "string",
             "format": "uuid",
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "pair": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -72281,6 +74697,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -74895,6 +77312,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -76198,7 +78616,7 @@
     },
     {
       "name": "designSystem.setComponentCell",
-      "description": "Set cells of one design-system component in one save: each `{ cell, value }`, the cell key `<variant>.<size>.<state>.<part>.<breakpoint>.<property>` (`primary.all.hover.container.base.background`: `all` when the value does not vary by size, `base` or a breakpoint id). A value is a token alias such as `{color.bg.accent}` (a semantic or foundation token, never a palette step or a raw literal), a bare keyword for a property whose values are modes (a link underline's `none`, `always`, `hover`), or `{ component, variant }` for a part that embeds another component. Read the cell keys of a component with the `component/<key>` resource (designSystem.readComponent) and the segments with designSystem.read `components: true`. The menu dialog's drawer is the `drawer-nav` component: its `overlay` cells (`background`, `opacity`, `blur`), `panel` cells (`background`, `width`, `padding`, `shadow`, `z`, `radius`, `offset-x`, `offset-y`, `fit`) and `motion` cells (`delay`, `duration`, `easing`, `fade`) style it, such as `full.all.default.overlay.base.blur`. Every save runs the AA contrast gate.",
+      "description": "Set cells of one design-system component in one save: each `{ cell, value }`, the cell key `<variant>.<size>.<state>.<part>.<breakpoint>.<property>` (`primary.all.hover.container.base.background`: `all` when the value does not vary by size, `base` or a breakpoint id). A value is a token alias such as `{color.bg.accent}` (a semantic or foundation token, never a palette step or a raw literal), a bare keyword for a property whose values are modes (a link underline's `none`, `always`, `hover`), or `{ component, variant }` for a part that embeds another component. Read the cell keys of a component with the `component/<key>` resource (designSystem.readComponent) and the segments with designSystem.read `components: true`. The menu dialog's drawer is the `drawer-nav` component: its `overlay` cells (`background`, `opacity`, `blur`), `panel` cells (`background`, `width`, `padding`, `shadow`, `z`, `radius`, `offset-x`, `offset-y`, `fit`) and `motion` cells (`delay`, `duration`, `easing`, `fade`) style it, such as `full.all.default.overlay.base.blur`. The AA contrast gate judges the end state of the whole batch, so a colour token and a cell that pairs with it may change in two operations of one batch.",
       "example": {
         "component": "button",
         "cells": [
@@ -77521,6 +79939,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -80112,6 +82531,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -82730,6 +85150,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -85307,6 +87728,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -87883,6 +90305,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -90638,6 +93061,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -93284,6 +95708,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -95850,6 +98275,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -98414,6 +100840,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -100998,6 +103425,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -103623,6 +106051,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -106214,6 +108643,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -108791,6 +111221,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -111389,6 +113820,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -113961,6 +116393,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -116493,6 +118926,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]
@@ -120095,6 +122529,7 @@
                       "video",
                       "link",
                       "icon",
+                      "svg",
                       "embed",
                       "table"
                     ]

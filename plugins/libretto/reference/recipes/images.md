@@ -41,6 +41,15 @@ Look at the picture once (`Read` the file) to write its alt text; do not read it
 - As a page's featured or social image: `page.update` with the field `page.read` shows.
 - Replacing a file everywhere it is used: `media.usage` `{ mediaId }` lists the pages, articles, tokens and settings that use it; `media.replace` swaps the bytes of a row staged by the admin's upload, which MCP cannot stage. To swap from here, upload the new file and re-point each use.
 
+## Icons, illustrations and charts in the site's colours (SVG)
+
+An SVG on an image node is a picture: the site's colours never reach it. To draw it in the page with the site's tokens, place it on an `svg` node (the **SVG drawing** primitive).
+
+1. **Prepare the file.** Lines and fills that follow the text colour use `currentColor`. Mark the one element in the second colour `data-role="accent"`, or name its colour at upload. Keep it to geometry and presentation attributes or plain class rules (`.a { stroke: … }`): no filters, embedded pictures, links or animations; at most 96 KB and 1,500 elements.
+2. **Upload it.** `upload_media_file` with its path; if the file paints its text colour or accent with a literal colour, name them: `{ "path": "~/glifi/cricchetto.svg", "svgTextColor": "#f5f4ee", "svgAccentColor": "#3ccb7f" }`. The answer's `inline` is `ready` (with `elements`, whether it has an `accent` part, and the `colors` left as drawn, which no token reaches) or `refused` with the reason (`svg_inline_too_large`, `svg_inline_too_many_elements`, `svg_inline_unsupported`, `svg_inline_styled`, `svg_inline_no_viewbox`): fix the file and upload it again. `media.read` `{ mediaId }` answers the same later.
+3. **Place it.** `insert` `{ "kind": "primitive", "type": "svg", "props": { "media": { "$media": "<id>" }, "label": { "it": "…", "en": "…" } } }`; `decorative: true` (no label) for one that only decorates text that says the same. An svg node whose media is not a ready SVG is refused at the node (`media_invalid`, with the reason).
+4. **Colour and size it with tokens** in the node's styles: `color` (the `currentColor` lines), `color` under `p:accent` (the accent part), `width` and `height` (an icon is `icon.size.inline` square by default; an illustration fills its container's width).
+
 ## 4. Check
 
 Look at the page at desktop and phone width ([preview and visual check](preview-and-verify.md)): crop, focus and size come from the node's styles and the variant, not from the file.

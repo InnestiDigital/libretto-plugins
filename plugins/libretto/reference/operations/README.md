@@ -2,7 +2,7 @@
 
 # Libretto operations
 
-166 operations, from Libretto's operation registry. Each runs inside a `libretto.batch` sent to `dry_run_ops` or `apply_ops` (see [mcp-tools.md](mcp-tools.md)). `discover_operations` with the name gives the live schema; this reference is the same registry, written for reading.
+167 operations, from Libretto's operation registry. Each runs inside a `libretto.batch` sent to `dry_run_ops` or `apply_ops` (see [mcp-tools.md](mcp-tools.md)). `discover_operations` with the name gives the live schema; this reference is the same registry, written for reading.
 
 | Domain | Operations |
 |---|---|
@@ -14,7 +14,7 @@
 | [Blogs, articles and page templates](blogs-and-articles.md) | `blog.create`, `article.create`, `blog.update`, `article.update`, `article.publish`, `article.unpublish`, `template.index`, `template.read` |
 | [Collections and items](collections.md) | `collection.list`, `collection.read`, `collection.create`, `collection.update`, `collection.delete`, `item.list`, `item.read`, `item.history`, `item.create`, `item.update`, `item.delete`, `item.reorder`, `item.import`, `item.rollback`, `item.setStatus` |
 | [Forms, submissions and members](forms-and-members.md) | `form.list`, `form.read`, `form.create`, `form.update`, `form.delete`, `submission.list`, `submission.setStatus`, `submission.delete`, `member.list`, `member.invite`, `member.setStatus`, `member.setRoles`, `member.delete`, `member.signOutAll`, `memberRole.list`, `memberRole.create`, `memberRole.delete`, `form.sendTest` |
-| [Media library and fonts](media-and-fonts.md) | `media.list`, `media.usage`, `media.recordUpload`, `media.upload`, `media.replace`, `media.delete`, `media.update`, `media.move`, `media.createFolder`, `media.renameFolder`, `media.deleteFolder`, `font.list`, `font.recordUpload`, `font.upload`, `font.delete`, `font.importGoogle` |
+| [Media library and fonts](media-and-fonts.md) | `media.list`, `media.read`, `media.usage`, `media.recordUpload`, `media.upload`, `media.replace`, `media.delete`, `media.update`, `media.move`, `media.createFolder`, `media.renameFolder`, `media.deleteFolder`, `font.list`, `font.recordUpload`, `font.upload`, `font.delete`, `font.importGoogle` |
 | [Motion and scenes](motion.md) | `motion.read`, `motion.replace`, `motion.delete`, `motion.listRecipes`, `motion.applyRecipe`, `motion.saveRecipe`, `motion.diagnose` |
 | [Site, settings, languages, redirects, access and domains](site-and-settings.md) | `site.read`, `site.update`, `access.read`, `access.update`, `settings.read`, `settings.update`, `breakpoints.update`, `layout.read`, `layout.update`, `redirects.read`, `redirects.update`, `apiConfig.read`, `apiConfig.update`, `environment.read`, `environment.update`, `site.create`, `site.updateLanguages`, `domain.add`, `domain.primary`, `domain.verify`, `domain.delete`, `maintenance.migrate`, `maintenance.restoreBackup` |
 | [Publication, versions and history](publication-and-history.md) | `history.read`, `history.undo`, `publication.publish`, `publication.activate`, `publication.rollbackPage`, `external.status`, `external.close`, `publication.versions`, `publication.versionPages`, `publication.pending` |

@@ -146,7 +146,7 @@ Example input:
 
 ## layout.update
 
-Replace this site's version of one of the theme's layout frames (`layoutId`, the frame a page names in `frame`, such as `default` or `scale-canvas`) with `layout`, the whole frame object (its `id` is `layoutId`; read it first with layout.read, which answers it as the site resolves it now). `frame.responsiveMode` decides how its pages fit the window: `breakpoint` reflows them at the site breakpoints, with fluid tokens growing with the window; `scale` lays them out at `designWidth` and scales the whole canvas to the window from `scaleFromWidth` (769 px by default) up, reflowing below it. The other layers are `header`, `footer`, `background`, `scroll`, `chrome` and `overridePolicy` (which `meta.layoutOverrides` layers a page may apply). Answers the frame as the site now resolves it, with warnings.
+Replace this site's version of one of the theme's layout frames (`layoutId`, the frame a page names in `frame`, such as `default` or `scale-canvas`) with `layout`, the whole frame object (its `id` is `layoutId`; read it first with layout.read, which answers it as the site resolves it now). `frame.responsiveMode` decides how its pages fit the window: `breakpoint` reflows them at the site breakpoints, with fluid tokens growing with the window; `scale` lays them out at `designWidth` and scales the whole canvas to the window from `scaleFromWidth` (769 px by default) up, reflowing below it. The other layers are `header`, `footer`, `background`, `scroll`, `chrome` and `overridePolicy` (which `meta.layoutOverrides` layers a page may apply). Colours and lengths are CSS, used as written: a token is its custom property, `var(--ds-color-bg-page)`; a `{color.bg.page}` reference is refused. Answers the frame as the site now resolves it, with warnings.
 
 - permission `site.structure` (admin, workspace owner); class `transaction`; writes `settings`; undoable with `history.undo`.
 
@@ -329,13 +329,14 @@ Example input:
 
 ## domain.add
 
-Connect a hostname to the site. The platform's base domain or one plain label under it goes live at once; any other hostname waits for its DNS record (`ownershipVerification`, `dnsTarget`) and the edge provider's certificate, checked with domain.verify. The first domain that goes live becomes primary while the platform address still is. A refused hostname is domain_refused with its `reason` (invalid, too_deep, platform_address, provider_unavailable; taken is 409). Site ownership is checked.
+Connect a hostname to the site. The platform's base domain or one plain label under it goes live at once; any other hostname waits for its DNS record (`ownershipVerification`, `dnsTarget`) and the edge provider's certificate, checked with domain.verify. The first domain under the platform domain that goes live becomes primary while the platform address still is. With `pair: true` a registrable domain or its www (`example.com`, `www.example.com`) connects both hostnames, answered as `domain` and `paired`; each verifies on its own, and the www becomes primary once it is live unless the site already has a custom primary, the apex then redirecting to it. Any other subdomain stays one hostname. A refused hostname is domain_refused with its `reason` (invalid, too_deep, platform_address, provider_unavailable; taken is 409). Site ownership is checked.
 
 - permission `site.admin` (admin); class `external`; writes `site`; **not undoable**: alone in its batch; external: alone in its batch, never in a dry run.
 
 | Input | Type | Required |
 |---|---|---|
 | `hostname` | string (min 1, max 255) | yes |
+| `pair` | boolean |  |
 
 Output: { domain: { id: string, siteId: string, hostname: string, kind: "platform" \| "custom", isPrimary: boolean, redirectToPrimary: boolean, status: "pending" \| "active" \| "error", dnsStatus: string, provider: string \| null, providerId: string \| null, providerStatus: string \| null, sslStatus: string \| null, dnsTarget: string… (full schema: discover_operations)
 
@@ -383,13 +384,14 @@ Example input:
 
 ## domain.delete
 
-Disconnect a domain from the site and release it at the edge provider; the platform address cannot be removed. When it was the primary, the platform address takes over. Site ownership is checked.
+Disconnect a domain from the site and release it at the edge provider; the platform address cannot be removed. With `pair: true` the other hostname of its pair (its apex or its www) goes too. When the primary goes, the platform address takes over. Site ownership is checked.
 
 - permission `site.admin` (admin); class `external`; writes `site`; needs `"confirmed": ["destructive"]`; **not undoable**: alone in its batch; external: alone in its batch, never in a dry run.
 
 | Input | Type | Required |
 |---|---|---|
 | `domainId` | uuid | yes |
+| `pair` | boolean |  |
 
 Output: { success: true }
 

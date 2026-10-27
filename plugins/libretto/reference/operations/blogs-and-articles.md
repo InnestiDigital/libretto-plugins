@@ -8,7 +8,7 @@ A blog is an index page with its articles; an article is a page with its own pub
 
 ## blog.create
 
-Create a blog index page from its `title` (in `locale`), an optional `slug` and `templateId`, the theme template it renders with (template.index lists the `blog-index` ones and what each draws around the page's own tree); articles go under it with article.create. Answers the new page's id and slug. Entry validation (page type, template, slug) and ownership checks apply.
+Create a blog index page from its `title` (in `locale`), an optional `slug`, optional `slugs` (its slug in each other locale, `{ "en": "notes" }`) and `templateId`, the theme template it renders with (template.index lists the `blog-index` ones and what each draws around the page's own tree); articles go under it with article.create. Answers the new page's id and slug. Entry validation (page type, template, slug) and ownership checks apply.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `pages`; undoable with `history.undo`.
 
@@ -16,6 +16,7 @@ Create a blog index page from its `title` (in `locale`), an optional `slug` and 
 |---|---|---|
 | `title` | string (min 1, max 200) | yes |
 | `slug` | string |  |
+| `slugs` | Record<string, string> |  |
 | `templateId` | string (min 1) | yes |
 | `locale` | string (min 1) |  |
 
@@ -29,7 +30,7 @@ Example input:
 
 ## article.create
 
-Create a draft article under a blog index (`blogId`, the blog index page id) from its `title`, an optional `slug` and `templateId`, the article template it renders with (template.index lists the `article` ones). Its content is its tree: fill it with tree.commit on the answered id; it stays off the public site until article.publish. Entry validation (page type, template, slug) and ownership checks apply.
+Create a draft article under a blog index (`blogId`, the blog index page id) from its `title`, an optional `slug`, optional `slugs` (its slug in each other locale, `{ "en": "a-house-on-the-hill" }`) and `templateId`, the article template it renders with (template.index lists the `article` ones). Its content is its tree: fill it with tree.commit on the answered id; it stays off the public site until article.publish. Entry validation (page type, template, slug) and ownership checks apply.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `pages`; undoable with `history.undo`.
 
@@ -37,6 +38,7 @@ Create a draft article under a blog index (`blogId`, the blog index page id) fro
 |---|---|---|
 | `title` | string (min 1, max 200) | yes |
 | `slug` | string |  |
+| `slugs` | Record<string, string> |  |
 | `templateId` | string (min 1) | yes |
 | `locale` | string (min 1) |  |
 | `blogId` | uuid | yes |
@@ -51,7 +53,7 @@ Example input:
 
 ## blog.update
 
-Patch a blog index page as { id, patch }: its slug, title, excerpt, featured image, author, canonical URL, SEO (`seo.metaTitle`, `metaDescription`, `ogImageId`, `noIndex`), template or members-only access. Its content is its tree. Entry validation (page type, template, slug) and ownership checks apply.
+Patch a blog index page as { id, patch }: its slug, its slug per locale (`slugs`: `{ "en": "notes" }` sets one, `null` removes it; renaming a published page keeps its old address as a 301), title, excerpt, featured image, author, canonical URL, SEO (`seo.metaTitle`, `metaDescription`, `ogImageId`, `noIndex`), template or members-only access. Its content is its tree. Entry validation (page type, template, slug) and ownership checks apply.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `pages`; undoable with `history.undo`.
 
@@ -60,6 +62,7 @@ Patch a blog index page as { id, patch }: its slug, title, excerpt, featured ima
 | `id` | string (min 1) | yes |
 | `patch` | object | yes |
 | `patch.slug` | string |  |
+| `patch.slugs` | Record<string, string \| null> |  |
 | `patch.title` | Record<string, string> |  |
 | `patch.excerpt` | Record<string, string> \| null |  |
 | `patch.featuredImageId` | string \| null |  |
@@ -81,7 +84,7 @@ Example input:
 
 ## article.update
 
-Patch an article as { id, patch }: its slug, title, excerpt, featured image, author, canonical URL, SEO (`seo.metaTitle`, `metaDescription`, `ogImageId`, `noIndex`), template or members-only access. Its content is its tree. Entry validation (page type, template, slug) and ownership checks apply.
+Patch an article as { id, patch }: its slug, its slug per locale (`slugs`: `{ "en": "my-house" }` sets one, `null` removes it; renaming a published article keeps its old address as a 301), title, excerpt, featured image, author, canonical URL, SEO (`seo.metaTitle`, `metaDescription`, `ogImageId`, `noIndex`), template or members-only access. Its content is its tree. Entry validation (page type, template, slug) and ownership checks apply.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `pages`; undoable with `history.undo`.
 
@@ -90,6 +93,7 @@ Patch an article as { id, patch }: its slug, title, excerpt, featured image, aut
 | `id` | string (min 1) | yes |
 | `patch` | object | yes |
 | `patch.slug` | string |  |
+| `patch.slugs` | Record<string, string \| null> |  |
 | `patch.title` | Record<string, string> |  |
 | `patch.excerpt` | Record<string, string> \| null |  |
 | `patch.featuredImageId` | string \| null |  |

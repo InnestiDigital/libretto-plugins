@@ -114,7 +114,7 @@ Example input:
 
 ## page.read
 
-Read a page row: slug, title, status, frame and SEO fields. Page validation and ownership checks apply.
+Read a page row: slug, its slug per locale (`slugs`), title, status, frame and SEO fields. Page validation and ownership checks apply.
 
 - permission `site.read` (admin, editor); class `read`; writes nothing.
 
@@ -122,7 +122,7 @@ Read a page row: slug, title, status, frame and SEO fields. Page validation and 
 |---|---|---|
 | `pageId` | string (min 1) | yes |
 
-Output: { page: { slug: string (min 1), title: Record<string, string>, frame: string, dynamic: boolean, position: integer ≥-9007199254740991, parentId: string \| null, requireAuth: boolean, requiredRoles?: string (max 40)[] (≤50), meta: Record<string, string \| number \| boolean \| null \| (… \| … \| … \| … \| … \| …)[] \| Record<string,… (full schema: discover_operations)
+Output: { page: { slug: string (min 1), slugs?: Record<string, string>, title: Record<string, string>, frame: string, dynamic: boolean, position: integer ≥-9007199254740991, parentId: string \| null, requireAuth: boolean, requiredRoles?: string (max 40)[] (≤50), meta: Record<string, string \| number \| boolean \| null \| (… \| … \| …… (full schema: discover_operations)
 
 Example input:
 
@@ -132,13 +132,14 @@ Example input:
 
 ## page.create
 
-Create a page (`slug`, `title` per locale, and optionally `frame`, the theme layout frame it renders in, `parentId`, `pageType`, SEO and members-only fields) with an empty tree. `status` defaults to draft; a draft page stays out of the site publish, so pass `status: "published"` for a page the next publication.publish should serve. Fill the tree with tree.commit in the same batch: read the new root id with tree.read through a $ref to this operation's page.id. A section's anchor is the node field `anchor` in that tree, not a page field, `meta.anchor` or `props.anchor`. A `pageType: "dynamic"` page names a collection in `collectionKey` and is the detail page of its items: it answers `/<slug>/<item slug>` in each locale, and its tree binds the item. Page validation and ownership checks apply.
+Create a page (`slug`, `title` per locale, and optionally `slugs`, its slug in each other locale such as `{ "en": "method" }`, `frame`, the theme layout frame it renders in, `parentId`, `pageType`, SEO and members-only fields) with an empty tree. `status` defaults to draft; a draft page stays out of the site publish, so pass `status: "published"` for a page the next publication.publish should serve. Fill the tree with tree.commit in the same batch: read the new root id with tree.read through a $ref to this operation's page.id. A section's anchor is the node field `anchor` in that tree, not a page field, `meta.anchor` or `props.anchor`. A `pageType: "dynamic"` page names a collection in `collectionKey` and is the detail page of its items: it answers `/<slug>/<item slug>` in each locale, and its tree binds the item. Page validation and ownership checks apply.
 
 - permission `site.structure` (admin, workspace owner); class `transaction`; writes `pages`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
 | `slug` | string (min 1) | yes |
+| `slugs` | Record<string, string \| null> |  |
 | `title` | Record<string, string> | yes |
 | `frame` | string |  |
 | `dynamic` | boolean |  |
@@ -162,7 +163,7 @@ Create a page (`slug`, `title` per locale, and optionally `frame`, the theme lay
 | `canonicalUrl` | string \| null |  |
 | `publishedAt` | string \| null |  |
 
-Output: { page: { slug: string (min 1), title: Record<string, string>, frame: string, dynamic: boolean, position: integer ≥-9007199254740991, parentId: string \| null, requireAuth: boolean, requiredRoles?: string (max 40)[] (≤50), meta: Record<string, string \| number \| boolean \| null \| (… \| … \| … \| … \| … \| …)[] \| Record<string,… (full schema: discover_operations)
+Output: { page: { slug: string (min 1), slugs?: Record<string, string>, title: Record<string, string>, frame: string, dynamic: boolean, position: integer ≥-9007199254740991, parentId: string \| null, requireAuth: boolean, requiredRoles?: string (max 40)[] (≤50), meta: Record<string, string \| number \| boolean \| null \| (… \| … \| …… (full schema: discover_operations)
 
 Example input:
 
@@ -174,21 +175,21 @@ Example input:
 
 ## page.update
 
-Patch a page's fields as { pageId, patch }: slug, title, `frame` (the theme layout frame it renders in, such as `default`, which reflows at the site breakpoints, or a scaled canvas such as `scale-canvas`; layout.update edits a frame), status, SEO, members-only access or `meta`. `patch.status: "published"` marks a draft page for the next site publish. `patch.meta` replaces the page's whole meta, so read the page first (page.read) and send its meta back with your change. `meta.layoutOverrides` overrides the frame for this page alone, layer by layer, where the frame's `overridePolicy` allows it: `background` ({ color, image, overlay, texture }: the page's own background colour, as raw CSS such as `var(--ds-color-bg-inverse)`), `header`, `footer`, `scroll` and `chrome`. Page validation and ownership checks apply.
+Patch a page's fields as { pageId, patch }: slug, `slugs` names the page's slug in each other locale, as `{ "en": "method" }`: the page answers `/en/method` in English (a page under it reads `/en/method/<its English slug>`) and its `slug` in the default locale; a locale without one answers `slug`. A `slugs` value sets that locale's slug, `null` removes it, a locale left out keeps its own; no sibling page may answer the same slug in any locale. Renaming a published page (its slug, a slug per locale or its parent) adds a 301 from each old address to the new one to the site's redirects (redirects.read). Also title, `frame` (the theme layout frame it renders in, such as `default`, which reflows at the site breakpoints, or a scaled canvas such as `scale-canvas`; layout.update edits a frame), status, SEO, members-only access or `meta`. `patch.status: "published"` marks a draft page for the next site publish. `patch.meta` replaces the page's whole meta, so read the page first (page.read) and send its meta back with your change. `meta.layoutOverrides` overrides the frame for this page alone, layer by layer, where the frame's `overridePolicy` allows it: `background` ({ color, image, overlay, texture }: the page's own background colour, as raw CSS such as `var(--ds-color-bg-inverse)`), `header`, `footer`, `scroll` and `chrome`. Page validation and ownership checks apply.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `pages`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
 | `pageId` | string (min 1) | yes |
-| `patch` | { slug?: string (min 1), title?: Record<string, string>, frame?: string, dynamic?: boolean, position?: integer ≥-9007199254740991, parentId?: string (min 1) \| null, requireAuth?: boolean, requiredRoles?: string (max 40)[] (≤50), meta?: Record<string, string \| number \| boolean \| null \| (string \| number \| boolean \| null … (full schema: discover_operations) | yes |
+| `patch` | { slug?: string (min 1), slugs?: Record<string, string \| null>, title?: Record<string, string>, frame?: string, dynamic?: boolean, position?: integer ≥-9007199254740991, parentId?: string (min 1) \| null, requireAuth?: boolean, requiredRoles?: string (max 40)[] (≤50), meta?: Record<string, string \| number \| boolean \| nu… (full schema: discover_operations) | yes |
 
-Output: { page: { slug: string (min 1), title: Record<string, string>, frame: string, dynamic: boolean, position: integer ≥-9007199254740991, parentId: string \| null, requireAuth: boolean, requiredRoles?: string (max 40)[] (≤50), meta: Record<string, string \| number \| boolean \| null \| (… \| … \| … \| … \| … \| …)[] \| Record<string,… (full schema: discover_operations)
+Output: { page: { slug: string (min 1), slugs?: Record<string, string>, title: Record<string, string>, frame: string, dynamic: boolean, position: integer ≥-9007199254740991, parentId: string \| null, requireAuth: boolean, requiredRoles?: string (max 40)[] (≤50), meta: Record<string, string \| number \| boolean \| null \| (… \| … \| …… (full schema: discover_operations)
 
 Example input:
 
 ```json
-{"pageId":"6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f","patch":{"title":{"en-US":"Studio and team"},"status":"published"}}
+{"pageId":"6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f","patch":{"title":{"en-US":"Studio and team","it":"Lo studio"},"slugs":{"it":"studio-e-squadra"},"status":"published"}}
 ```
 
 ## page.delete
@@ -219,7 +220,7 @@ Fork a theme template (`templateId`, one template.index lists) into an editable 
 |---|---|---|
 | `templateId` | string (min 1) | yes |
 
-Output: { page: { slug: string (min 1), title: Record<string, string>, frame: string, dynamic: boolean, position: integer ≥-9007199254740991, parentId: string \| null, requireAuth: boolean, requiredRoles?: string (max 40)[] (≤50), meta: Record<string, string \| number \| boolean \| null \| (… \| … \| … \| … \| … \| …)[] \| Record<string,… (full schema: discover_operations)
+Output: { page: { slug: string (min 1), slugs?: Record<string, string>, title: Record<string, string>, frame: string, dynamic: boolean, position: integer ≥-9007199254740991, parentId: string \| null, requireAuth: boolean, requiredRoles?: string (max 40)[] (≤50), meta: Record<string, string \| number \| boolean \| null \| (… \| … \| …… (full schema: discover_operations)
 
 Example input:
 
@@ -238,7 +239,7 @@ Protect a page with a password, change it, or remove it with `password: null`. A
 | `pageId` | string (min 1) | yes |
 | `password` | string (min 4, max 200) \| null | yes |
 
-Output: { page: { slug: string (min 1), title: Record<string, string>, frame: string, dynamic: boolean, position: integer ≥-9007199254740991, parentId: string \| null, requireAuth: boolean, requiredRoles?: string (max 40)[] (≤50), meta: Record<string, string \| number \| boolean \| null \| (… \| … \| … \| … \| … \| …)[] \| Record<string,… (full schema: discover_operations)
+Output: { page: { slug: string (min 1), slugs?: Record<string, string>, title: Record<string, string>, frame: string, dynamic: boolean, position: integer ≥-9007199254740991, parentId: string \| null, requireAuth: boolean, requiredRoles?: string (max 40)[] (≤50), meta: Record<string, string \| number \| boolean \| null \| (… \| … \| …… (full schema: discover_operations)
 
 Example input:
 

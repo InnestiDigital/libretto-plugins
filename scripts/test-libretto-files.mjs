@@ -145,7 +145,10 @@ try {
   mkdirSync(join(photos, 'sotto'))
   writeFileSync(join(photos, 'sotto', 'c.jpg'), 'c')
 
-  const fake = { revision: 7, stored: [], staleOnce: false, siteIds: [] }
+  const drawings = makeDir('drawings')
+  writeFileSync(join(drawings, 'glifo.svg'), '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M0 0h24" stroke="#3ccb7f"/></svg>')
+
+  const fake = { revision: 7, stored: [], staleOnce: false, siteIds: [], inputs: [] }
   const http = createServer(async (request, response) => {
     let body = ''
     for await (const chunk of request) body += chunk
@@ -168,6 +171,7 @@ try {
     if (args.baseRevisions.media !== fake.revision) return text({ status: 409, code: 'stale_revision', message: 'media moved' }, true)
     if (operation.input.filename === 'rifiuta.jpg') return text({ status: 422, message: 'refused for the test' }, true)
     const dryRun = name === 'dry_run_ops'
+    fake.inputs.push(operation.input)
     if (!dryRun) {
       fake.stored.push(operation.input.filename)
       fake.revision++
@@ -214,6 +218,15 @@ try {
     fake.siteIds = []
     await remote.call('upload_media_files', { paths: [join(photos, 'b.png')], skipExisting: false })
     assert.deepEqual([...new Set(fake.siteIds)], [undefined])
+  })
+  await check('an SVG\'s colour roles reach media.upload as svgRoles, and are refused for another kind of file', async () => {
+    fake.inputs = []
+    await remote.call('upload_media_file', { path: join(drawings, 'glifo.svg'), svgAccentColor: '#3ccb7f', svgTextColor: '#000' })
+    assert.deepEqual(fake.inputs.at(-1)?.svgRoles, { text: '#000', accent: '#3ccb7f' })
+    await remote.call('upload_media_file', { path: join(drawings, 'glifo.svg') })
+    assert.equal(fake.inputs.at(-1)?.svgRoles, undefined)
+    const { error } = await remote.call('upload_media_file', { path: join(photos, 'a.jpg'), svgAccentColor: '#3ccb7f' })
+    assert.match(error, /for an SVG file only/)
   })
   await check('more files than a call takes are refused before anything is sent', async () => {
     const many = Array.from({ length: 101 }, (_, i) => join(photos, `f${i}.jpg`))

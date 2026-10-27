@@ -4,7 +4,7 @@
 
 Images and files live in the media library; nodes reference them as `{ "$media": "<id>" }`. Fonts are site font faces (uploaded or imported from Google Fonts) that font-family tokens name.
 
-[`media.list`](#medialist) · [`media.usage`](#mediausage) · [`media.recordUpload`](#mediarecordupload) · [`media.upload`](#mediaupload) · [`media.replace`](#mediareplace) · [`media.delete`](#mediadelete) · [`media.update`](#mediaupdate) · [`media.move`](#mediamove) · [`media.createFolder`](#mediacreatefolder) · [`media.renameFolder`](#mediarenamefolder) · [`media.deleteFolder`](#mediadeletefolder) · [`font.list`](#fontlist) · [`font.recordUpload`](#fontrecordupload) · [`font.upload`](#fontupload) · [`font.delete`](#fontdelete) · [`font.importGoogle`](#fontimportgoogle)
+[`media.list`](#medialist) · [`media.read`](#mediaread) · [`media.usage`](#mediausage) · [`media.recordUpload`](#mediarecordupload) · [`media.upload`](#mediaupload) · [`media.replace`](#mediareplace) · [`media.delete`](#mediadelete) · [`media.update`](#mediaupdate) · [`media.move`](#mediamove) · [`media.createFolder`](#mediacreatefolder) · [`media.renameFolder`](#mediarenamefolder) · [`media.deleteFolder`](#mediadeletefolder) · [`font.list`](#fontlist) · [`font.recordUpload`](#fontrecordupload) · [`font.upload`](#fontupload) · [`font.delete`](#fontdelete) · [`font.importGoogle`](#fontimportgoogle)
 
 ## media.list
 
@@ -29,6 +29,24 @@ Example input:
 ```
 
 > Find an image by file name, then reference it in an image node as `{ "src": { "$media": "<id>" } }`.
+
+## media.read
+
+Read one media row: its kind, size, alt text and, for an SVG, whether the svg primitive draws it inline (`inline`: ready with its elements, accent part, text role and the colours left as drawn, or refused with the reason). Site ownership is checked; undo restores the media ledger.
+
+- permission `site.read` (admin, editor); class `read`; writes nothing.
+
+| Input | Type | Required |
+|---|---|---|
+| `mediaId` | uuid | yes |
+
+Output: { id: uuid, kind: "image" \| "svg" \| "video" \| "document", filename: string (min 1, max 255), mime: string (min 1, max 127), size: integer ≥0, url: string (min 1, max 2048), width?: integer ≥1 ≤100000, height?: integer ≥1 ≤100000, variants: ({ width: integer ≥1 ≤100000, height?: integer ≥1 ≤100000, mime: "image/avif" \| … (full schema: discover_operations)
+
+Example input:
+
+```json
+{"mediaId":"2c3d4e5f-6a7b-4c8d-9e0f-1a2b3c4d5e6f"}
+```
 
 ## media.usage
 
@@ -74,7 +92,7 @@ Example input:
 
 ## media.upload
 
-Upload a file from its base64 bytes: staged, checked (type, size, magic, SVG sanitiser, quota), its variants rendered, then recorded like media.recordUpload, in its folder when one is named. The same limits as the admin upload (images 5 MB). Site ownership is checked; undo restores the media ledger.
+Upload a file from its base64 bytes: staged, checked (type, size, magic, SVG sanitiser, quota), its variants rendered, then recorded like media.recordUpload, in its folder when one is named. The same limits as the admin upload (images 5 MB). An SVG is also made an inline drawing for the svg primitive when it fits (96 KB, 1500 elements, geometry and presentation attributes or plain class rules): svgRoles names the colour that follows the text colour and the one that becomes the accent part; the answer's inline says whether it is drawn inline. Site ownership is checked; undo restores the media ledger.
 
 - permission `content.edit` (admin, editor); class `transaction`; writes `media`; undoable with `history.undo`.
 
@@ -84,6 +102,9 @@ Upload a file from its base64 bytes: staged, checked (type, size, magic, SVG san
 | `contentType` | string (min 1, max 127) | yes |
 | `data` | string (min 1, max 146800640) | yes |
 | `folderId` | uuid \| null |  |
+| `svgRoles` | object |  |
+| `svgRoles.text` | string |  |
+| `svgRoles.accent` | string |  |
 
 Output: { id: uuid, kind: "image" \| "svg" \| "video" \| "document", filename: string (min 1, max 255), mime: string (min 1, max 127), size: integer ≥0, url: string (min 1, max 2048), width?: integer ≥1 ≤100000, height?: integer ≥1 ≤100000, variants: ({ width: integer ≥1 ≤100000, height?: integer ≥1 ≤100000, mime: "image/avif" \| … (full schema: discover_operations)
 
