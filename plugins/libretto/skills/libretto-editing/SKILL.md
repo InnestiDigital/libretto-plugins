@@ -37,10 +37,12 @@ Never talk about the `Authorization` header, HTTP, the cause codes, the plugin's
 | A site rebuilt to match a finished design (an HTML/CSS handoff or a live site) | [rebuild from a reference](../../reference/recipes/rebuild-from-reference.md) |
 | A new section | [sections from presets](../../reference/recipes/sections-from-presets.md) |
 | A blog, articles, or a page on a template | [blogs and templates](../../reference/recipes/blogs-and-templates.md): read the `templates` resource before you build |
+| Footnotes in a text (a raised number, the notes, `↩` back-links) | [blogs and templates](../../reference/recipes/blogs-and-templates.md), Footnotes: anchor and link marks written with `set_props`, not `content.importMarkdown` |
+| Pages under an address segment that is no page (`/note/tema/libretto`) | a folder: `page.create` `{ "pageType": "folder", "slug": "tema", "title": {…}, "parentId": "<note>" }`, then the pages with `parentId` the folder; it holds no tree and its own address answers 404 |
 | Header, footer, menus | [header, footer and menus](../../reference/recipes/header-footer-and-menus.md) |
 | The page an address that does not exist shows (404) | `settings.setNotFoundPage` naming a published static page, not the home page (`{ "notFoundPage": { "pageId": "<page id>", "locales": { "en": "<page id>" } } }`; `locales` only for a different page in that language; null goes back to the theme's own); it goes live with the next publish (`libretto-publish`) |
 | Projects, events, team: repeated content | [collections and items](../../reference/recipes/collections-and-items.md) |
-| Another language | [translations](../../reference/recipes/translations.md): after the texts and the title, give the page its slug in that language (`slugs`) |
+| Another language | [translations](../../reference/recipes/translations.md): after the texts and the title, give the page its slug in that language (`slugs`); a picture with words, the share image and an ARIA label can differ by language too |
 | Things that move | [motion](../../reference/recipes/motion.md) |
 | Pictures | [images](../../reference/recipes/images.md) |
 | A contact form: its fields, error messages, error summary, required marks, consent sentence or send button | [forms](../../reference/recipes/forms.md) |

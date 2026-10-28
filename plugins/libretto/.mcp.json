@@ -3,6 +3,7 @@
     "libretto": {
       "type": "http",
       "url": "${LIBRETTO_URL:-${user_config.libretto_url}}/api/mcp",
+      "timeout": 300000,
       "headers": {
         "Authorization": "Bearer ${LIBRETTO_MCP_TOKEN:-${user_config.libretto_token}}"
       }

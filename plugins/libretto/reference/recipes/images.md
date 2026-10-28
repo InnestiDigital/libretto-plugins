@@ -38,7 +38,8 @@ Look at the picture once (`Read` the file) to write its alt text; do not read it
 - On an image node: `set_props` `{ id, patch: { "src": { "$media": "<media id>" } } }` in a `tree.commit`. Find the node in the outline (`kind:type` such as `primitive:image`); the prop names come from `catalog/<type>` for that type (some types name it `media` or `image`, and carry their own alt prop).
 - A new image: `insert` an image node of a type listed in the catalogue, with `props.src` `{ "$media": "<id>" }` and a fresh 8-character id.
 - In a collection item: the media field takes the media id ([collections](collections-and-items.md)).
-- As a page's featured or social image: `page.update` with the field `page.read` shows.
+- As a page's featured or social image: `page.update` with the field `page.read` shows (`ogImageId`; `ogImages` for another language's own share image).
+- A picture with words in it, one per language (a chart, a poster, an SVG drawing): `src` (or an svg node's `media`) as a locale map of pictures, the default language's required ([translations](translations.md), Where texts live).
 - Replacing a file everywhere it is used: `media.usage` `{ mediaId }` lists the pages, articles, tokens and settings that use it; `media.replace` swaps the bytes of a row staged by the admin's upload, which MCP cannot stage. To swap from here, upload the new file and re-point each use.
 
 ## Icons, illustrations and charts in the site's colours (SVG)

@@ -60,3 +60,31 @@ One page cannot drop or change a locked part on its own. If one page needs diffe
 ## 5. Look at it
 
 Check the blog and one article at desktop and phone width ([preview and verify](preview-and-verify.md)). Check the locked parts too: the card images, the toggle labels, the title length on phone.
+
+## Footnotes
+
+A rich text has no footnote node: a footnote is a raised link to an anchored note, and the note links back. Write it in the `richtext` node's `content`, a Tiptap document per language, with `set_props`. `content.importMarkdown` cannot: it reads `<sup>` but no anchor and no link name, and a later import of that language replaces the document and drops them.
+
+1. Read the node (`tree/<pageId>?node=<id>&depth=0`): `content` is `{ "it": { "type": "doc", … }, "en-US": { … } }`. `set_props` replaces the whole prop, so send every language's document back, each with its notes.
+2. The reference, in the sentence: the run `1` with three marks.
+3. The notes, at the end: an `orderedList` whose items open with a run marked `anchor` and close with a back-link `↩` whose link has `ariaLabel`, so a screen reader hears the words, not the arrow.
+
+```json
+{ "op": "set_props", "id": "<richtext node>", "patch": { "content": { "it": { "type": "doc", "content": [
+  { "type": "paragraph", "content": [
+    { "type": "text", "text": "Il cricchetto gira in un verso solo" },
+    { "type": "text", "text": "1", "marks": [{ "type": "superscript" }, { "type": "anchor", "attrs": { "id": "rif-1" } }, { "type": "link", "attrs": { "href": "#nota-1" } }] },
+    { "type": "text", "text": "." }
+  ] },
+  { "type": "orderedList", "content": [{ "type": "listItem", "content": [{ "type": "paragraph", "content": [
+    { "type": "text", "text": "Ogni dente blocca il precedente.", "marks": [{ "type": "anchor", "attrs": { "id": "nota-1" } }] },
+    { "type": "text", "text": " " },
+    { "type": "text", "text": "↩", "marks": [{ "type": "link", "attrs": { "href": "#rif-1", "ariaLabel": "Torna al testo" } }] }
+  ] }] }] }
+] }, "en-US": { "…": "the same, in English, with ariaLabel \"Back to the text\"" } } } }
+```
+
+- An id is a letter, then letters, digits, `-` and `_`, at most 64 characters; another id is dropped. Use each id once on the page (`nota-1`, `nota-2`, …); a heading's own anchor never takes one of them.
+- Write `↩` (U+21A9) without the emoji selector (U+FE0F), so it stays a text arrow; a site font that lacks it falls back to the visitor's system font.
+- Style the number and the notes on the rich text with a chained tail (`t: sup a`, `t:> ol > li p`; [rebuild from a reference](rebuild-from-reference.md), the table).
+- The editor has no button for an anchor or a link's name yet: it keeps them when the user edits the text, but only MCP writes them.

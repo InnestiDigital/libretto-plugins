@@ -115,7 +115,7 @@ Nell'admin, **Agenti e accessi MCP**: accanto al token premi **Revoca**. Smette 
 ### Limiti
 
 - Funziona con Claude Code. Claude Desktop e claude.ai richiedono un connettore con login OAuth, che Libretto non offre ancora.
-- Creare o eliminare pagine e cambiare le lingue del sito richiede un amministratore della piattaforma.
+- Creare o eliminare pagine richiede il proprietario dello spazio di lavoro o un amministratore della piattaforma; cambiare le lingue del sito, un amministratore della piattaforma.
 - I file dei font (WOFF2) Claude li carica con `libretto-files` quando il tuo Libretto ha l'operazione `font.upload`; altrimenti si caricano nell'admin (Font). I Google Fonts si importano sempre da Claude.
 
 ---
@@ -233,7 +233,7 @@ In the admin, **Agenti e accessi MCP**: press **Revoca** (Revoke) next to the to
 ### Limits
 
 - Works with Claude Code. Claude Desktop and claude.ai need a connector with OAuth sign-in, which Libretto does not offer yet.
-- Creating or deleting pages and changing the site's languages need a platform admin.
+- Creating or deleting pages needs the workspace owner or a platform admin; changing the site's languages, a platform admin.
 - Claude uploads font files (WOFF2) through `libretto-files` when your Libretto has the `font.upload` operation; otherwise they are uploaded in the admin (Font). Google Fonts are always imported from Claude.
 
 ### How it is built

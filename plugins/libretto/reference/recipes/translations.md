@@ -23,6 +23,9 @@ A text is either a plain string (the same in every language) or a **locale map**
 | Menu labels | menus | `navigation.upsert` with locale-map labels ([menus](header-footer-and-menus.md)) |
 | Collection values | items | `item.update` with locale maps on `localized` fields |
 | Image alt, caption | media | `media.update` `{ mediaId, alt: { ... } }` |
+| A picture with words in it (a chart, a poster, a diagram) | an `image` node's `src`, each of its `sources[].src`, an `svg` node's `media` | `set_props` with a locale map of pictures: `{ "src": { "it": { "$media": "<it id>" }, "en-US": { "$media": "<en id>" } } }`. The default language's entry is required (`I8.locale_default`); a language left out shows the default's. Each language's picture brings its own size and alt text. A plain picture stays one for every language |
+| Share image (social card) | page or article fields | `page.update` `{ pageId, patch: { "ogImages": { "en-US": "<media id>" } } }`; an article or a blog index: `article.update` / `blog.update` `patch.seo.ogImages`. The default language's is `ogImageId`; the map patches like `slugs` (`null` removes a language's own, which then shares the default's) |
+| ARIA labels (`aria-label`, `aria-description`, …) | a node's `attrs` | `set_attrs` `{ id, patch: { "aria-label": { "it": "Grafico dei costi", "en-US": "Cost chart" } } }`; a language with no entry gets no label. Only the ARIA attributes a visitor hears take a map |
 | Site title, tagline, legal line | settings | `settings.update` (fields from `settings.read`) |
 | Form labels and messages | forms | `form.update` (fields from `form.read`) |
 
