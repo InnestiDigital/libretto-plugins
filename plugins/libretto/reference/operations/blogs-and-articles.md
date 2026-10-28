@@ -54,7 +54,7 @@ Example input:
 
 ## blog.update
 
-Patch a blog index page as { id, patch }: its slug, its slug per locale (`slugs`: `{ "en": "notes" }` sets one, `null` removes it; renaming a published page keeps its old address as a 301), title, excerpt, featured image, author, canonical URL, SEO (`seo.metaTitle`, `metaDescription`, `ogImageId`, `noIndex`), template or members-only access. Its content is its tree. Entry validation (page type, template, slug) and ownership checks apply.
+Patch a blog index page as { id, patch }: its slug, its slug per locale (`slugs`: `{ "en": "notes" }` sets one, `null` removes it; renaming a published page keeps its old address as a 301), title, excerpt, featured image, author, canonical URL, SEO (`seo.metaTitle`, `metaDescription`, `ogImageId`, `ogImages` the share image per other locale, `noIndex`), template or members-only access. Its content is its tree. Entry validation (page type, template, slug) and ownership checks apply.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `pages`; undoable with `history.undo`.
 
@@ -73,7 +73,7 @@ Example input:
 
 ## article.update
 
-Patch an article as { id, patch }: its slug, its slug per locale (`slugs`: `{ "en": "my-house" }` sets one, `null` removes it; renaming a published article keeps its old address as a 301), title, excerpt, featured image, author, canonical URL, SEO (`seo.metaTitle`, `metaDescription`, `ogImageId`, `noIndex`), template or members-only access, and `publishedAt`, its publication date (ISO, not in the future): a draft keeps it for its first article.publish, and a published article moves to it at once, still published and without its other draft edits, its BlogPosting `datePublished`, the sitemap and the lists following. Its content is its tree. Entry validation (page type, template, slug) and ownership checks apply.
+Patch an article as { id, patch }: its slug, its slug per locale (`slugs`: `{ "en": "my-house" }` sets one, `null` removes it; renaming a published article keeps its old address as a 301), title, excerpt, featured image, author, canonical URL, SEO (`seo.metaTitle`, `metaDescription`, `ogImageId`, `ogImages` the share image per other locale, `noIndex`), template or members-only access, and `publishedAt`, its publication date (ISO, not in the future): a draft keeps it for its first article.publish, and a published article moves to it at once, still published and without its other draft edits, its BlogPosting `datePublished`, the sitemap and the lists following. Its content is its tree. Entry validation (page type, template, slug) and ownership checks apply.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `pages`; undoable with `history.undo`.
 

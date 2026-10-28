@@ -132,7 +132,7 @@ Example input:
 
 ## page.create
 
-Create a page (`slug`, `title` per locale, and optionally `slugs`, its slug in each other locale such as `{ "en": "method" }`, `frame`, the theme layout frame it renders in, `parentId`, `pageType`, SEO and members-only fields) with an empty tree. `status` defaults to draft; a draft page stays out of the site publish, so pass `status: "published"` for a page the next publication.publish should serve. Fill the tree with tree.commit in the same batch: read the new root id with tree.read through a $ref to this operation's page.id. A section's anchor is the node field `anchor` in that tree, not a page field, `meta.anchor` or `props.anchor`. A `pageType: "dynamic"` page names a collection in `collectionKey` and is the detail page of its items: it answers `/<slug>/<item slug>` in each locale, and its tree binds the item. Page validation and ownership checks apply.
+Create a page (`slug`, `title` per locale, and optionally `slugs`, its slug in each other locale such as `{ "en": "method" }`, `frame`, the theme layout frame it renders in, `parentId`, `pageType`, SEO and members-only fields) with an empty tree. `status` defaults to draft; a draft page stays out of the site publish, so pass `status: "published"` for a page the next publication.publish should serve. Fill the tree with tree.commit in the same batch: read the new root id with tree.read through a $ref to this operation's page.id. A section's anchor is the node field `anchor` in that tree, not a page field, `meta.anchor` or `props.anchor`. A `pageType: "dynamic"` page names a collection in `collectionKey` and is the detail page of its items: it answers `/<slug>/<item slug>` in each locale, and its tree binds the item. A `pageType: "folder"` row only gives the pages under it a path segment (`/note/tema/libretto` with no page at `/note/tema`): pass `slug`, `title`, `parentId` and `slugs` only; it is always published, holds no tree (tree.commit on it is refused), its own path answers 404, and no menu, breadcrumb, list or sitemap names it. Put pages under it with their `parentId`. Page validation and ownership checks apply.
 
 - permission `site.structure` (admin, workspace owner); class `transaction`; writes `pages`; undoable with `history.undo`.
 
@@ -148,7 +148,7 @@ Create a page (`slug`, `title` per locale, and optionally `slugs`, its slug in e
 | `requireAuth` | boolean |  |
 | `requiredRoles` | string (max 40)[] (≤50) |  |
 | `meta` | Record<string, string \| number \| boolean \| null \| (string \| number \| boolean \| null \| (… \| … \| … \| … \| … \| …)[] \| Record<string, … \| … \| … \| … \| … \| …>)[] \| Record<string, string \| number \| boolean \| null \| (… \| … \| … \| … \| … \| …)[] \| Record<string, … \| … \| … \| … \| … \| …>>> |  |
-| `pageType` | "static" \| "blog-index" \| "article" \| "dynamic" |  |
+| `pageType` | "static" \| "blog-index" \| "article" \| "dynamic" \| "folder" |  |
 | `templateId` | string (min 1) \| null |  |
 | `collectionKey` | string (max 40) \| null |  |
 | `status` | "draft" \| "published" |  |
@@ -159,6 +159,7 @@ Create a page (`slug`, `title` per locale, and optionally `slugs`, its slug in e
 | `metaTitle` | Record<string, string> \| null |  |
 | `metaDescription` | Record<string, string> \| null |  |
 | `ogImageId` | string (min 1) \| null |  |
+| `ogImages` | Record<string, string (min 1) \| null> |  |
 | `noIndex` | boolean |  |
 | `canonicalUrl` | string \| null |  |
 | `publishedAt` | string \| null |  |
@@ -175,7 +176,7 @@ Example input:
 
 ## page.update
 
-Patch a page's fields as { pageId, patch }: slug, `slugs` names the page's slug in each other locale, as `{ "en": "method" }`: the page answers `/en/method` in English (a page under it reads `/en/method/<its English slug>`) and its `slug` in the default locale; a locale without one answers `slug`. A `slugs` value sets that locale's slug, `null` removes it, a locale left out keeps its own; no sibling page may answer the same slug in any locale. Renaming a published page (its slug, a slug per locale or its parent) adds a 301 from each old address to the new one to the site's redirects (redirects.read). Also title, `frame` (the theme layout frame it renders in, such as `default`, which reflows at the site breakpoints, or a scaled canvas such as `scale-canvas`; layout.update edits a frame), status, SEO, members-only access or `meta`. `patch.status: "published"` marks a draft page for the next site publish. `patch.meta` replaces the page's whole meta, so read the page first (page.read) and send its meta back with your change. `meta.layoutOverrides` overrides the frame for this page alone, layer by layer, where the frame's `overridePolicy` allows it: `background` ({ color, image, overlay, texture }: the page's own background colour, as raw CSS such as `var(--ds-color-bg-inverse)`), `header`, `footer`, `scroll` and `chrome`. Page validation and ownership checks apply.
+Patch a page's fields as { pageId, patch }: `ogImages` sets the share image of each other locale (`{ "en": "<media id>" }`, `null` removes one; a locale without one shares `ogImageId`). Slug, `slugs` names the page's slug in each other locale, as `{ "en": "method" }`: the page answers `/en/method` in English (a page under it reads `/en/method/<its English slug>`) and its `slug` in the default locale; a locale without one answers `slug`. A `slugs` value sets that locale's slug, `null` removes it, a locale left out keeps its own; no sibling page may answer the same slug in any locale. Renaming a published page (its slug, a slug per locale or its parent) adds a 301 from each old address to the new one to the site's redirects (redirects.read). Also title, `frame` (the theme layout frame it renders in, such as `default`, which reflows at the site breakpoints, or a scaled canvas such as `scale-canvas`; layout.update edits a frame), status, SEO, members-only access or `meta`. `patch.status: "published"` marks a draft page for the next site publish. `patch.meta` replaces the page's whole meta, so read the page first (page.read) and send its meta back with your change. `meta.layoutOverrides` overrides the frame for this page alone, layer by layer, where the frame's `overridePolicy` allows it: `background` ({ color, image, overlay, texture }: the page's own background colour, as raw CSS such as `var(--ds-color-bg-inverse)`), `header`, `footer`, `scroll` and `chrome`. Page validation and ownership checks apply.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `pages`; undoable with `history.undo`.
 

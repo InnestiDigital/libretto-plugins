@@ -49,12 +49,14 @@ class TokenRefusal extends LibrettoError {
 const TOOLS = [
   {
     name: 'upload_media_file',
-    description: 'Upload a file from this computer (an absolute path, a path starting with ~/, or relative to the working directory) into the Libretto site\'s media library through media.upload, without putting its bytes in the conversation. Images up to 5 MB (shrink larger ones first, for example `sips -Z 2400 in.jpg --out out.jpg` on macOS). dryRun: true runs every check and stores nothing. The answer holds the media record (`id`, `url`, kind, dimensions) and the `requestId` that history.undo takes. Then place the image with `{ "$media": "<id>" }` and set its alt text with media.update.',
+    description: 'Upload a file from this computer (an absolute path, a path starting with ~/, or relative to the working directory) into the Libretto site\'s media library through media.upload, without putting its bytes in the conversation. Images up to 5 MB (shrink larger ones first, for example `sips -Z 2400 in.jpg --out out.jpg` on macOS). dryRun: true runs every check and stores nothing. The answer holds the media record (`id`, `url`, kind, dimensions) and the `requestId` that history.undo takes. Then place the image with `{ "$media": "<id>" }` and set its alt text with media.update. An SVG is also made an inline drawing for the svg primitive when it fits (the answer\'s `inline` says ready, or why not): `svgTextColor` names the colour that follows the text colour, `svgAccentColor` the one that becomes the accent part a node style colours (`p:accent`).',
     inputSchema: {
       type: 'object',
       properties: {
         path: { type: 'string', minLength: 1, description: 'The file to upload.' },
         folderId: { type: ['string', 'null'], description: 'A media folder id (media.list answers folders); null or absent for the root.' },
+        svgTextColor: { type: 'string', pattern: '^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$', description: 'SVG only: the colour of the file that should follow the text colour of the node drawing it, such as "#1a1a1a" (currentColor already does).' },
+        svgAccentColor: { type: 'string', pattern: '^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$', description: 'SVG only: the colour of the file\'s one accent element, which becomes the accent part (elements marked data-role="accent" in the file already are).' },
         dryRun: { type: 'boolean', description: 'Check the upload without storing it.' },
         siteId: { type: 'string', minLength: 1, description: 'The site to upload to, one of the ids libretto\'s site_context lists: needed with a token of several sites, left out with a one-site token.' },
       },
@@ -212,11 +214,19 @@ function mediaTypeOf(file, bytes) {
   return contentType
 }
 
-async function uploadMediaFile({ path, folderId = null, dryRun = false, siteId }) {
+/** The `svgRoles` of media.upload from the tool's colours; a refusal for colours on a file that is not an SVG. */
+function svgRolesOf(contentType, svgTextColor, svgAccentColor) {
+  if (svgTextColor === undefined && svgAccentColor === undefined) return {}
+  if (contentType !== 'image/svg+xml') throw new LibrettoError('svgTextColor and svgAccentColor are for an SVG file only')
+  return { svgRoles: { ...(svgTextColor === undefined ? {} : { text: svgTextColor }), ...(svgAccentColor === undefined ? {} : { accent: svgAccentColor }) } }
+}
+
+async function uploadMediaFile({ path, folderId = null, svgTextColor, svgAccentColor, dryRun = false, siteId }) {
   const { file, bytes } = await localFile(path)
   const contentType = mediaTypeOf(file, bytes)
+  const roles = svgRolesOf(contentType, svgTextColor, svgAccentColor)
   const data = (await readFile(file)).toString('base64')
-  const { requestId, answer } = await sendOperation('media.upload', { filename: basename(file), contentType, data, folderId }, 'media', dryRun, siteId)
+  const { requestId, answer } = await sendOperation('media.upload', { filename: basename(file), contentType, data, folderId, ...roles }, 'media', dryRun, siteId)
   return { dryRun, requestId, file, bytes, contentType, answer }
 }
 
