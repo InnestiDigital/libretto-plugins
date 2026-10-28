@@ -69109,7 +69109,7 @@
     },
     {
       "name": "brand.updateIdentity",
-      "description": "Patch a brand identity (the default preset's, or `presetId`'s): its brand name, tagline, logos, the four brand colours, the headline and body roles, the tone words and the do and don't rules. Brand validation applies, and history.undo restores the brand rows the batch changed.",
+      "description": "Patch a brand identity (the default preset's, or `presetId`'s): its brand name, tagline, logos, the four brand colours, the headline and body roles, the tone words, the concept (the creative idea every design repeats) and the do and don't rules: the brand brief agents read at libretto://site/<id>/brand. Brand validation applies, and history.undo restores the brand rows the batch changed.",
       "example": {
         "identity": {
           "brandName": "Studio",
@@ -69163,11 +69163,14 @@
               "toneWords": {
                 "$ref": "#/$defs/__schema11"
               },
-              "doRules": {
+              "concept": {
                 "$ref": "#/$defs/__schema12"
               },
-              "dontRules": {
+              "doRules": {
                 "$ref": "#/$defs/__schema13"
+              },
+              "dontRules": {
+                "$ref": "#/$defs/__schema14"
               }
             },
             "additionalProperties": false
@@ -69240,6 +69243,9 @@
           },
           "__schema13": {
             "type": "string"
+          },
+          "__schema14": {
+            "type": "string"
           }
         }
       },
@@ -69307,6 +69313,9 @@
               "toneWords": {
                 "type": "string"
               },
+              "concept": {
+                "type": "string"
+              },
               "doRules": {
                 "type": "string"
               },
@@ -69327,6 +69336,7 @@
               "headlineRole",
               "bodyRole",
               "toneWords",
+              "concept",
               "doRules",
               "dontRules"
             ],

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.1
+
+### Brand
+
+- The brand rules you put into Libretto reach Claude: before it writes copy, composes a brand canvas or picks colours, it reads the site's brand brief (the concept, the tone words, the do and don't rules, the logos, and the brand colours and fonts as the design system draws them) and follows it.
+
 ## 0.5.0
 
 Everything new since 0.4.7.

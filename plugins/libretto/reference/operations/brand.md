@@ -67,16 +67,16 @@ Example input:
 
 ## brand.updateIdentity
 
-Patch a brand identity (the default preset's, or `presetId`'s): its brand name, tagline, logos, the four brand colours, the headline and body roles, the tone words and the do and don't rules. Brand validation applies, and history.undo restores the brand rows the batch changed.
+Patch a brand identity (the default preset's, or `presetId`'s): its brand name, tagline, logos, the four brand colours, the headline and body roles, the tone words, the concept (the creative idea every design repeats) and the do and don't rules: the brand brief agents read at libretto://site/<id>/brand. Brand validation applies, and history.undo restores the brand rows the batch changed.
 
 - permission `site.admin` (admin); class `transaction`; writes `brand`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
 | `presetId` | string (min 1) |  |
-| `identity` | { brandName?: string, tagline?: string, logoPrimary?: string \| null, logoInverse?: string \| null, logoMark?: string \| null, brandPrimary?: string, brandSecondary?: string, brandSurface?: string, brandOnSurface?: string, headlineRole?: string, bodyRole?: string, toneWords?: string, doRules?: string, dontRules?: string } | yes |
+| `identity` | { brandName?: string, tagline?: string, logoPrimary?: string \| null, logoInverse?: string \| null, logoMark?: string \| null, brandPrimary?: string, brandSecondary?: string, brandSurface?: string, brandOnSurface?: string, headlineRole?: string, bodyRole?: string, toneWords?: string, concept?: string, doRules?: string, do… (full schema: discover_operations) | yes |
 
-Output: { identity: { brandName: string, tagline: string, logoPrimary: string \| null, logoInverse: string \| null, logoMark: string \| null, brandPrimary: string, brandSecondary: string, brandSurface: string, brandOnSurface: string, headlineRole: string, bodyRole: string, toneWords: string, doRules: string, dontRules: string } }
+Output: { identity: { brandName: string, tagline: string, logoPrimary: string \| null, logoInverse: string \| null, logoMark: string \| null, brandPrimary: string, brandSecondary: string, brandSurface: string, brandOnSurface: string, headlineRole: string, bodyRole: string, toneWords: string, concept: string, doRules: string, dont… (full schema: discover_operations)
 
 Example input:
 
