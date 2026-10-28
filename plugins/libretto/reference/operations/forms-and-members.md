@@ -114,7 +114,7 @@ List the submissions of a form, newest first, optionally only those with a statu
 | `offset` | integer ≥0 |  |
 | `limit` | integer ≥1 ≤200 |  |
 
-Output: { formId: uuid, submissions: ({ id: uuid, formId: uuid, values: Record<string, string (max 5000) \| boolean>, status: "new" \| "read" \| "archived", consent: { given: boolean, policyVersion: … \| …, text: string (max 2000) } \| null, createdAt: string, readAt: string \| null })[], total: integer ≥0 }
+Output: { formId: uuid, submissions: ({ id: uuid, formId: uuid, values: Record<string, string (max 5000) \| boolean>, status: "new" \| "read" \| "archived", consent: { given: boolean, policyVersion: … \| …, text: string (max 2000) } \| null, notification: { status: "sent" \| "failed", error: … \| … } \| null, createdAt: string, readAt… (full schema: discover_operations)
 
 Example input:
 

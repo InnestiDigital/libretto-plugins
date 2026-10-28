@@ -44,6 +44,7 @@ Never talk about the `Authorization` header, HTTP, the cause codes, the plugin's
 | Things that move | [motion](../../reference/recipes/motion.md) |
 | Pictures | [images](../../reference/recipes/images.md) |
 | A contact form: its fields, error messages, error summary, required marks, consent sentence or send button | [forms](../../reference/recipes/forms.md) |
+| A site's email: its own SMTP server, a test email, a form message that was not emailed | [site email](../../reference/recipes/site-email.md) |
 | "Is it readable / accessible" | [contrast and accessibility](../../reference/recipes/contrast-and-a11y.md) |
 | To see the result | the `libretto-visual-check` skill, [preview and verify](../../reference/recipes/preview-and-verify.md) |
 | The live site as a visitor sees it | `render_preview` with `"target": "live"` ([preview and verify](../../reference/recipes/preview-and-verify.md)) |

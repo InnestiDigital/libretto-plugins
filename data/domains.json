@@ -67,6 +67,13 @@
     ],
     "intro": "Forms collect submissions; members are the site's signed-in visitors with roles that gate content (`visibleTo`)."
   },
+  "mail": {
+    "title": "Site email",
+    "prefixes": [
+      "mail"
+    ],
+    "intro": "How a site sends its own email (form notifications, the emails to its members): the platform's server when the workspace is allowed it, the site's own SMTP server, or none. The SMTP password is write-only. See the site-email recipe."
+  },
   "media-and-fonts": {
     "title": "Media library and fonts",
     "prefixes": [

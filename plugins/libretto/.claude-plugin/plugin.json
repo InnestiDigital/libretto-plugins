@@ -1,7 +1,7 @@
 {
   "name": "libretto",
   "displayName": "Libretto",
-  "version": "0.4.17",
+  "version": "0.4.18",
   "description": "Edit a Libretto site from Claude Code: the Libretto MCP server plus skills for editing pages, the design system, visual checks, publishing and reporting issues",
   "author": {
     "name": "Innesti Digital"

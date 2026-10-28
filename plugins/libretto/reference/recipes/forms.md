@@ -80,6 +80,10 @@ The button sits at the end of its row by default. The position is the `align` ce
 
 `stacked` is the form layout variant the form draws (its `form` part's cell, `default.all.default.form.base.variant`); read both on the `component/form` and `component/form-layout` resources first. A cell at another breakpoint (`md` instead of `base`) moves the button from that width up.
 
+## When nothing is emailed
+
+The notifications go through the site's email ([site email](site-email.md)). A site with no email configured still stores every message, marked as not notified, and a form save with recipients answers a warning finding (rule `mail_not_configured`): set the site's mail, then `mail.test`.
+
 ## Check
 
 - `render_preview` the page, then submit nothing in the browser (the `libretto-visual-check` skill) to see the messages, the summary and the marks. Never send a real submit on a live site without the user: it emails the recipients.
