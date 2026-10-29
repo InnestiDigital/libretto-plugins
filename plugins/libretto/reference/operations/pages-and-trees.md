@@ -4,7 +4,7 @@
 
 A page is a row (slug, title, status, frame, SEO) plus a tree (`splash.tree/3`) of nodes. Header, footer, above and below are regions: their trees live on pages named `region-*`, and `region.read` gives their root ids. Every node edit is a `tree.commit` of `splash.ops/2` ops.
 
-[`pattern.paintCells`](#patternpaintcells) · [`catalog.read`](#catalogread) · [`region.read`](#regionread) · [`tree.read`](#treeread) · [`tree.commit`](#treecommit) · [`content.importMarkdown`](#contentimportmarkdown) · [`page.read`](#pageread) · [`page.create`](#pagecreate) · [`page.update`](#pageupdate) · [`page.delete`](#pagedelete) · [`page.forkTemplate`](#pageforktemplate) · [`page.setPassword`](#pagesetpassword) · [`tree.node`](#treenode) · [`catalog.index`](#catalogindex) · [`catalog.entry`](#catalogentry)
+[`pattern.paintCells`](#patternpaintcells) · [`pattern.setLink`](#patternsetlink) · [`catalog.read`](#catalogread) · [`region.read`](#regionread) · [`tree.read`](#treeread) · [`tree.commit`](#treecommit) · [`content.importMarkdown`](#contentimportmarkdown) · [`page.read`](#pageread) · [`page.create`](#pagecreate) · [`page.update`](#pageupdate) · [`page.delete`](#pagedelete) · [`page.forkTemplate`](#pageforktemplate) · [`page.setPassword`](#pagesetpassword) · [`tree.node`](#treenode) · [`catalog.index`](#catalogindex) · [`catalog.entry`](#catalogentry)
 
 ## pattern.paintCells
 
@@ -27,6 +27,26 @@ Example input:
 
 ```json
 {"pageId":"6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f","nodeId":"claim001","from":"empty","cells":[[0,0],[1,0]],"runs":[{"j":3,"from":2,"to":6}],"on":true}
+```
+
+## pattern.setLink
+
+Make a pattern layer's lattice follow an image layer of the same page (`link`: { node: the image layer's id, origin: [x, y] of dot [0, 0] as fractions of the picture's width and height, pitch: a fraction of its width, ratio: the picture's width over height }), so it follows the picture's move, zoom and each format's cover fit; `link: null` stops it. A node that is not an image layer of the page is refused.
+
+- permission `site.edit` (admin, editor); class `transaction`; writes `tree:{pageId}`; undoable with `history.undo`.
+
+| Input | Type | Required |
+|---|---|---|
+| `pageId` | string (min 1) | yes |
+| `nodeId` | nodeId | yes |
+| `link` | { node: nodeId, origin: any[], pitch: number ≤10, ratio: number ≤100 } \| null | yes |
+
+Output: { revision: integer ≥0, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { meta?: …, styles?: …, variant?: …, theme?: …, visibility?: …, attrs?: …, id: …, kind: …, type: …, children: … } \| { meta?: …, styles?: …, variant?: …, theme?: …, visibility?: …, attrs?: …, id: …, slot?: …, name… (full schema: discover_operations)
+
+Example input:
+
+```json
+{"pageId":"6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f","nodeId":"claim001","link":{"node":"claim001","origin":[0.5,0.5],"pitch":0.04,"ratio":1.5}}
 ```
 
 ## catalog.read

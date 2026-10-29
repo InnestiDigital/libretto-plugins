@@ -2,7 +2,7 @@
 
 Use when the user wants a poster, a flyer or a social graphic made in the brand: one composition shown at several sizes, some on paper (A3, A4) and some on screen (a story, a post), and a print file when a format is on paper.
 
-Operations: [brand](../operations/brand.md) (`brand.createTemplate`, `brand.renderDraft`, `brand.updateTemplate`, `brand.print`), [pages and trees](../operations/pages-and-trees.md) (`tree.read`, `tree.commit`, `pattern.paintCells`), [media and fonts](../operations/media-and-fonts.md), [design system](../operations/design-system.md).
+Operations: [brand](../operations/brand.md) (`brand.createTemplate`, `brand.renderDraft`, `brand.updateTemplate`, `brand.print`), [render tools](../operations/mcp-tools.md) (`compare_reference`), [pages and trees](../operations/pages-and-trees.md) (`tree.read`, `tree.commit`, `pattern.paintCells`, `pattern.setLink`), [media and fonts](../operations/media-and-fonts.md), [design system](../operations/design-system.md).
 
 ## What a brand template is
 
@@ -30,8 +30,9 @@ A canvas page (a section holding one box, the canvas host) that carries its form
 2. `brand.createTemplate` `{ "name", "formats": { "list": [...], "master": "a3" } }`. It answers the template row; its `id` is the page id. Read the tree with `tree.read` to get the host's id.
 3. Build the layers with `tree.commit` on that page: `insert` under the host, `set_style` for the geometry (scoped CSS `position: absolute`, `left`, `top`, `width`, `height` in percent), `set_props` for the text or the picture. Texts use `type.*` presets and `font.family.*` tokens.
 4. Change the formats later with `set_meta` on the host: its `meta` is replaced whole, so send the whole `meta` you read with `formats` changed.
-5. Look at it: `brand.renderDraft` `{ "templateId", "formatId" }` for each format, and fix what differs from what was asked.
-6. Approve when the user says so, then print (see Print below).
+5. Look at it: `brand.renderDraft` `{ "templateId", "formatId" }` for each format. The picture comes as an image block after the receipt (fitted to 1568 px on its longer side); the result's `image` is only a line naming it, and `width` and `height` are the full render's. Look at the picture before you change anything: never judge a layout from percentages you computed. If you cannot see an image, say so and ask the user to look.
+6. Compare it with the reference the user gave (a file in the media library, an image at a public https URL or a public page): `compare_reference` `{ "templateId", "formatId", "referenceMediaId" }` (or `referenceUrl`, or `referencePageUrl` with `referenceSelector`). The answer is one image block with three panels side by side, the reference, your render and the pixels that differ in red, plus `ratio` (the share of differing pixels), `heightMismatch` and the verdict. Fix the biggest red areas first (a picture's size and place, a band's width, a text's size), render again and compare again until the red is only edges and anti-aliasing. For a reference you can only see on the user's screen, ask for it as an upload (`upload_media_file`).
+7. Approve when the user says so, then print (see Print below).
 
 ## Pattern layers: dots on a lattice
 
@@ -57,6 +58,22 @@ A new pattern is a full lattice. Which dots are lit is stored as a bitset, so ne
 
 The dot `[i, j]` sits `i` pitches along the lattice's first axis (at `angle`, the screen's y pointing down) plus `j` pitches along the second, at `angle - 60`: at angle 0, `i` goes right and `j` goes right and up. Look at the result with `brand.renderDraft` and adjust, as you would a picture.
 
+### Dots that follow a picture
+
+`pattern.setLink` makes the lattice follow an image layer of the same page, so the dots stay on the picture when it moves, zooms or is cropped by each format's cover fit; `"link": null` stops it.
+
+```json
+{ "name": "pattern.setLink", "input": {
+  "pageId": "<template page id>", "nodeId": "dots0001",
+  "link": { "node": "pict0001", "origin": [0.5, 0.5], "pitch": 0.0167, "ratio": 1.5 } } }
+```
+
+- `node`: the id of the image layer (an `image` primitive of the page; a text, a box or the pattern itself is refused).
+- `origin`: where dot `[0, 0]` lies on the picture, as `[x, y]` fractions of the picture's width and height (`[0.5, 0.5]` is its centre, `[0, 0]` its top-left corner).
+- `pitch`: the distance between neighbouring dots, as a fraction of the picture's width (`0.0167` is 60 dots across it).
+- `ratio`: the picture's width over its height in pixels (a 3000 x 2000 picture is `1.5`; the media record has both).
+- The image layer must be placed in percentages, unrotated and fitted by cover (`object-fit: cover`); otherwise the link is ignored and the pattern stays where its own box puts it. Look at the render to check the dots sit where you meant.
+
 ## Fonts for print
 
 A print file takes only fonts the site holds: Google families with `font.importGoogle` (`display` is `swap` when you leave it out), and a foundry's faces with `upload_font_file` in WOFF2, WOFF, TTF or OTF (Libretto stores each as WOFF2). Text set in a family the site has no face for is refused when printing. Ask the user for the licence before uploading a face.
@@ -66,7 +83,7 @@ A print file takes only fonts the site holds: Google families with `font.importG
 A print colour is a token with CMYK: a colour token may carry `$extensions["com.libretto.print"] = { "cmyk": [c, m, y, k], "link": "rgb" | "cmyk" | "free" }`, written with `designSystem.setToken` or `setTokens`. `rgb` derives the CMYK from the RGB, `cmyk` derives the RGB, `free` keeps both as given. Every colour the canvas paints needs one: a colour with no CMYK refuses the print.
 
 1. Approve the template (`brand.updateTemplate` with `status: "approved"` and the `draftRevision` of the last `brand.renderDraft`).
-2. `brand.print` `{ "templateId", "format": "a3" }`, alone in a batch with the `media` base revision. `format` is one of the template's mm formats (the master when left out). It stores a PDF/X-3 file (FOGRA39, trim plus bleed, crop marks) in the media library and answers its record with the `url`, never the bytes.
+2. `brand.print` `{ "templateId", "format": "a3" }`, alone in a batch whose `baseRevisions` names `media` (copy it from `site_context`; no other revision is needed, and any other you name is checked as usual). `format` is one of the template's mm formats (the master when left out). It stores a PDF/X-3 file (FOGRA39, trim plus bleed, crop marks) in the media library and answers its record with the `url`, never the bytes.
 3. A 422 `print-refused` lists what the print cannot hold, each with its layers:
    - `colour-without-cmyk`: give the colour token its CMYK.
    - a shadow, a filter, an opacity, a blend mode or a picture with transparency: remove it or flatten the picture first.

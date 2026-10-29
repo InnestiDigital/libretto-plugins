@@ -223,7 +223,7 @@ Example input:
 
 ## brand.render
 
-Render an approved brand template in one of its approved formats (`formatId`, the master when omitted) to a PNG or a JPEG (`type`, png by default) at `scale` 1 to 4 (the longer side at most 8192 px), in a brand preset (`presetId`), with the overrides of the fields its curation lets a person change (`overrides`, by node), and answer it as base64 (`image`) without storing it. GET /api/admin/s/<site>/brand-templates/<id>/download?format=&scale=&type= answers the same image, without overrides, as a file. The render runs in a standalone boundary; run it alone in a batch.
+Render an approved brand template in one of its approved formats (`formatId`, the master when omitted) to a PNG or a JPEG (`type`, png by default) at `scale` 1 to 4 (the longer side at most 8192 px), in a brand preset (`presetId`), with the overrides of the fields its curation lets a person change (`overrides`, by node), and answer it without storing it. Over MCP the picture comes as an image block of the answer, fitted to 1568 px on its longer side so you can look at it, and the result's `image` is one line naming that block and its size (`width` and `height` are the full render's). GET /api/admin/s/<site>/brand-templates/<id>/download?format=&scale=&type= answers the same image, without overrides, as a file. The render runs in a standalone boundary; run it alone in a batch.
 
 - permission `brand.generate` (admin); class `external`; writes nothing; external: alone in its batch, never in a dry run.
 
@@ -269,7 +269,7 @@ Example input:
 
 ## brand.renderDraft
 
-Render a brand template's canvas as it stands now, approved or not, as the admin preview draws it: in one of its formats (`formatId`, the master when omitted), PNG or JPEG at `scale` 1 to 4, in a brand preset, answered as base64 (`image`) with `draftRevision`, the revision brand.updateTemplate approves (`status: "approved"`, `expectedDraftRevision`). An edit of the canvas after the render changes the revision, so render again before approving. The render runs in a standalone boundary; run it alone in a batch.
+Render a brand template's canvas as it stands now, approved or not, as the admin preview draws it: in one of its formats (`formatId`, the master when omitted), PNG or JPEG at `scale` 1 to 4, in a brand preset, answered with `draftRevision`, the revision brand.updateTemplate approves (`status: "approved"`, `expectedDraftRevision`). An edit of the canvas after the render changes the revision, so render again before approving. Over MCP the picture comes as an image block of the answer, fitted to 1568 px on its longer side so you can look at it, and the result's `image` is one line naming that block and its size (`width` and `height` are the full render's). To compare it with a reference image, use compare_reference with `templateId`. The render runs in a standalone boundary; run it alone in a batch.
 
 - permission `site.admin` (admin); class `external`; writes nothing; external: alone in its batch, never in a dry run.
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.4
+
+### Brand
+
+- Claude now sees the canvas it draws. A draft render (and a render of an approved canvas) arrives as a picture it can look at, not as a block of text, so it can judge the layout before it approves or prints.
+- Claude can compare a canvas with the reference you give it (a file in the media library, an image link or a web page): it gets the reference, its render and the places they differ side by side, and fixes the biggest differences first.
+- Claude can make a dot grid follow a picture (so the dots stay on the photo when it moves or is cropped for another format), and the guide explains how, with an example.
+- Printing a canvas asks only for the media library's revision, as the guide always said.
+
 ## 0.5.3
 
 ### Brand

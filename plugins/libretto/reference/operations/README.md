@@ -2,11 +2,11 @@
 
 # Libretto operations
 
-181 operations, from Libretto's operation registry. Each runs inside a `libretto.batch` sent to `dry_run_ops` or `apply_ops` (see [mcp-tools.md](mcp-tools.md)). `discover_operations` with the name gives the live schema; this reference is the same registry, written for reading.
+182 operations, from Libretto's operation registry. Each runs inside a `libretto.batch` sent to `dry_run_ops` or `apply_ops` (see [mcp-tools.md](mcp-tools.md)). `discover_operations` with the name gives the live schema; this reference is the same registry, written for reading.
 
 | Domain | Operations |
 |---|---|
-| [Pages, trees and regions](pages-and-trees.md) | `pattern.paintCells`, `catalog.read`, `region.read`, `tree.read`, `tree.commit`, `content.importMarkdown`, `page.read`, `page.create`, `page.update`, `page.delete`, `page.forkTemplate`, `page.setPassword`, `tree.node`, `catalog.index`, `catalog.entry` |
+| [Pages, trees and regions](pages-and-trees.md) | `pattern.paintCells`, `pattern.setLink`, `catalog.read`, `region.read`, `tree.read`, `tree.commit`, `content.importMarkdown`, `page.read`, `page.create`, `page.update`, `page.delete`, `page.forkTemplate`, `page.setPassword`, `tree.node`, `catalog.index`, `catalog.entry` |
 | [Site components, presets and effects](components-and-presets.md) | `preset.list`, `preset.insert`, `preset.save`, `preset.rename`, `preset.delete`, `component.list`, `component.createFromNode`, `component.update`, `component.instantiate`, `component.detach`, `effect.list`, `effect.save`, `effect.delete`, `preset.index`, `preset.read` |
 | [Design system](design-system.md) | `designSystem.promoteVariant`, `designSystem.setToken`, `designSystem.setTokens`, `designSystem.setComponentCell`, `designSystem.createVariant`, `designSystem.createTheme`, `designSystem.activateSet`, `designSystem.setScheme`, `designSystem.resetToBlueprint`, `designSystem.importTokens`, `designSystem.diff`, `designSystem.lint`, `designSystem.createSet`, `designSystem.updateTheme`, `designSystem.updateVariant`, `designSystem.deleteVariant`, `designSystem.setMixin`, `designSystem.deleteMixin`, `designSystem.read`, `designSystem.readComponent` |
 | [Brand setup, identity and brand formats](brand.md) | `brand.setup`, `brand.presets`, `brand.templates`, `brand.updateIdentity`, `brand.createPreset`, `brand.renamePreset`, `brand.deletePreset`, `brand.createTemplate`, `brand.updateTemplate`, `brand.deleteTemplate`, `brand.rebuildTemplate`, `brand.render`, `brand.save`, `brand.renderDraft`, `brand.print`, `brand.createProject`, `brand.updateProject`, `brand.duplicateProject`, `brand.deleteProject`, `brand.images`, `brand.uploadImage`, `brand.projects` |
