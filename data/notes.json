@@ -139,7 +139,7 @@
       "What a publish would ship, by area, everyone's changes included, and `publishBaseRevisions`, the base revisions of the publish batch. Read it before asking the human for the go; a changed page still in draft status stays out."
     ],
     "font.upload": [
-      "From a file on the user's computer use `upload_font_file` of the plugin's `libretto-files` server: it sends this operation without the bytes passing through the conversation. Check the licence first and record it in `licence`. WOFF2 only."
+      "From a file on the user's computer use `upload_font_file` of the plugin's `libretto-files` server: it sends this operation without the bytes passing through the conversation. Check the licence first and record it in `licence`. WOFF2, WOFF, TTF or OTF: Libretto stores each as WOFF2."
     ],
     "ticket.create": [
       "Prefer the `report_issue` tool: the same input, one call, no batch. Through `apply_ops` it must be alone in its batch, with `baseRevisions` `{}`, and cannot be dry-run. 429 `ticket_rate_limited` after 20 tickets in an hour; 422 `ticket_page_unknown` for a `pageId` that is not a page of this site."

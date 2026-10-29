@@ -4,7 +4,30 @@
 
 A page is a row (slug, title, status, frame, SEO) plus a tree (`splash.tree/3`) of nodes. Header, footer, above and below are regions: their trees live on pages named `region-*`, and `region.read` gives their root ids. Every node edit is a `tree.commit` of `splash.ops/2` ops.
 
-[`catalog.read`](#catalogread) · [`region.read`](#regionread) · [`tree.read`](#treeread) · [`tree.commit`](#treecommit) · [`content.importMarkdown`](#contentimportmarkdown) · [`page.read`](#pageread) · [`page.create`](#pagecreate) · [`page.update`](#pageupdate) · [`page.delete`](#pagedelete) · [`page.forkTemplate`](#pageforktemplate) · [`page.setPassword`](#pagesetpassword) · [`tree.node`](#treenode) · [`catalog.index`](#catalogindex) · [`catalog.entry`](#catalogentry)
+[`pattern.paintCells`](#patternpaintcells) · [`catalog.read`](#catalogread) · [`region.read`](#regionread) · [`tree.read`](#treeread) · [`tree.commit`](#treecommit) · [`content.importMarkdown`](#contentimportmarkdown) · [`page.read`](#pageread) · [`page.create`](#pagecreate) · [`page.update`](#pageupdate) · [`page.delete`](#pagedelete) · [`page.forkTemplate`](#pageforktemplate) · [`page.setPassword`](#pagesetpassword) · [`tree.node`](#treenode) · [`catalog.index`](#catalogindex) · [`catalog.entry`](#catalogentry)
+
+## pattern.paintCells
+
+Light or darken dots of a pattern node by lattice coordinates: `cells` as [i, j] pairs and `runs` of one row (j, from to), `on` (default true), `from` to reset the pattern to a full or an empty lattice first. To light only some dots: from "empty", then on. One commit; the cells must fit 256 x 256.
+
+- permission `site.edit` (admin, editor); class `transaction`; writes `tree:{pageId}`; undoable with `history.undo`.
+
+| Input | Type | Required |
+|---|---|---|
+| `pageId` | string (min 1) | yes |
+| `nodeId` | nodeId | yes |
+| `cells` | any[][] (≤62000) |  |
+| `runs` | { j: integer ≥-9007199254740991, from: integer ≥-9007199254740991, to: integer ≥-9007199254740991 }[] (≤62000) |  |
+| `on` | boolean |  |
+| `from` | "full" \| "empty" |  |
+
+Output: { revision: integer ≥0, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { meta?: …, styles?: …, variant?: …, theme?: …, visibility?: …, attrs?: …, id: …, kind: …, type: …, children: … } \| { meta?: …, styles?: …, variant?: …, theme?: …, visibility?: …, attrs?: …, id: …, slot?: …, name… (full schema: discover_operations)
+
+Example input:
+
+```json
+{"pageId":"6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f","nodeId":"claim001","from":"empty","cells":[[0,0],[1,0]],"runs":[{"j":3,"from":2,"to":6}],"on":true}
+```
 
 ## catalog.read
 

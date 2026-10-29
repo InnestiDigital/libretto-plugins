@@ -23,6 +23,8 @@ const MAX_FILES = 100
 const MAX_LIBRARY_PAGES = 50
 /** font.upload's `data` holds at most 16 MiB of base64 characters; the server's FONT_MAX_FILE_MB may be lower. */
 const MAX_FONT_BASE64 = 16 * 1024 * 1024
+/** The font containers Libretto reads; it stores each as WOFF2. */
+const FONT_EXTENSIONS = new Set(['.woff2', '.woff', '.ttf', '.otf'])
 const CONTENT_TYPES = new Map([
   ['.jpg', 'image/jpeg'], ['.jpeg', 'image/jpeg'], ['.png', 'image/png'], ['.webp', 'image/webp'],
   ['.gif', 'image/gif'], ['.svg', 'image/svg+xml'], ['.pdf', 'application/pdf'],
@@ -86,11 +88,11 @@ const TOOLS = [
   },
   {
     name: 'upload_font_file',
-    description: 'Upload a font face from a WOFF2 file on this computer into the Libretto site\'s font library through font.upload, without putting its bytes in the conversation. One file is one face: give the family name, weight and style. A variable file draws a range of weights: give weight as [min, max] (for example [200, 800]), or leave weight out and Libretto reads the range from the file; then a type style may use any weight inside it, such as 370. Check the licence first and record it in `licence` (the foundry\'s terms or the licence file\'s name): the library shows it with the face. WOFF, TTF and OTF are refused: convert to WOFF2 first, if the licence allows it. A face the library already holds is refused (409 font_face_exists) unless replace is true. dryRun: true runs every check and stores nothing. Then point a font-family token at the family (designSystem.setToken, type fontFamily). Needs a Libretto with font.upload: an older one answers unknown_operation.',
+    description: 'Upload a font face from a WOFF2, WOFF, TTF or OTF file on this computer into the Libretto site\'s font library through font.upload, without putting its bytes in the conversation. One file is one face: give the family name, weight and style. A variable file draws a range of weights: give weight as [min, max] (for example [200, 800]), or leave weight out and Libretto reads the range from the file; then a type style may use any weight inside it, such as 370. Check the licence first and record it in `licence` (the foundry\'s terms or the licence file\'s name): the library shows it with the face. A WOFF, TTF or OTF file is converted to WOFF2 by Libretto (the stored face is WOFF2); convert nothing yourself, and check the licence allows it first. A face the library already holds is refused (409 font_face_exists) unless replace is true. dryRun: true runs every check and stores nothing. Then point a font-family token at the family (designSystem.setToken, type fontFamily). Needs a Libretto with font.upload: an older one answers unknown_operation.',
     inputSchema: {
       type: 'object',
       properties: {
-        path: { type: 'string', minLength: 1, description: 'The .woff2 file to upload.' },
+        path: { type: 'string', minLength: 1, description: 'The .woff2, .woff, .ttf or .otf file to upload.' },
         name: { type: 'string', minLength: 1, maxLength: 100, description: 'The family name, as tokens will name it (for example "Sul Sans").' },
         weight: {
           oneOf: [
@@ -337,7 +339,7 @@ async function uploadMediaFiles({ paths = [], directory, pattern, recursive = fa
 
 async function uploadFontFile({ path, name, weight, style, display, fallbackStack, licence, replace, dryRun = false, siteId }) {
   const { file, bytes } = await localFile(path)
-  if (extname(file).toLowerCase() !== '.woff2') throw new LibrettoError(`${basename(file)} is not a .woff2 file; Libretto takes WOFF2 faces only. Convert it first, if its licence allows it.`)
+  if (!FONT_EXTENSIONS.has(extname(file).toLowerCase())) throw new LibrettoError(`${basename(file)} is not a font file (.woff2, .woff, .ttf or .otf).`)
   const data = (await readFile(file)).toString('base64')
   if (data.length > MAX_FONT_BASE64) throw new LibrettoError(`${basename(file)} is ${(bytes / 1048576).toFixed(1)} MB, more than font.upload carries.`)
   const input = {

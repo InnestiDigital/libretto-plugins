@@ -6,6 +6,7 @@
       "page",
       "content",
       "region",
+      "pattern",
       "catalog"
     ],
     "intro": "A page is a row (slug, title, status, frame, SEO) plus a tree (`splash.tree/3`) of nodes. Header, footer, above and below are regions: their trees live on pages named `region-*`, and `region.read` gives their root ids. Every node edit is a `tree.commit` of `splash.ops/2` ops."

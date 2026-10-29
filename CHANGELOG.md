@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.3
+
+### Brand
+
+- A new guide for posters, flyers and social graphics: formats in millimetres or pixels, bleed, margins and safe zones, the print colours, the fonts a print file needs, and how to read what the print refuses.
+- Claude can light chosen dots of a dot-grid layer from their positions (single dots or whole rows) instead of failing to write the pattern; the change is one step and can be undone.
+
+### Fonts
+
+- Font files can be TTF, OTF or WOFF as well as WOFF2: Libretto converts them to WOFF2 when it stores them, so Claude no longer asks you to convert a file first.
+- A Google font imported without a `display` setting now uses `swap` (the text shows at once and changes when the font has loaded).
+
 ## 0.5.2
 
 ### Brand

@@ -35,6 +35,7 @@ Never talk about the `Authorization` header, HTTP, the cause codes, the plugin's
 | A new look across the site: colours, type, spacing, component looks, themes | [design update](../../reference/recipes/design-update.md) and the `libretto-design-system` skill |
 | One page restyled or restructured | [restyle a page](../../reference/recipes/restyle-page.md) |
 | A site rebuilt to match a finished design (an HTML/CSS handoff or a live site) | [rebuild from a reference](../../reference/recipes/rebuild-from-reference.md) |
+| A poster, flyer or social graphic in the brand: formats in mm or px, bleed, dots, a print PDF | [brand canvases](../../reference/recipes/brand-canvases.md) |
 | A new section | [sections from presets](../../reference/recipes/sections-from-presets.md) |
 | A blog, articles, or a page on a template | [blogs and templates](../../reference/recipes/blogs-and-templates.md): read the `templates` resource before you build |
 | Footnotes in a text (a raised number, the notes, `↩` back-links) | [blogs and templates](../../reference/recipes/blogs-and-templates.md), Footnotes: anchor and link marks written with `set_props`, not `content.importMarkdown` |
@@ -83,7 +84,7 @@ Every operation, its input, permission and typical errors: [operations reference
 15. **Close a brand canvas through MCP.** A brand template is a canvas page you edit with `tree.commit`; brand.render draws only its approved version, and to its author a template not yet approved answers 409 (`not-approved`), not "not found". `render_preview` does not draw a canvas. The loop:
     - look at it as it stands with `brand.renderDraft` `{ "templateId", "formatId" }` (the image, and `draftRevision`);
     - approve it when the user says so: `brand.updateTemplate` `{ "templateId", "patch": { "status": "approved", "expectedDraftRevision": "<that draftRevision>" } }`. An edit after the render changes the revision (409 `draft-revision-mismatch`): render the draft again and show it before you approve;
-    - the print file: `brand.print` `{ "templateId", "format": "<a millimetre format>" }`, alone in a batch with the `media` base revision. It stores the PDF/X-3 file (FOGRA39, bleed and crop marks) in the media library and answers its record with the `url`, never the bytes. A 422 `print-refused` lists what the print cannot hold (a colour whose token has no CMYK, a shadow, a transparency, a system font), each with its layers: fix those and print again.
+    - the print file: `brand.print` `{ "templateId", "format": "<a millimetre format>" }`, alone in a batch with the `media` base revision. It stores the PDF/X-3 file (FOGRA39, bleed and crop marks) in the media library and answers its record with the `url`, never the bytes. A 422 `print-refused` lists what the print cannot hold (a colour whose token has no CMYK, a shadow, a transparency, a system font), each with its layers: fix those and print again. Formats in mm, bleed, pattern dots (`pattern.paintCells`) and the print colours are in [brand canvases](../../reference/recipes/brand-canvases.md).
 
 ## Talking to the user
 

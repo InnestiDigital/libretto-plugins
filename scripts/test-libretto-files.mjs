@@ -116,13 +116,13 @@ try {
   // os.homedir() reads HOME (USERPROFILE on Windows).
   const local = start(process.execPath, [server], { cwd: work, env: { ...process.env, HOME: home, USERPROFILE: home, LIBRETTO_URL: 'http://127.0.0.1:9', LIBRETTO_MCP_TOKEN: 'unused' } })
   const pathCases = [
-    ['~/ is the home directory', 'upload_font_file', '~/Immagini/foto.txt', 'foto.txt is not a .woff2 file'],
+    ['~/ is the home directory', 'upload_font_file', '~/Immagini/foto.txt', 'foto.txt is not a font file'],
     ['~/ is the home directory (media)', 'upload_media_file', '~/Immagini/foto.txt', 'Unknown file type .txt'],
     ['~ alone is the home directory', 'upload_media_file', '~', `No file at ${home}`],
     ['a missing file under ~ names the expanded path', 'upload_media_file', '~/Immagini/manca.jpg', `No file at ${join(home, 'Immagini', 'manca.jpg')}`],
-    ['a relative path is under the working directory', 'upload_font_file', 'foto.txt', 'foto.txt is not a .woff2 file'],
+    ['a relative path is under the working directory', 'upload_font_file', 'foto.txt', 'foto.txt is not a font file'],
     ['~name is not expanded', 'upload_media_file', '~altro/foto.jpg', `No file at ${join(work, '~altro', 'foto.jpg')}`],
-    ['an absolute path stays as it is', 'upload_font_file', join(work, 'foto.txt'), 'foto.txt is not a .woff2 file'],
+    ['an absolute path stays as it is', 'upload_font_file', join(work, 'foto.txt'), 'foto.txt is not a font file'],
   ]
   for (const [what, tool, path, expected] of pathCases) {
     await check(what, async () => {
@@ -148,7 +148,7 @@ try {
   const drawings = makeDir('drawings')
   writeFileSync(join(drawings, 'glifo.svg'), '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M0 0h24" stroke="#3ccb7f"/></svg>')
 
-  const fake = { revision: 7, stored: [], staleOnce: false, siteIds: [], inputs: [] }
+  const fake = { revision: 7, stored: [], staleOnce: false, siteIds: [], inputs: [], fonts: [] }
   const http = createServer(async (request, response) => {
     let body = ''
     for await (const chunk of request) body += chunk
@@ -162,11 +162,15 @@ try {
     if (message.id === undefined) return response.writeHead(202).end()
     const { name, arguments: args } = message.params
     fake.siteIds.push(args.siteId)
-    if (name === 'site_context') return text({ baseRevisions: { media: fake.revision } })
+    if (name === 'site_context') return text({ baseRevisions: { media: fake.revision, fonts: 3 } })
     const [operation] = args.operations
     assert.equal(args.format, 'libretto.batch')
     if (operation.name === 'media.list') {
       return text({ revisions: { media: fake.revision }, results: [{ name: 'media.list', output: { items: [{ id: 'm-existing', filename: 'gia.jpg', size: existing.length }], total: 1, page: operation.input.page, perPage: 100, usedBytes: 0, quotaBytes: 1e9 } }] })
+    }
+    if (operation.name === 'font.upload') {
+      fake.fonts.push({ fileName: operation.input.fileName, bytes: Buffer.from(operation.input.data, 'base64').toString() })
+      return text({ revisions: { fonts: 3 }, results: [{ name: 'font.upload', output: { id: 'f-1', name: operation.input.name } }] })
     }
     if (args.baseRevisions.media !== fake.revision) return text({ status: 409, code: 'stale_revision', message: 'media moved' }, true)
     if (operation.input.filename === 'rifiuta.jpg') return text({ status: 422, message: 'refused for the test' }, true)
@@ -184,6 +188,15 @@ try {
   const url = `http://127.0.0.1:${http.address().port}`
   const remote = start(process.execPath, [server], { cwd: work, env: { ...process.env, LIBRETTO_URL: url, LIBRETTO_MCP_TOKEN: 'test' } })
 
+  await check('a font file of any of the four formats is sent as it is, for the server to convert', async () => {
+    const faces = makeDir('faces')
+    const names = ['Sul.woff2', 'Sul.woff', 'Sul.ttf', 'Sul.otf', 'Upper.TTF']
+    for (const fileName of names) {
+      writeFileSync(join(faces, fileName), `bytes of ${fileName}`)
+      await remote.call('upload_font_file', { path: join(faces, fileName), name: 'Sul Sans', weight: 400, style: 'normal' })
+    }
+    assert.deepEqual(fake.fonts, names.map(fileName => ({ fileName, bytes: `bytes of ${fileName}` })))
+  })
   await check('a dry run checks every file and stores nothing', async () => {
     const answer = await remote.call('upload_media_files', { directory: photos, dryRun: true })
     assert.deepEqual(answer.counts, { files: 5, uploaded: 0, toUpload: 3, skipped: 1, refused: 1 })
