@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.2
+
+### Brand
+
+- Claude can finish a brand canvas on its own: it looks at the canvas as it stands, approves it when you say so, and makes the print PDF (PDF/X-3, FOGRA39, with bleed and crop marks), which lands in the media library. If the canvas holds something a print file cannot (a colour without its CMYK, a shadow, a transparency), it tells you what and where.
+
 ## 0.5.1
 
 ### Brand

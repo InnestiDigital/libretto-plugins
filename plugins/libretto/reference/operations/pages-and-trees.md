@@ -33,7 +33,7 @@ Read a site region and its editable page identity.
 |---|---|---|
 | `region` | "header" \| "footer" \| "above" \| "below" | yes |
 
-Output: { region: "header" \| "footer" \| "above" \| "below", pageId: string (min 1), tree: { format: "splash.tree", v: 3, revision: integer ≥0, root: { meta?: { canvas?: boolean, attributes?: Record<string, …>, reveal?: { mode: "enter", … } \| { mode: "scroll", … }, showOn?: "list" \| "item" }, styles?: { mixins: …[], sheet: Recor… (full schema: discover_operations)
+Output: { region: "header" \| "footer" \| "above" \| "below", pageId: string (min 1), tree: { format: "splash.tree", v: 3, revision: integer ≥0, root: { meta?: { canvas?: boolean, formats?: { list: …, master: … }, place?: Record<string, …>, pin?: "top" \| "bottom" \| "left" \| "right", attach?: { pattern: …, at: …, offset: …, size?:… (full schema: discover_operations)
 
 Example input:
 
@@ -51,7 +51,7 @@ Read a draft page tree and its revision.
 |---|---|---|
 | `pageId` | string (min 1) | yes |
 
-Output: { format: "splash.tree", v: 3, revision: integer ≥0, root: { meta?: { canvas?: boolean, attributes?: Record<string, string>, reveal?: { effect: …, distance?: …, mode?: …, once: …, threshold: …, durationMs?: …, staggerChildren: …, stagger?: … } \| { effect: …, distance?: …, mode: …, start: …, length: …, easing: …, fromOp… (full schema: discover_operations)
+Output: { format: "splash.tree", v: 3, revision: integer ≥0, root: { meta?: { canvas?: boolean, formats?: { list: …[] (≤12), master: string }, place?: Record<string, { x: …, y: …, w: …, h: …, r?: … }>, pin?: "top" \| "bottom" \| "left" \| "right", attach?: { pattern: nodeId, at: …[], offset: …[], size?: number ≤1000 }, print?: { … (full schema: discover_operations)
 
 Example input:
 
@@ -260,7 +260,7 @@ Read one node of a page's draft tree with its props, styles, meta, variant and t
 | `nodeId` | nodeId | yes |
 | `depth` | integer ≥0 ≤4 |  |
 
-Output: { pageId: string, revision: integer ≥0, path: ({ id: nodeId, kind: "root" \| "section" \| "repeater" \| "outlet" \| "primitive" \| "component" \| "instance", type: string })[], node: { meta?: { canvas?: boolean, attributes?: Record<string, string>, reveal?: { effect: …, distance?: …, mode?: …, once: …, threshold: …, duration… (full schema: discover_operations)
+Output: { pageId: string, revision: integer ≥0, path: ({ id: nodeId, kind: "root" \| "section" \| "repeater" \| "outlet" \| "primitive" \| "component" \| "instance", type: string })[], node: { meta?: { canvas?: boolean, formats?: { list: …[] (≤12), master: string }, place?: Record<string, { x: …, y: …, w: …, h: …, r?: … }>, pin?: "t… (full schema: discover_operations)
 
 Example input:
 

@@ -4,7 +4,7 @@
 
 `brand.setup` derives the whole token set of a brand (palettes, roles, type, space, radii) from a few inputs, as the admin's Brand setup screen does. The other `brand.*` operations manage the brand identity, format presets and templates, and render brand images.
 
-[`brand.setup`](#brandsetup) · [`brand.presets`](#brandpresets) · [`brand.templates`](#brandtemplates) · [`brand.updateIdentity`](#brandupdateidentity) · [`brand.createPreset`](#brandcreatepreset) · [`brand.renamePreset`](#brandrenamepreset) · [`brand.deletePreset`](#branddeletepreset) · [`brand.createTemplate`](#brandcreatetemplate) · [`brand.updateTemplate`](#brandupdatetemplate) · [`brand.deleteTemplate`](#branddeletetemplate) · [`brand.rebuildTemplate`](#brandrebuildtemplate) · [`brand.render`](#brandrender) · [`brand.save`](#brandsave)
+[`brand.setup`](#brandsetup) · [`brand.presets`](#brandpresets) · [`brand.templates`](#brandtemplates) · [`brand.updateIdentity`](#brandupdateidentity) · [`brand.createPreset`](#brandcreatepreset) · [`brand.renamePreset`](#brandrenamepreset) · [`brand.deletePreset`](#branddeletepreset) · [`brand.createTemplate`](#brandcreatetemplate) · [`brand.updateTemplate`](#brandupdatetemplate) · [`brand.deleteTemplate`](#branddeletetemplate) · [`brand.rebuildTemplate`](#brandrebuildtemplate) · [`brand.render`](#brandrender) · [`brand.save`](#brandsave) · [`brand.renderDraft`](#brandrenderdraft) · [`brand.print`](#brandprint) · [`brand.createProject`](#brandcreateproject) · [`brand.updateProject`](#brandupdateproject) · [`brand.duplicateProject`](#brandduplicateproject) · [`brand.deleteProject`](#branddeleteproject) · [`brand.images`](#brandimages) · [`brand.uploadImage`](#branduploadimage) · [`brand.projects`](#brandprojects)
 
 ## brand.setup
 
@@ -57,7 +57,7 @@ List the site's brand templates, the fixed-size canvases (a social post, a banne
 - permission `site.admin` (admin); class `read`; writes nothing.
 - Input: `{}`.
 
-Output: { templates: ({ id: string (min 1), name: string, pageId: string (min 1), snapshot: { canvas: { width: …, height: … }, frame: string (min 1), frameOverrides: … \| …, tree: { format: …, v: …, revision: …, root: … } } \| null, customerSettings: Record<string, …[] (≤128)> \| null, status: "draft" \| "approved", version: numbe… (full schema: discover_operations)
+Output: { templates: ({ id: string (min 1), name: string, pageId: string (min 1), snapshot: { frame: string (min 1), frameOverrides: … \| …, tree: { format: …, v: …, revision: …, root: … } } \| null, customerSettings: Record<string, …[] (≤128)> \| null, status: "draft" \| "approved", version: number, formats: { list: …[] (≤12), ma… (full schema: discover_operations)
 
 Example input:
 
@@ -142,23 +142,24 @@ Example input:
 
 ## brand.createTemplate
 
-Create a brand template: a canvas page of `width` by `height` pixels (fixed at creation) with a first section, laid out from one of the theme's canvas presets when `layoutId` names one. Edit its content with tree.commit on its page, then approve it with brand.updateTemplate. Brand validation applies, and history.undo restores the brand rows the batch changed.
+Create a brand template: a canvas page with a first section, the canvas host, carrying `formats` (`meta.formats`: the formats it is made in, px or mm with a dpi, each with margins and an optional bleed, and the id of the master; every format must draw at 16 to 4096 px a side), laid out from one of the theme's canvas presets when `layoutId` names one. The layers' style geometry is the master's placement; another format remaps it unless a layer has a hand placement there (`meta.place`). Edit its content and its formats with tree.commit on its page, then approve it with brand.updateTemplate. Brand validation applies, and history.undo restores the brand rows the batch changed.
 
 - permission `site.admin` (admin); class `transaction`; writes `brand`, `pages`; undoable with `history.undo`.
 
 | Input | Type | Required |
 |---|---|---|
 | `name` | string (min 1, max 120) | yes |
-| `width` | integer ≥16 ≤4096 | yes |
-| `height` | integer ≥16 ≤4096 | yes |
 | `layoutId` | string (min 1) |  |
+| `formats` | object | yes |
+| `formats.list` | ({ id: string, label: string (min 1, max 60), width: number ≤10000, height: number ≤10000, unit: "px" \| "mm", dpi?: integer ≥72 ≤600, margins: { top: number ≥0 ≤10000, right: number ≥0 ≤10000, bottom: number ≥0 ≤10000, left: number ≥0 ≤10000 }, safe?: { top: number ≥0 ≤10000, right: number ≥0 ≤10000, bottom: number ≥0 … (full schema: discover_operations) | yes |
+| `formats.master` | string | yes |
 
-Output: { id: string (min 1), name: string, pageId: string (min 1), snapshot: { canvas: { width: integer ≥16 ≤4096, height: integer ≥16 ≤4096 }, frame: string (min 1), frameOverrides: Record<string, any> \| null, tree: { format: "splash.tree", v: 3, revision: integer ≥0, root: { meta?: …, styles?: …, variant?: …, theme?: …, vis… (full schema: discover_operations)
+Output: { id: string (min 1), name: string, pageId: string (min 1), snapshot: { frame: string (min 1), frameOverrides: Record<string, any> \| null, tree: { format: "splash.tree", v: 3, revision: integer ≥0, root: { meta?: …, styles?: …, variant?: …, theme?: …, visibility?: …, attrs?: …, id: …, kind: …, type: …, children: … } \| … (full schema: discover_operations)
 
 Example input:
 
 ```json
-{"name":"Instagram post","width":1080,"height":1080}
+{"name":"Inauguration poster","formats":{"list":[{"id":"a3","label":"A3","width":297,"height":420,"unit":"mm","dpi":150,"margins":{"top":10,"right":10,"bottom":10,"left":10},"bleed":5},{"id":"story","label":"Storia 9:16","width":1080,"height":1920,"unit":"px","margins":{"top":250,"right":60,"bottom":250,"left":60}}],"master":"a3"}}
 ```
 
 ## brand.updateTemplate
@@ -173,10 +174,10 @@ Rename a brand template, approve it (`status: "approved"` with `expectedDraftRev
 | `patch` | object | yes |
 | `patch.name` | string (max 120) |  |
 | `patch.status` | "draft" \| "approved" |  |
-| `patch.customerSettings` | Record<string, string (min 1)[] (≤128)> \| null |  |
+| `patch.customerSettings` | Record<string, (string \| "$place" \| "$crop" \| "$colors:text" \| "$colors:background")[] (≤128)> \| null |  |
 | `patch.expectedDraftRevision` | string |  |
 
-Output: { id: string (min 1), name: string, pageId: string (min 1), snapshot: { canvas: { width: integer ≥16 ≤4096, height: integer ≥16 ≤4096 }, frame: string (min 1), frameOverrides: Record<string, any> \| null, tree: { format: "splash.tree", v: 3, revision: integer ≥0, root: { meta?: …, styles?: …, variant?: …, theme?: …, vis… (full schema: discover_operations)
+Output: { id: string (min 1), name: string, pageId: string (min 1), snapshot: { frame: string (min 1), frameOverrides: Record<string, any> \| null, tree: { format: "splash.tree", v: 3, revision: integer ≥0, root: { meta?: …, styles?: …, variant?: …, theme?: …, visibility?: …, attrs?: …, id: …, kind: …, type: …, children: … } \| … (full schema: discover_operations)
 
 Example input:
 
@@ -212,7 +213,7 @@ Recreate the canvas page of a brand template whose page was deleted, from its la
 |---|---|---|
 | `templateId` | string (min 1) | yes |
 
-Output: { id: string (min 1), name: string, pageId: string (min 1), snapshot: { canvas: { width: integer ≥16 ≤4096, height: integer ≥16 ≤4096 }, frame: string (min 1), frameOverrides: Record<string, any> \| null, tree: { format: "splash.tree", v: 3, revision: integer ≥0, root: { meta?: …, styles?: …, variant?: …, theme?: …, vis… (full schema: discover_operations)
+Output: { id: string (min 1), name: string, pageId: string (min 1), snapshot: { frame: string (min 1), frameOverrides: Record<string, any> \| null, tree: { format: "splash.tree", v: 3, revision: integer ≥0, root: { meta?: …, styles?: …, variant?: …, theme?: …, visibility?: …, attrs?: …, id: …, kind: …, type: …, children: … } \| … (full schema: discover_operations)
 
 Example input:
 
@@ -222,7 +223,7 @@ Example input:
 
 ## brand.render
 
-Render an approved brand template to a PNG (`scale` 1 or 2) in a brand preset (`presetId`), with the overrides of the fields its curation lets a person change (`overrides`, by node), and answer it as base64 without storing it. The render runs in a standalone boundary; run it alone in a batch.
+Render an approved brand template in one of its approved formats (`formatId`, the master when omitted) to a PNG or a JPEG (`type`, png by default) at `scale` 1 to 4 (the longer side at most 8192 px), in a brand preset (`presetId`), with the overrides of the fields its curation lets a person change (`overrides`, by node), and answer it as base64 (`image`) without storing it. GET /api/admin/s/<site>/brand-templates/<id>/download?format=&scale=&type= answers the same image, without overrides, as a file. The render runs in a standalone boundary; run it alone in a batch.
 
 - permission `brand.generate` (admin); class `external`; writes nothing; external: alone in its batch, never in a dry run.
 
@@ -230,20 +231,22 @@ Render an approved brand template to a PNG (`scale` 1 or 2) in a brand preset (`
 |---|---|---|
 | `templateId` | string (min 1) | yes |
 | `presetId` | string (min 1) |  |
-| `scale` | 1 \| 2 |  |
+| `formatId` | string (min 1) |  |
+| `scale` | 1 \| 2 \| 3 \| 4 |  |
+| `type` | "png" \| "jpeg" |  |
 | `overrides` | any |  |
 
-Output: { png: string, contentType: "image/png", filename: string, templateVersion: integer, width: integer, height: integer, warnings: string[] }
+Output: { image: string, contentType: "image/png" \| "image/jpeg", filename: string, templateVersion: integer, formatId: string, width: integer, height: integer, warnings: string[] }
 
 Example input:
 
 ```json
-{"templateId":"4e5f6a7b-8c9d-4e0f-9a1b-2c3d4e5f6a7b","scale":1}
+{"templateId":"4e5f6a7b-8c9d-4e0f-9a1b-2c3d4e5f6a7b","formatId":"story","scale":1}
 ```
 
 ## brand.save
 
-Render an approved brand template as brand.render does and store the PNG in the media library, with the record of how it was made. The render runs in a standalone boundary; run it alone in a batch.
+Render an approved brand template as brand.render does and store the image in the media library, with the record of how it was made (its version, format and overrides). The render runs in a standalone boundary; run it alone in a batch.
 
 - permission `brand.generate` (admin); class `external`; writes `media`, `generations`; undoable with `history.undo`; external: alone in its batch, never in a dry run.
 
@@ -251,7 +254,9 @@ Render an approved brand template as brand.render does and store the PNG in the 
 |---|---|---|
 | `templateId` | string (min 1) | yes |
 | `presetId` | string (min 1) |  |
-| `scale` | 1 \| 2 |  |
+| `formatId` | string (min 1) |  |
+| `scale` | 1 \| 2 \| 3 \| 4 |  |
+| `type` | "png" \| "jpeg" |  |
 | `overrides` | any |  |
 
 Output: { kind: "template", media: { id: uuid, kind: "image" \| "svg" \| "video" \| "document", filename: string (min 1, max 255), mime: string (min 1, max 127), size: integer ≥0, url: string (min 1, max 2048), width?: integer ≥1 ≤100000, height?: integer ≥1 ≤100000, variants: ({ width: integer ≥1 ≤100000, height?: integer ≥1 ≤10… (full schema: discover_operations)
@@ -259,5 +264,187 @@ Output: { kind: "template", media: { id: uuid, kind: "image" \| "svg" \| "video"
 Example input:
 
 ```json
-{"templateId":"4e5f6a7b-8c9d-4e0f-9a1b-2c3d4e5f6a7b","scale":2}
+{"templateId":"4e5f6a7b-8c9d-4e0f-9a1b-2c3d4e5f6a7b","formatId":"a3","scale":2,"type":"jpeg"}
+```
+
+## brand.renderDraft
+
+Render a brand template's canvas as it stands now, approved or not, as the admin preview draws it: in one of its formats (`formatId`, the master when omitted), PNG or JPEG at `scale` 1 to 4, in a brand preset, answered as base64 (`image`) with `draftRevision`, the revision brand.updateTemplate approves (`status: "approved"`, `expectedDraftRevision`). An edit of the canvas after the render changes the revision, so render again before approving. The render runs in a standalone boundary; run it alone in a batch.
+
+- permission `site.admin` (admin); class `external`; writes nothing; external: alone in its batch, never in a dry run.
+
+| Input | Type | Required |
+|---|---|---|
+| `templateId` | string (min 1) | yes |
+| `presetId` | string (min 1) |  |
+| `formatId` | string (min 1) |  |
+| `scale` | 1 \| 2 \| 3 \| 4 |  |
+| `type` | "png" \| "jpeg" |  |
+
+Output: { image: string, contentType: "image/png" \| "image/jpeg", filename: string, formatId: string, width: integer, height: integer, warnings: string[], draftRevision: string }
+
+Example input:
+
+```json
+{"templateId":"4e5f6a7b-8c9d-4e0f-9a1b-2c3d4e5f6a7b","formatId":"a3"}
+```
+
+## brand.print
+
+Make the PDF/X-3 print file of an approved brand template (FOGRA39, trim plus bleed with crop marks), as the admin's print download makes it: in one of its millimetre formats (`format`, the master when omitted), in a brand preset, with the overrides its curation allows, and store it in the media library; the answer names the stored file (`media`, with its URL) and how it was made. A canvas that holds what a print PDF cannot is refused (422 print-refused, with the findings). The render runs in a standalone boundary; run it alone in a batch, with the media base revision.
+
+- permission `brand.generate` (admin); class `external`; writes `media`; undoable with `history.undo`; external: alone in its batch, never in a dry run.
+
+| Input | Type | Required |
+|---|---|---|
+| `templateId` | string (min 1) | yes |
+| `format` | string (min 1) |  |
+| `presetId` | string (min 1) |  |
+| `overrides` | any |  |
+
+Output: { kind: "print", media: { id: uuid, kind: "image" \| "svg" \| "video" \| "document", filename: string (min 1, max 255), mime: string (min 1, max 127), size: integer ≥0, url: string (min 1, max 2048), width?: integer ≥1 ≤100000, height?: integer ≥1 ≤100000, variants: ({ width: integer ≥1 ≤100000, height?: integer ≥1 ≤10000… (full schema: discover_operations)
+
+Example input:
+
+```json
+{"templateId":"4e5f6a7b-8c9d-4e0f-9a1b-2c3d4e5f6a7b","format":"a3"}
+```
+
+## brand.createProject
+
+Start a project in the studio: a graphic made from an approved brand template, kept as its recipe (the template, the approved version, `formatId` one of its formats, the `overrides` its curation lets the person send, as brand.render takes them) and a `name`. A project is a working file, not site content: it has no undo and leaves no history row, and the call runs alone in a batch. Whoever may draw the template (brand.generate) may keep projects of it; a client's overrides are held to the template's curation.
+
+- permission `brand.generate` (admin); class `external`; writes nothing; external: alone in its batch, never in a dry run.
+
+| Input | Type | Required |
+|---|---|---|
+| `templateId` | string (min 1) | yes |
+| `formatId` | string (min 1) | yes |
+| `name` | string (min 1, max 120) | yes |
+| `overrides` | any |  |
+
+Output: { id: string (min 1), templateId: string (min 1), templateVersion: integer, formatId: string (min 1), name: string (min 1, max 120), overrides: Record<string, { $place?: Record<string, { x: number ≥-200 ≤300, y: number ≥-200 ≤300, w: number ≥0 ≤500, h: number ≥0 ≤500, r?: number ≥-360 ≤360 }>, $colors?: { text?: string… (full schema: discover_operations)
+
+Example input:
+
+```json
+{"templateId":"4e5f6a7b-8c9d-4e0f-9a1b-2c3d4e5f6a7b","formatId":"story","name":"Opening night","overrides":{"title001":{"text":"Opening night, 12 November"}}}
+```
+
+## brand.updateProject
+
+Save a project (the studio's autosave): its `patch` changes the name, the format or the overrides, and pins the project to the template's current approved version. A project is a working file, not site content: it has no undo and leaves no history row, and the call runs alone in a batch. Whoever may draw the template (brand.generate) may keep projects of it; a client's overrides are held to the template's curation.
+
+- permission `brand.generate` (admin); class `external`; writes nothing; external: alone in its batch, never in a dry run.
+
+| Input | Type | Required |
+|---|---|---|
+| `projectId` | string (min 1) | yes |
+| `patch` | object | yes |
+| `patch.name` | string (min 1, max 120) |  |
+| `patch.formatId` | string (min 1) |  |
+| `patch.overrides` | any |  |
+
+Output: { id: string (min 1), templateId: string (min 1), templateVersion: integer, formatId: string (min 1), name: string (min 1, max 120), overrides: Record<string, { $place?: Record<string, { x: number ≥-200 ≤300, y: number ≥-200 ≤300, w: number ≥0 ≤500, h: number ≥0 ≤500, r?: number ≥-360 ≤360 }>, $colors?: { text?: string… (full schema: discover_operations)
+
+Example input:
+
+```json
+{"projectId":"5f6a7b8c-9d0e-4f1a-8b2c-3d4e5f6a7b8c","patch":{"formatId":"a3"}}
+```
+
+## brand.duplicateProject
+
+Copy a project under a new `name`, with its format and overrides. A project is a working file, not site content: it has no undo and leaves no history row, and the call runs alone in a batch. Whoever may draw the template (brand.generate) may keep projects of it; a client's overrides are held to the template's curation.
+
+- permission `brand.generate` (admin); class `external`; writes nothing; external: alone in its batch, never in a dry run.
+
+| Input | Type | Required |
+|---|---|---|
+| `projectId` | string (min 1) | yes |
+| `name` | string (min 1, max 120) | yes |
+
+Output: { id: string (min 1), templateId: string (min 1), templateVersion: integer, formatId: string (min 1), name: string (min 1, max 120), overrides: Record<string, { $place?: Record<string, { x: number ≥-200 ≤300, y: number ≥-200 ≤300, w: number ≥0 ≤500, h: number ≥0 ≤500, r?: number ≥-360 ≤360 }>, $colors?: { text?: string… (full schema: discover_operations)
+
+Example input:
+
+```json
+{"projectId":"5f6a7b8c-9d0e-4f1a-8b2c-3d4e5f6a7b8c","name":"Opening night (copy)"}
+```
+
+## brand.deleteProject
+
+Delete a project. Images already saved in the media library stay. A project is a working file, not site content: it has no undo and leaves no history row, and the call runs alone in a batch. Whoever may draw the template (brand.generate) may keep projects of it; a client's overrides are held to the template's curation.
+
+- permission `brand.generate` (admin); class `external`; writes nothing; external: alone in its batch, never in a dry run.
+
+| Input | Type | Required |
+|---|---|---|
+| `projectId` | string (min 1) | yes |
+
+Output: { success: true }
+
+Example input:
+
+```json
+{"projectId":"5f6a7b8c-9d0e-4f1a-8b2c-3d4e5f6a7b8c"}
+```
+
+## brand.images
+
+List the images of the site's media library for a studio graphic (`search` by filename, `page`, `perPage` up to 60), the newest first: each as its media record (a graphic names it as `{ "$media": id }` in an exposed image prop) with a small variant for a thumbnail (`thumbnailUrl`); or, with `ids`, the images those ids name among the site's (a reopened graphic's swapped-in pictures). Read-only: no folders and no other kinds of media.
+
+- permission `brand.generate` (admin); class `read`; writes nothing.
+
+| Input | Type | Required |
+|---|---|---|
+| `search` | string (max 200) |  |
+| `page` | integer |  |
+| `perPage` | integer ≥1 ≤60 |  |
+| `ids` | uuid[] (≤64) |  |
+
+Output: { items: ({ id: uuid, kind: "image" \| "svg" \| "video" \| "document", filename: string (min 1, max 255), mime: string (min 1, max 127), size: integer ≥0, url: string (min 1, max 2048), width?: integer ≥1 ≤100000, height?: integer ≥1 ≤100000, variants: ({ width: integer ≥1 ≤100000, height?: integer ≥1 ≤100000, mime: "imag… (full schema: discover_operations)
+
+Example input:
+
+```json
+{"search":"opening","perPage":24}
+```
+
+## brand.uploadImage
+
+Add an image to the site's media library for a studio graphic: a PNG, JPEG or WebP (`contentType`) of at most 5 MB, its bytes in base64 (`data`), checked and given its variants as any upload (media.upload), at the top level of the library. Answers the image as brand.images lists it; history.undo removes it.
+
+- permission `brand.generate` (admin); class `transaction`; writes `media`; undoable with `history.undo`.
+
+| Input | Type | Required |
+|---|---|---|
+| `filename` | string (min 1, max 255) | yes |
+| `contentType` | "image/png" \| "image/jpeg" \| "image/webp" | yes |
+| `data` | string (min 1, max 6990508) | yes |
+
+Output: { id: uuid, kind: "image" \| "svg" \| "video" \| "document", filename: string (min 1, max 255), mime: string (min 1, max 127), size: integer ≥0, url: string (min 1, max 2048), width?: integer ≥1 ≤100000, height?: integer ≥1 ≤100000, variants: ({ width: integer ≥1 ≤100000, height?: integer ≥1 ≤100000, mime: "image/avif" \| … (full schema: discover_operations)
+
+Example input:
+
+```json
+{"filename":"opening.png","contentType":"image/png","data":"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGD4DwABBAEAwS2OUAAAAABJRU5ErkJggg=="}
+```
+
+## brand.projects
+
+List the studio projects of an approved brand template (`templateId`), the most recently saved first (at most 200): each with its name, format, overrides and the approved version it was saved against.
+
+- permission `brand.generate` (admin); class `read`; writes nothing.
+
+| Input | Type | Required |
+|---|---|---|
+| `templateId` | string (min 1) | yes |
+
+Output: { projects: { id: string (min 1), templateId: string (min 1), templateVersion: integer, formatId: string (min 1), name: string (min 1, max 120), overrides: Record<string, { $place?: Record<string, …>, $colors?: { text?: …, background?: … }, $crop?: { zoom: …, x: …, y: … } }>, createdAt: string, updatedAt: string }[] }
+
+Example input:
+
+```json
+{"templateId":"4e5f6a7b-8c9d-4e0f-9a1b-2c3d4e5f6a7b"}
 ```
