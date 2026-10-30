@@ -8,7 +8,7 @@ A page is a row (slug, title, status, frame, SEO) plus a tree (`splash.tree/3`) 
 
 ## pattern.paintCells
 
-Light or darken dots of a pattern node by lattice coordinates: `cells` as [i, j] pairs and `runs` of one row (j, from to), `on` (default true), `from` to reset the pattern to a full or an empty lattice first. To light only some dots: from "empty", then on. One commit; the cells must fit 256 x 256.
+Light or darken dots of a pattern node by lattice coordinates. `cells` are [i, j] pairs and `runs` rows of one row (j, from to); `on` (default true); `from` first resets the pattern to a full or an empty lattice (to light only some dots: from "empty", then on). One commit; the cells must fit 256 x 256.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `tree:{pageId}`; undoable with `history.undo`.
 
@@ -31,7 +31,7 @@ Example input:
 
 ## pattern.setLink
 
-Make a pattern layer's lattice follow an image layer of the same page (`link`: { node: the image layer's id, origin: [x, y] of dot [0, 0] as fractions of the picture's width and height, pitch: a fraction of its width, ratio: the picture's width over height }), so it follows the picture's move, zoom and each format's cover fit; `link: null` stops it. A node that is not an image layer of the page is refused.
+Make a pattern layer's lattice follow an image layer, or stop it. `link`: { node: the image layer's id on the same page, origin: [x, y] of dot [0, 0] as fractions of the picture's width and height, pitch: a fraction of its width, ratio: the picture's width over height }, so the dots follow the picture's move, zoom and each format's cover fit; `link: null` stops it. A node that is not an image layer of the page is refused.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `tree:{pageId}`; undoable with `history.undo`.
 
@@ -51,7 +51,7 @@ Example input:
 
 ## pattern.fillFromImage
 
-Light the dots of a pattern layer from where a picture has content, as the editor's "Light the dots from a picture" does, with the same maths: a dot is lit when at least `coveragePct` (default 1) of the picture's pixels within `radiusCells` cells (default 2) of it are ink (`inkPct` % dark and opaque, default 15), then the lit area grows by `spread` cells (default 0); `radiusCells` 0 asks about the dot alone. The picture is the image layer `imageId`, else the one the pattern follows; the lattice is read in `formatId`, else the master. The lit cells are replaced, as one commit, and must fit 256 x 256 cells.
+Light a pattern layer's dots from a picture, as the editor's "Light the dots from a picture" does. A dot is lit when at least `coveragePct` (default 1) of the picture's pixels within `radiusCells` cells (default 2) of it are ink (`inkPct` % dark and opaque, default 15), then the lit area grows by `spread` cells (default 0); `radiusCells` 0 asks about the dot alone. The picture is the image layer `imageId`, else the one the pattern follows; the lattice is read in `formatId`, else the master. The lit cells are replaced, as one commit, and must fit 256 x 256 cells.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `tree:{pageId}`; undoable with `history.undo`.
 

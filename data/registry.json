@@ -17982,7 +17982,7 @@
     },
     {
       "name": "pattern.paintCells",
-      "description": "Light or darken dots of a pattern node by lattice coordinates: `cells` as [i, j] pairs and `runs` of one row (j, from to), `on` (default true), `from` to reset the pattern to a full or an empty lattice first. To light only some dots: from \"empty\", then on. One commit; the cells must fit 256 x 256.",
+      "description": "Light or darken dots of a pattern node by lattice coordinates. `cells` are [i, j] pairs and `runs` rows of one row (j, from to); `on` (default true); `from` first resets the pattern to a full or an empty lattice (to light only some dots: from \"empty\", then on). One commit; the cells must fit 256 x 256.",
       "example": {
         "pageId": "6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f",
         "nodeId": "claim001",
@@ -20195,7 +20195,7 @@
     },
     {
       "name": "pattern.setLink",
-      "description": "Make a pattern layer's lattice follow an image layer of the same page (`link`: { node: the image layer's id, origin: [x, y] of dot [0, 0] as fractions of the picture's width and height, pitch: a fraction of its width, ratio: the picture's width over height }), so it follows the picture's move, zoom and each format's cover fit; `link: null` stops it. A node that is not an image layer of the page is refused.",
+      "description": "Make a pattern layer's lattice follow an image layer, or stop it. `link`: { node: the image layer's id on the same page, origin: [x, y] of dot [0, 0] as fractions of the picture's width and height, pitch: a fraction of its width, ratio: the picture's width over height }, so the dots follow the picture's move, zoom and each format's cover fit; `link: null` stops it. A node that is not an image layer of the page is refused.",
       "example": {
         "pageId": "6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f",
         "nodeId": "claim001",
@@ -22368,7 +22368,7 @@
     },
     {
       "name": "pattern.fillFromImage",
-      "description": "Light the dots of a pattern layer from where a picture has content, as the editor's \"Light the dots from a picture\" does, with the same maths: a dot is lit when at least `coveragePct` (default 1) of the picture's pixels within `radiusCells` cells (default 2) of it are ink (`inkPct` % dark and opaque, default 15), then the lit area grows by `spread` cells (default 0); `radiusCells` 0 asks about the dot alone. The picture is the image layer `imageId`, else the one the pattern follows; the lattice is read in `formatId`, else the master. The lit cells are replaced, as one commit, and must fit 256 x 256 cells.",
+      "description": "Light a pattern layer's dots from a picture, as the editor's \"Light the dots from a picture\" does. A dot is lit when at least `coveragePct` (default 1) of the picture's pixels within `radiusCells` cells (default 2) of it are ink (`inkPct` % dark and opaque, default 15), then the lit area grows by `spread` cells (default 0); `radiusCells` 0 asks about the dot alone. The picture is the image layer `imageId`, else the one the pattern follows; the lattice is read in `formatId`, else the master. The lit cells are replaced, as one commit, and must fit 256 x 256 cells.",
       "example": {
         "pageId": "6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f",
         "nodeId": "claim001",
