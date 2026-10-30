@@ -78244,6 +78244,7 @@
                 "enum": [
                   "$place",
                   "$crop",
+                  "$blend",
                   "$colors:text",
                   "$colors:background"
                 ]
@@ -80581,6 +80582,7 @@
                 "enum": [
                   "$place",
                   "$crop",
+                  "$blend",
                   "$colors:text",
                   "$colors:background"
                 ]
@@ -80686,6 +80688,7 @@
                 "enum": [
                   "$place",
                   "$crop",
+                  "$blend",
                   "$colors:text",
                   "$colors:background"
                 ]
@@ -82420,6 +82423,7 @@
                 "enum": [
                   "$place",
                   "$crop",
+                  "$blend",
                   "$colors:text",
                   "$colors:background"
                 ]
@@ -84236,6 +84240,7 @@
                 "enum": [
                   "$place",
                   "$crop",
+                  "$blend",
                   "$colors:text",
                   "$colors:background"
                 ]
@@ -85128,7 +85133,7 @@
     },
     {
       "name": "brand.print",
-      "description": "Make the PDF/X-3 print file of an approved brand template (FOGRA39, trim plus bleed with crop marks), as the admin's print download makes it: in one of its millimetre formats (`format`, the master when omitted), in a brand preset, with the overrides its curation allows, and store it in the media library; the answer names the stored file (`media`, with its URL) and how it was made. A canvas that holds what a print PDF cannot is refused (422 print-refused, with the findings). The render runs in a standalone boundary; run it alone in a batch, with the media base revision.",
+      "description": "Make the PDF/X-3 print file of an approved brand template (FOGRA39, trim plus bleed with crop marks), as the admin's print download makes it: in one of its millimetre formats (`format`, the master when omitted), in a brand preset, with the overrides its curation allows, and store it in the media library; the answer names the stored file (`media`, with its URL) and how it was made, with a look at the file's page rendered from the PDF itself (`image`, a JPEG at most 1568 px a side; over MCP an image block), so you see the sheet the printer gets, bleed, crop marks and slug included. A canvas that holds what a print PDF cannot is refused (422 print-refused, with the findings). The render runs in a standalone boundary; run it alone in a batch, with the media base revision.",
       "example": {
         "templateId": "4e5f6a7b-8c9d-4e0f-9a1b-2c3d4e5f6a7b",
         "format": "a3"
@@ -85487,6 +85492,13 @@
             "items": {
               "type": "string"
             }
+          },
+          "image": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string",
+            "const": "image/jpeg"
           }
         },
         "required": [
@@ -85707,10 +85719,13 @@
               },
               "$crop": {
                 "$ref": "#/$defs/__schema18"
+              },
+              "$blend": {
+                "$ref": "#/$defs/__schema19"
               }
             },
             "additionalProperties": {
-              "$ref": "#/$defs/__schema19"
+              "$ref": "#/$defs/__schema20"
             }
           },
           "__schema14": {
@@ -85804,6 +85819,38 @@
             "additionalProperties": false
           },
           "__schema19": {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "normal",
+                  "darken",
+                  "multiply",
+                  "color-burn",
+                  "lighten",
+                  "screen",
+                  "color-dodge",
+                  "overlay",
+                  "soft-light",
+                  "hard-light",
+                  "difference",
+                  "exclusion",
+                  "hue",
+                  "saturation",
+                  "color",
+                  "luminosity"
+                ]
+              },
+              "opacity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "additionalProperties": false
+          },
+          "__schema20": {
             "anyOf": [
               {
                 "type": "object",
@@ -85840,11 +85887,11 @@
                 "additionalProperties": false
               },
               {
-                "$ref": "#/$defs/__schema20"
+                "$ref": "#/$defs/__schema21"
               }
             ]
           },
-          "__schema20": {
+          "__schema21": {
             "anyOf": [
               {
                 "type": "string"
@@ -85861,7 +85908,7 @@
               {
                 "type": "array",
                 "items": {
-                  "$ref": "#/$defs/__schema20"
+                  "$ref": "#/$defs/__schema21"
                 }
               },
               {
@@ -85870,7 +85917,7 @@
                   "type": "string"
                 },
                 "additionalProperties": {
-                  "$ref": "#/$defs/__schema20"
+                  "$ref": "#/$defs/__schema21"
                 }
               }
             ]
@@ -86000,10 +86047,13 @@
               },
               "$crop": {
                 "$ref": "#/$defs/__schema6"
+              },
+              "$blend": {
+                "$ref": "#/$defs/__schema7"
               }
             },
             "additionalProperties": {
-              "$ref": "#/$defs/__schema7"
+              "$ref": "#/$defs/__schema8"
             }
           },
           "__schema2": {
@@ -86097,6 +86147,38 @@
             "additionalProperties": false
           },
           "__schema7": {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "normal",
+                  "darken",
+                  "multiply",
+                  "color-burn",
+                  "lighten",
+                  "screen",
+                  "color-dodge",
+                  "overlay",
+                  "soft-light",
+                  "hard-light",
+                  "difference",
+                  "exclusion",
+                  "hue",
+                  "saturation",
+                  "color",
+                  "luminosity"
+                ]
+              },
+              "opacity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "additionalProperties": false
+          },
+          "__schema8": {
             "anyOf": [
               {
                 "type": "object",
@@ -86133,11 +86215,11 @@
                 "additionalProperties": false
               },
               {
-                "$ref": "#/$defs/__schema8"
+                "$ref": "#/$defs/__schema9"
               }
             ]
           },
-          "__schema8": {
+          "__schema9": {
             "anyOf": [
               {
                 "type": "string"
@@ -86154,7 +86236,7 @@
               {
                 "type": "array",
                 "items": {
-                  "$ref": "#/$defs/__schema8"
+                  "$ref": "#/$defs/__schema9"
                 }
               },
               {
@@ -86163,7 +86245,7 @@
                   "type": "string"
                 },
                 "additionalProperties": {
-                  "$ref": "#/$defs/__schema8"
+                  "$ref": "#/$defs/__schema9"
                 }
               }
             ]
@@ -86297,10 +86379,13 @@
               },
               "$crop": {
                 "$ref": "#/$defs/__schema6"
+              },
+              "$blend": {
+                "$ref": "#/$defs/__schema7"
               }
             },
             "additionalProperties": {
-              "$ref": "#/$defs/__schema7"
+              "$ref": "#/$defs/__schema8"
             }
           },
           "__schema2": {
@@ -86394,6 +86479,38 @@
             "additionalProperties": false
           },
           "__schema7": {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "normal",
+                  "darken",
+                  "multiply",
+                  "color-burn",
+                  "lighten",
+                  "screen",
+                  "color-dodge",
+                  "overlay",
+                  "soft-light",
+                  "hard-light",
+                  "difference",
+                  "exclusion",
+                  "hue",
+                  "saturation",
+                  "color",
+                  "luminosity"
+                ]
+              },
+              "opacity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "additionalProperties": false
+          },
+          "__schema8": {
             "anyOf": [
               {
                 "type": "object",
@@ -86430,11 +86547,11 @@
                 "additionalProperties": false
               },
               {
-                "$ref": "#/$defs/__schema8"
+                "$ref": "#/$defs/__schema9"
               }
             ]
           },
-          "__schema8": {
+          "__schema9": {
             "anyOf": [
               {
                 "type": "string"
@@ -86451,7 +86568,7 @@
               {
                 "type": "array",
                 "items": {
-                  "$ref": "#/$defs/__schema8"
+                  "$ref": "#/$defs/__schema9"
                 }
               },
               {
@@ -86460,7 +86577,7 @@
                   "type": "string"
                 },
                 "additionalProperties": {
-                  "$ref": "#/$defs/__schema8"
+                  "$ref": "#/$defs/__schema9"
                 }
               }
             ]
@@ -86570,10 +86687,13 @@
               },
               "$crop": {
                 "$ref": "#/$defs/__schema6"
+              },
+              "$blend": {
+                "$ref": "#/$defs/__schema7"
               }
             },
             "additionalProperties": {
-              "$ref": "#/$defs/__schema7"
+              "$ref": "#/$defs/__schema8"
             }
           },
           "__schema2": {
@@ -86667,6 +86787,38 @@
             "additionalProperties": false
           },
           "__schema7": {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "normal",
+                  "darken",
+                  "multiply",
+                  "color-burn",
+                  "lighten",
+                  "screen",
+                  "color-dodge",
+                  "overlay",
+                  "soft-light",
+                  "hard-light",
+                  "difference",
+                  "exclusion",
+                  "hue",
+                  "saturation",
+                  "color",
+                  "luminosity"
+                ]
+              },
+              "opacity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "additionalProperties": false
+          },
+          "__schema8": {
             "anyOf": [
               {
                 "type": "object",
@@ -86703,11 +86855,11 @@
                 "additionalProperties": false
               },
               {
-                "$ref": "#/$defs/__schema8"
+                "$ref": "#/$defs/__schema9"
               }
             ]
           },
-          "__schema8": {
+          "__schema9": {
             "anyOf": [
               {
                 "type": "string"
@@ -86724,7 +86876,7 @@
               {
                 "type": "array",
                 "items": {
-                  "$ref": "#/$defs/__schema8"
+                  "$ref": "#/$defs/__schema9"
                 }
               },
               {
@@ -86733,7 +86885,7 @@
                   "type": "string"
                 },
                 "additionalProperties": {
-                  "$ref": "#/$defs/__schema8"
+                  "$ref": "#/$defs/__schema9"
                 }
               }
             ]
@@ -88021,10 +88173,13 @@
               },
               "$crop": {
                 "$ref": "#/$defs/__schema6"
+              },
+              "$blend": {
+                "$ref": "#/$defs/__schema7"
               }
             },
             "additionalProperties": {
-              "$ref": "#/$defs/__schema7"
+              "$ref": "#/$defs/__schema8"
             }
           },
           "__schema2": {
@@ -88118,6 +88273,38 @@
             "additionalProperties": false
           },
           "__schema7": {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "normal",
+                  "darken",
+                  "multiply",
+                  "color-burn",
+                  "lighten",
+                  "screen",
+                  "color-dodge",
+                  "overlay",
+                  "soft-light",
+                  "hard-light",
+                  "difference",
+                  "exclusion",
+                  "hue",
+                  "saturation",
+                  "color",
+                  "luminosity"
+                ]
+              },
+              "opacity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "additionalProperties": false
+          },
+          "__schema8": {
             "anyOf": [
               {
                 "type": "object",
@@ -88154,11 +88341,11 @@
                 "additionalProperties": false
               },
               {
-                "$ref": "#/$defs/__schema8"
+                "$ref": "#/$defs/__schema9"
               }
             ]
           },
-          "__schema8": {
+          "__schema9": {
             "anyOf": [
               {
                 "type": "string"
@@ -88175,7 +88362,7 @@
               {
                 "type": "array",
                 "items": {
-                  "$ref": "#/$defs/__schema8"
+                  "$ref": "#/$defs/__schema9"
                 }
               },
               {
@@ -88184,7 +88371,7 @@
                   "type": "string"
                 },
                 "additionalProperties": {
-                  "$ref": "#/$defs/__schema8"
+                  "$ref": "#/$defs/__schema9"
                 }
               }
             ]

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.5
+
+### Brand
+
+- Blends and transparency print the way a print designer flattens them: a grid of dots in multiply over a photo, a picture with transparent pixels or a faded layer is flattened with what lies under it into a 300 ppi CMYK area, over a flat colour it stays vector in the computed colour, and everything above stays sharp. Claude tells you what was flattened.
+- Claude sees the print file before it goes to the printer: the page of the PDF, bleed and crop marks included.
+- A canvas can let the studio change a layer's blend and opacity.
+
 ## 0.5.4
 
 ### Brand

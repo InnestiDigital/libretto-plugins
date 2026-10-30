@@ -174,7 +174,7 @@ Rename a brand template, approve it (`status: "approved"` with `expectedDraftRev
 | `patch` | object | yes |
 | `patch.name` | string (max 120) |  |
 | `patch.status` | "draft" \| "approved" |  |
-| `patch.customerSettings` | Record<string, (string \| "$place" \| "$crop" \| "$colors:text" \| "$colors:background")[] (≤128)> \| null |  |
+| `patch.customerSettings` | Record<string, (string \| "$place" \| "$crop" \| "$blend" \| "$colors:text" \| "$colors:background")[] (≤128)> \| null |  |
 | `patch.expectedDraftRevision` | string |  |
 
 Output: { id: string (min 1), name: string, pageId: string (min 1), snapshot: { frame: string (min 1), frameOverrides: Record<string, any> \| null, tree: { format: "splash.tree", v: 3, revision: integer ≥0, root: { meta?: …, styles?: …, variant?: …, theme?: …, visibility?: …, attrs?: …, id: …, kind: …, type: …, children: … } \| … (full schema: discover_operations)
@@ -291,7 +291,7 @@ Example input:
 
 ## brand.print
 
-Make the PDF/X-3 print file of an approved brand template (FOGRA39, trim plus bleed with crop marks), as the admin's print download makes it: in one of its millimetre formats (`format`, the master when omitted), in a brand preset, with the overrides its curation allows, and store it in the media library; the answer names the stored file (`media`, with its URL) and how it was made. A canvas that holds what a print PDF cannot is refused (422 print-refused, with the findings). The render runs in a standalone boundary; run it alone in a batch, with the media base revision.
+Make the PDF/X-3 print file of an approved brand template (FOGRA39, trim plus bleed with crop marks), as the admin's print download makes it: in one of its millimetre formats (`format`, the master when omitted), in a brand preset, with the overrides its curation allows, and store it in the media library; the answer names the stored file (`media`, with its URL) and how it was made, with a look at the file's page rendered from the PDF itself (`image`, a JPEG at most 1568 px a side; over MCP an image block), so you see the sheet the printer gets, bleed, crop marks and slug included. A canvas that holds what a print PDF cannot is refused (422 print-refused, with the findings). The render runs in a standalone boundary; run it alone in a batch, with the media base revision.
 
 - permission `brand.generate` (admin); class `external`; writes `media`; undoable with `history.undo`; external: alone in its batch, never in a dry run.
 
@@ -441,7 +441,7 @@ List the studio projects of an approved brand template (`templateId`), the most 
 |---|---|---|
 | `templateId` | string (min 1) | yes |
 
-Output: { projects: { id: string (min 1), templateId: string (min 1), templateVersion: integer, formatId: string (min 1), name: string (min 1, max 120), overrides: Record<string, { $place?: Record<string, …>, $colors?: { text?: …, background?: … }, $crop?: { zoom: …, x: …, y: … } }>, createdAt: string, updatedAt: string }[] }
+Output: { projects: { id: string (min 1), templateId: string (min 1), templateVersion: integer, formatId: string (min 1), name: string (min 1, max 120), overrides: Record<string, { $place?: Record<string, …>, $colors?: { text?: …, background?: … }, $crop?: { zoom: …, x: …, y: … }, $blend?: { mode?: …, opacity?: … } }>, created… (full schema: discover_operations)
 
 Example input:
 

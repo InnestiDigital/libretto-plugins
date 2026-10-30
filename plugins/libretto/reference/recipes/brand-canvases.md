@@ -83,10 +83,27 @@ A print file takes only fonts the site holds: Google families with `font.importG
 A print colour is a token with CMYK: a colour token may carry `$extensions["com.libretto.print"] = { "cmyk": [c, m, y, k], "link": "rgb" | "cmyk" | "free" }`, written with `designSystem.setToken` or `setTokens`. `rgb` derives the CMYK from the RGB, `cmyk` derives the RGB, `free` keeps both as given. Every colour the canvas paints needs one: a colour with no CMYK refuses the print.
 
 1. Approve the template (`brand.updateTemplate` with `status: "approved"` and the `draftRevision` of the last `brand.renderDraft`).
-2. `brand.print` `{ "templateId", "format": "a3" }`, alone in a batch whose `baseRevisions` names `media` (copy it from `site_context`; no other revision is needed, and any other you name is checked as usual). `format` is one of the template's mm formats (the master when left out). It stores a PDF/X-3 file (FOGRA39, trim plus bleed, crop marks) in the media library and answers its record with the `url`, never the bytes.
+2. `brand.print` `{ "templateId", "format": "a3" }`, alone in a batch whose `baseRevisions` names `media` (copy it from `site_context`; no other revision is needed, and any other you name is checked as usual). `format` is one of the template's mm formats (the master when left out). It stores a PDF/X-3 file (FOGRA39, trim plus bleed, crop marks) in the media library and answers its record with the `url`, never the bytes, plus a look at the file: its page rendered from the PDF itself (the whole sheet, bleed, crop marks and slug line included), as an image block after the receipt. Look at it: it is what the printer gets, flattened areas included.
 3. A 422 `print-refused` lists what the print cannot hold, each with its layers:
    - `colour-without-cmyk`: give the colour token its CMYK.
-   - a shadow, a filter, an opacity, a blend mode or a picture with transparency: remove it or flatten the picture first.
    - `system-font`: use a family the site holds.
+   - a transparency on the canvas itself (not on one of its layers): give the canvas an opaque colour.
    Fix those and print again. A picture under 200 ppi at its size in mm is a warning, not a refusal: use a larger file or place it smaller. A 500 `print-nonconforming` means the file failed Libretto's own PDF/X-3 check: open a ticket (`report_issue`).
-4. Tell the user where the file is (the media library) and what the findings were.
+4. Tell the user where the file is (the media library), what the findings were, and what the print flattened (its `warnings`).
+
+## Blends, opacity and transparency in print
+
+A layer may blend with what lies under it: `set_style` on the layer at `base` with `mix-blend-mode` (`normal`, `darken`, `multiply`, `color-burn`, `lighten`, `screen`, `color-dodge`, `overlay`, `soft-light`, `hard-light`, `difference`, `exclusion`, `hue`, `saturation`, `color`, `luminosity`) and `opacity` (0 to 1). A pattern of dots in `multiply` over a photo is the usual case: the dots darken the photo and the drawings above stay crisp.
+
+A PDF/X-3 file holds no transparency, so the print flattens it, as a print designer would:
+
+- **Over a flat colour, vector.** A layer whose only transparency is its own blend or opacity, over one flat colour (the canvas's or a box's), prints as vector shapes in the colour the blend gives, computed in CMYK from the two colours' print data: backdrop + opacity x (blend(backdrop, colour) - backdrop).
+- **Over anything else, a 300 ppi CMYK raster.** A layer over a photo, a picture with transparent pixels, a shadow, a filter or a colour with alpha is flattened with everything under it, in its own area only, into one 300 ppi CMYK picture: the blend is computed in CMYK, token colours keep their CMYK, picture pixels go through the FOGRA39 profile.
+- **Above stays vector.** Layers above the flattened area (texts, bands, a logo mark) are printed as they are, vector and sharp.
+- **What it tells you.** The answer's `warnings` say what was flattened and what stays vector in the computed ink, in the user's language ("Appiattiti a 300 ppi in quadricromia: griglia, con ciò che sta sotto (foto, griglia)."), and the slug line of the file says it in the site's language ("appiattiti a 300 ppi: foto, griglia, marchio"). The editor's print checks show each transparency as "Flattened in print", not as a problem.
+
+Name the layers (`name`) the way the user calls them: the warnings and the slug use the names.
+
+## Blend and opacity in the studio
+
+A person making a graphic in the studio may change a layer's blend and opacity when the canvas exposes them: add `"$blend"` to the layer's entry of the template's `customerSettings` (`brand.updateTemplate` `{ "templateId", "patch": { "customerSettings": { "<layerId>": ["$blend"] } } }`, alongside the other entries the layer exposes). The studio then shows the sixteen modes and an opacity slider; a graphic carries them as the override `{ "<layerId>": { "$blend": { "mode": "multiply", "opacity": 0.8 } } }` (`brand.render` and `brand.print` take the same `overrides`), refused where the curation does not grant `$blend`.
