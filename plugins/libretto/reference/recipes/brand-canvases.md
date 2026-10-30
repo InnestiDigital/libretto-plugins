@@ -2,7 +2,7 @@
 
 Use when the user wants a poster, a flyer or a social graphic made in the brand: one composition shown at several sizes, some on paper (A3, A4) and some on screen (a story, a post), and a print file when a format is on paper.
 
-Operations: [brand](../operations/brand.md) (`brand.createTemplate`, `brand.renderDraft`, `brand.updateTemplate`, `brand.print`), [render tools](../operations/mcp-tools.md) (`compare_reference`), [pages and trees](../operations/pages-and-trees.md) (`tree.read`, `tree.commit`, `pattern.paintCells`, `pattern.setLink`), [media and fonts](../operations/media-and-fonts.md), [design system](../operations/design-system.md).
+Operations: [brand](../operations/brand.md) (`brand.createTemplate`, `brand.renderDraft`, `brand.updateTemplate`, `brand.print`), [render tools](../operations/mcp-tools.md) (`compare_reference`), [pages and trees](../operations/pages-and-trees.md) (`tree.read`, `tree.commit`, `pattern.paintCells`, `pattern.setLink`, `pattern.fillFromImage`), [media and fonts](../operations/media-and-fonts.md), [design system](../operations/design-system.md).
 
 ## What a brand template is
 
@@ -73,6 +73,21 @@ The dot `[i, j]` sits `i` pitches along the lattice's first axis (at `angle`, th
 - `pitch`: the distance between neighbouring dots, as a fraction of the picture's width (`0.0167` is 60 dots across it).
 - `ratio`: the picture's width over its height in pixels (a 3000 x 2000 picture is `1.5`; the media record has both).
 - The image layer must be placed in percentages, unrotated and fitted by cover (`object-fit: cover`); otherwise the link is ignored and the pattern stays where its own box puts it. Look at the render to check the dots sit where you meant.
+
+### Dots lit from a picture
+
+`pattern.fillFromImage` does what the editor's "Light the dots from a picture" does, with the same maths, so a poster whose dots sit around the figures of its photo needs one call, not thousands of cells. The lit cells are replaced (dots already lit go dark unless the picture lights them), as one commit that `history.undo` takes back.
+
+```json
+{ "name": "pattern.fillFromImage", "input": {
+  "pageId": "<template page id>", "nodeId": "dots0001", "imageId": "pict0001",
+  "inkPct": 15, "radiusCells": 2, "coveragePct": 1, "spread": 0 } }
+```
+
+- `imageId`: the image layer to read (a picture of the media library, upright and fitted by cover); left out, the picture the pattern follows (`pattern.setLink`).
+- A dot is lit when at least `coveragePct` of the picture's pixels within `radiusCells` cells of it are ink (a pixel is ink from `inkPct` % dark and opaque); then the lit area grows by `spread` cells. The defaults (15, 2, 1, 0) light the soft areas around figures drawn in thin strokes. A bigger radius or a smaller coverage gives bigger areas; a `radiusCells` of 0 lights only the dots on the strokes.
+- The picture's plan lines (a wall, a dimension) carry ink too and light dots: the call cannot tell a figure from a line. Look at the render, then darken what should stay dark with `pattern.paintCells` (`"on": false`).
+- The answer carries `lit`, the number of dots lit. The lit cells must fit 256 x 256 cells; if they do not, raise `coveragePct` or `inkPct`.
 
 ## Fonts for print
 

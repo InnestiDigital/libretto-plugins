@@ -4,7 +4,7 @@
 
 A page is a row (slug, title, status, frame, SEO) plus a tree (`splash.tree/3`) of nodes. Header, footer, above and below are regions: their trees live on pages named `region-*`, and `region.read` gives their root ids. Every node edit is a `tree.commit` of `splash.ops/2` ops.
 
-[`pattern.paintCells`](#patternpaintcells) · [`pattern.setLink`](#patternsetlink) · [`catalog.read`](#catalogread) · [`region.read`](#regionread) · [`tree.read`](#treeread) · [`tree.commit`](#treecommit) · [`content.importMarkdown`](#contentimportmarkdown) · [`page.read`](#pageread) · [`page.create`](#pagecreate) · [`page.update`](#pageupdate) · [`page.delete`](#pagedelete) · [`page.forkTemplate`](#pageforktemplate) · [`page.setPassword`](#pagesetpassword) · [`tree.node`](#treenode) · [`catalog.index`](#catalogindex) · [`catalog.entry`](#catalogentry)
+[`pattern.paintCells`](#patternpaintcells) · [`pattern.setLink`](#patternsetlink) · [`pattern.fillFromImage`](#patternfillfromimage) · [`catalog.read`](#catalogread) · [`region.read`](#regionread) · [`tree.read`](#treeread) · [`tree.commit`](#treecommit) · [`content.importMarkdown`](#contentimportmarkdown) · [`page.read`](#pageread) · [`page.create`](#pagecreate) · [`page.update`](#pageupdate) · [`page.delete`](#pagedelete) · [`page.forkTemplate`](#pageforktemplate) · [`page.setPassword`](#pagesetpassword) · [`tree.node`](#treenode) · [`catalog.index`](#catalogindex) · [`catalog.entry`](#catalogentry)
 
 ## pattern.paintCells
 
@@ -47,6 +47,31 @@ Example input:
 
 ```json
 {"pageId":"6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f","nodeId":"claim001","link":{"node":"claim001","origin":[0.5,0.5],"pitch":0.04,"ratio":1.5}}
+```
+
+## pattern.fillFromImage
+
+Light the dots of a pattern layer from where a picture has content, as the editor's "Light the dots from a picture" does, with the same maths: a dot is lit when at least `coveragePct` (default 1) of the picture's pixels within `radiusCells` cells (default 2) of it are ink (`inkPct` % dark and opaque, default 15), then the lit area grows by `spread` cells (default 0); `radiusCells` 0 asks about the dot alone. The picture is the image layer `imageId`, else the one the pattern follows; the lattice is read in `formatId`, else the master. The lit cells are replaced, as one commit, and must fit 256 x 256 cells.
+
+- permission `site.edit` (admin, editor); class `transaction`; writes `tree:{pageId}`; undoable with `history.undo`.
+
+| Input | Type | Required |
+|---|---|---|
+| `pageId` | string (min 1) | yes |
+| `nodeId` | nodeId | yes |
+| `imageId` | nodeId |  |
+| `formatId` | string (min 1, max 32) |  |
+| `inkPct` | number ≥1 ≤100 |  |
+| `radiusCells` | number ≥0 ≤12 |  |
+| `coveragePct` | number ≥0.5 ≤100 |  |
+| `spread` | integer ≥0 ≤12 |  |
+
+Output: { revision: integer ≥0, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { meta?: …, styles?: …, variant?: …, theme?: …, visibility?: …, attrs?: …, id: …, kind: …, type: …, children: … } \| { meta?: …, styles?: …, variant?: …, theme?: …, visibility?: …, attrs?: …, id: …, slot?: …, name… (full schema: discover_operations)
+
+Example input:
+
+```json
+{"pageId":"6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f","nodeId":"claim001","imageId":"claim001","radiusCells":2,"coveragePct":1,"inkPct":15,"spread":0}
 ```
 
 ## catalog.read

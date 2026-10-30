@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.6
+
+### Brand
+
+- Claude can light a dot grid from a picture in one step, the way the editor's "Light the dots from a picture" does: the dots around the figures of the photo, with the size of the area and how much of it must hold drawing as settings. The guide says what it can and cannot tell apart (a figure from a line of the plan) and how to fix the rest.
+
 ## 0.5.5
 
 ### Brand
