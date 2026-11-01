@@ -148,7 +148,7 @@ try {
   const drawings = makeDir('drawings')
   writeFileSync(join(drawings, 'glifo.svg'), '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M0 0h24" stroke="#3ccb7f"/></svg>')
 
-  const fake = { revision: 7, stored: [], staleOnce: false, siteIds: [], inputs: [], fonts: [] }
+  const fake = { revision: 7, stored: [], staleOnce: false, siteIds: [], inputs: [], fonts: [], fontWeights: [] }
   const http = createServer(async (request, response) => {
     let body = ''
     for await (const chunk of request) body += chunk
@@ -170,6 +170,7 @@ try {
     }
     if (operation.name === 'font.upload') {
       fake.fonts.push({ fileName: operation.input.fileName, bytes: Buffer.from(operation.input.data, 'base64').toString() })
+      fake.fontWeights.push('weight' in operation.input ? operation.input.weight : 'absent')
       return text({ revisions: { fonts: 3 }, results: [{ name: 'font.upload', output: { id: 'f-1', name: operation.input.name } }] })
     }
     if (args.baseRevisions.media !== fake.revision) return text({ status: 409, code: 'stale_revision', message: 'media moved' }, true)
@@ -196,6 +197,17 @@ try {
       await remote.call('upload_font_file', { path: join(faces, fileName), name: 'Sul Sans', weight: 400, style: 'normal' })
     }
     assert.deepEqual(fake.fonts, names.map(fileName => ({ fileName, bytes: `bytes of ${fileName}` })))
+  })
+  await check('a variable font face takes a weight range, or no weight for the file\'s own range', async () => {
+    const { result } = await remote.request('tools/list', {})
+    const schema = result.tools.find(tool => tool.name === 'upload_font_file').inputSchema
+    assert.equal(schema.required.includes('weight'), false)
+    const faces = makeDir('variable')
+    writeFileSync(join(faces, 'Flex.woff2'), 'variable bytes')
+    fake.fontWeights = []
+    await remote.call('upload_font_file', { path: join(faces, 'Flex.woff2'), name: 'Flex', weight: [200, 800], style: 'normal' })
+    await remote.call('upload_font_file', { path: join(faces, 'Flex.woff2'), name: 'Flex', style: 'normal', replace: true })
+    assert.deepEqual(fake.fontWeights, [[200, 800], 'absent'])
   })
   await check('a dry run checks every file and stores nothing', async () => {
     const answer = await remote.call('upload_media_files', { directory: photos, dryRun: true })
