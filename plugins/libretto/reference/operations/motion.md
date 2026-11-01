@@ -8,7 +8,7 @@ Scenes animate nodes on scroll, on load or on interaction. Prefer recipes (`moti
 
 ## motion.read
 
-Read the draft scenes of a page: each scene with its id, trigger, entries and options, as motion.replace writes them. A scene write shares the page tree's revision, and publish copies the scenes with the page.
+Read the draft scenes of a page: each scene with its id, trigger, entries and options, as motion.replace writes them. With a region's page id (region.read answers it) it reads that region's own scenes. A scene write shares the page tree's revision, and publish copies the scenes with the page.
 
 - permission `site.read` (admin, editor); class `read`; writes nothing.
 
@@ -26,7 +26,7 @@ Example input:
 
 ## motion.replace
 
-Replace every scene of a page with `scenes` (at most 500; scene and entry ids unique, each scene's `pageId` the page and `versionId` "_draft"). Each scene is validated against the nodes of the page and of its header and footer: a target none of them holds, or a node id two of them hold (422 scene_target_ambiguous), is refused. For the common effects prefer motion.applyRecipe. A scene write shares the page tree's revision, and publish copies the scenes with the page.
+Replace every scene of a page with `scenes` (at most 500; scene and entry ids unique, each scene's `pageId` the page and `versionId` "_draft"). Each scene is validated against the nodes of the page and of its header and footer: a target none of them holds, or a node id two of them hold (422 scene_target_ambiguous), is refused. With a region's page id (header, footer, above or below; region.read answers it) the scenes are the region's own: authored once, they play on every page that renders the region, and name the region's own nodes without `region` (any other target is refused, 422 motion_invalid; publish refuses one the same way, 422 scene_target_invalid), such as a header logo that swings on every page. For the common effects prefer motion.applyRecipe. A scene may repeat (`loop: { repeat: <1-1000> | "infinite", yoyo? }`, such as a logo that swings forever on load; refused, with the reason, on a scrubbed scroll, on a scroll-direction trigger, and when infinite on a first-interaction gate), and may follow the page's scroll direction (trigger `scroll-direction`: plays scrolling down and back up, or with `distance` follows the scroll and with `idleSnapMs` settles to the nearer end; `from` keeps it at its start until an anchor's edge meets the viewport, `holdWhile` keeps it there while `<html>` carries a data attribute). A keyframe entry on a text or richtext node may play on its laid-out lines or words (`split: { by: "lines" | "words", words? }`, `stagger` apart, `words` ms between the words of a line; any other target is refused, 422 motion_invalid with INVALID_SPLIT_TARGET; never split under reduced motion), and `staggerWithin` (ms) compresses the delays so the last item ends in that time. A scene's `pageState` { state, lockScroll?, controls? } sets `data-page-<state>="on"` on the page's <html> while its trigger is active (a click scene toggles it; Escape and a chosen link close it), which node styles read as `pg:[data-page-<state>="on"]` and `page-state` triggers follow. A scene write shares the page tree's revision, and publish copies the scenes with the page.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `tree:{pageId}`; undoable with `history.undo`.
 
@@ -40,7 +40,7 @@ Output: { success: true }
 Example input:
 
 ```json
-{"pageId":"6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f","scenes":[]}
+{"pageId":"6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f","scenes":[{"id":"menu-toggle","pageId":"6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f","versionId":"_draft","trigger":{"type":"event","event":"click","source":{"nodeId":"burger01"}},"entries":[],"pageState":{"state":"menu-open","lockScroll":true,"controls":{"nodeId":"panel001"}}},{"id":"menu-in","pageId":"6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f","versionId":"_draft","trigger":{"type":"page-state","state":"menu-open"},"entries":[{"id":"menu-in-1","sceneId":"menu-in","target":{"nodeId":"menuhead"},"keyframes":[{"offset":0,"opacity":0,"transform":{"y":"1em"}},{"offset":1,"opacity":1,"transform":{"y":"0"}}],"position":{"type":"absolute","ms":0},"duration":500,"easing":"smooth-out","split":{"by":"lines"},"stagger":80,"staggerWithin":400,"reducedMotion":"fade-only"}]},{"id":"bar-ride","pageId":"6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f","versionId":"_draft","trigger":{"type":"scroll-direction","distance":{"value":60,"unit":"px"},"idleSnapMs":150,"holdWhile":{"name":"data-page-menu-open","value":"on"}},"entries":[{"id":"bar-ride-1","sceneId":"bar-ride","target":{"nodeId":"bar00001","region":"header"},"keyframes":[{"offset":1,"transform":{"y":"-60px"}}],"position":{"type":"absolute","ms":0},"easing":"linear","reducedMotion":"instant"}]},{"id":"logo-swing","pageId":"6f1d2c3b-4a59-4e8d-9c7b-1a2b3c4d5e6f","versionId":"_draft","trigger":{"type":"event","event":"load","source":"page"},"loop":{"repeat":"infinite","yoyo":true},"entries":[{"id":"logo-swing-1","sceneId":"logo-swing","target":{"nodeId":"logo0001"},"keyframes":[{"offset":0,"transform":{"rotate":"-6deg"}},{"offset":1,"transform":{"rotate":"6deg"}}],"position":{"type":"absolute","ms":0},"duration":1200,"easing":"gentle"}]}]}
 ```
 
 ## motion.delete

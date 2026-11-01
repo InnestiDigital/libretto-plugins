@@ -18,6 +18,13 @@ Operations: [pages and trees](../operations/pages-and-trees.md) (`region.read`, 
 4. New section in a region: `preset.insert` with the region's `pageId` and the region root as `parentId` ([sections from presets](sections-from-presets.md)).
 5. Apply, look at two pages (every page shows the change): [preview and visual check](preview-and-verify.md). The draft preview renders the draft's header and footer. To check a text there, `render_preview` `{ "pageId": "<any page>", "find": "<a few words>" }` (it searches the page, its header and its footer) or the node in the region's tree; to see it, a screenshot cropped to the header or footer node (`"crop": { "nodeId": "<its id>" }`). If the node has your text and the draft preview does not, that is a bug: tell the user and open a ticket (`libretto-report-issue`).
 
+## Header motion, menus and safe areas
+
+- **Motion on every page:** scenes on the region's own page row (`motion.replace` with the region's `pageId`) play on every page that renders the region, naming the region's node ids without `region` ([motion](motion.md), "Beyond the recipes"). A page scene may still move a header node with `"region": "header"`.
+- **A full-screen menu, a bar that rides away scrolling down, a node shown on some sections only:** page states, the `scroll-direction` trigger and the `pg:` scope, in the same table. The menu dialog's `pageState` prop (such as `"menu-open"`) writes `data-page-menu-open="on"` on `<html>` while its drawer is open, so any node, in the header or on the page, can style itself under `pg:[data-page-menu-open="on"]`.
+- **Stacking:** the header stacks over the page content, so a header node with `position: fixed` (or an open menu) is drawn over the page and placed against the viewport.
+- **Phone safe areas:** inside `calc()`, `clamp()`, `min()` or `max()` a length may read `env(safe-area-inset-top|right|bottom|left)`, with an optional length fallback: `"padding-bottom": "calc(16px + env(safe-area-inset-bottom, 0px))"` keeps a fixed bar above the home indicator. A bare `env()` is refused: write `max(0px, env(safe-area-inset-bottom))`.
+
 ## Free content in the footer
 
 The `footer` node draws its columns from props and menus, but its **brand column** (the logo or wordmark) also takes free nodes: a sentence under the logo, a link, an image, a `ds.*` component. Use it for anything the footer's props have no field for, never a fake menu item.

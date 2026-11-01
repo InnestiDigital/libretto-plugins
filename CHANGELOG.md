@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.7
+
+### Motion
+
+- Claude can write motion the recipes do not cover yet: a scene that repeats (a logo that swings forever), a bar that rides away scrolling down and comes back scrolling up, a full-screen menu that holds the page still, a heading that enters line by line or word by word, sections that stack as you scroll, a logo visitors can drag, a node shown on some sections only, and header motion that plays on every page. For each one the guide says the limits and what a visitor with reduced motion sees.
+- A screenshot says what a visitor with reduced motion sees, so Claude knows when a capture shows a scene's end and when its start.
+
+### Header and fonts
+
+- A fixed bar keeps clear of a phone's home indicator and notch (safe areas).
+- Text styles can be italic or slanted, drawn by the family's italic or by a variable font's slant axis; Google Fonts families bring every alphabet Google serves; a variable font file is one upload for its whole weight range.
+
 ## 0.5.6
 
 ### Brand

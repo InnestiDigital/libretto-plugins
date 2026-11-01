@@ -27,9 +27,9 @@ Operations: [design-system](../operations/design-system.md), [media-and-fonts](.
 
 ## 3. Type
 
-1. Fonts: a Google family is `font.importGoogle` `{ "family", "weights", "styles" }` (`display` is `swap` unless you give another; 409 `font_face_exists` if already there). A font file (a foundry's face):
+1. Fonts: a Google family is `font.importGoogle` `{ "family", "weights", "styles" }` (`display` is `swap` unless you give another; 409 `font_face_exists` if already there). It stores every subset Google serves (cyrillic, the numbered slices of a Korean, Japanese or Chinese family included), each with its `unicode-range`, so a page downloads only what its text draws. A font file (a foundry's face):
    1. Licence first: ask the user under which licence the studio holds the face and whether it covers web use on this site; do not upload without it.
-   2. Upload each face (one file per weight and style, WOFF2, WOFF, TTF or OTF: Libretto converts the last three to WOFF2, convert nothing yourself) with `upload_font_file` of the `libretto-files` server: `{ "path", "name": "Sul Sans", "weight": 400, "style": "normal", "licence": "<the licence>", "dryRun": true }`, then without `dryRun`. A variable file is one face per style for its whole range: `"weight": [200, 800]`, or leave `weight` out to use the range the file declares. It sends `font.upload`; 409 `font_face_exists` means the face is there already (`replace: true` only on the user's word).
+   2. Upload each face (one file per weight and style, WOFF2, WOFF, TTF or OTF: Libretto converts the last three to WOFF2, convert nothing yourself) with `upload_font_file` of the `libretto-files` server: `{ "path", "name": "Sul Sans", "weight": 400, "style": "normal", "licence": "<the licence>", "dryRun": true }`, then without `dryRun`. A variable file is one face per style for its whole range: `"weight": [200, 800]`, or leave `weight` out to use the range the file declares. A variable file with a slant axis (`slnt`) is uploaded with `"style": "normal"`: its italic and oblique are the axis, no italic file needed. It sends `font.upload`; 409 `font_face_exists` means the face is there already (`replace: true` only on the user's word).
    3. Point a family token at it (step 2). A Libretto without `font.upload` answers `unknown_operation`: then upload the faces on the admin's Typography page with Chrome (`libretto-admin-browser`), or ask the user to.
 2. Families: `font.family.display`, `font.family.heading`, `font.family.body`, `font.family.ui`... in set `core`, type `fontFamily`, value an array (`["DM Sans", "sans-serif"]`).
 3. Type styles: `type.<style>` tokens (`type.section-title`, `type.body`) are composites. `setToken` needs the **whole** value: copy `sets.core` of the token (its raw value, aliases included; not the resolved `value`, which has the aliases filled in), change what the brief asks, write it back with `"type": "typography"`:
@@ -37,6 +37,7 @@ Operations: [design-system](../operations/design-system.md), [media-and-fonts](.
    { "set": "core", "path": "type.section-title", "type": "typography",
      "value": { "fontFamily": "{font.family.display}", "fontSize": "clamp(1.5rem, 5vw, 2rem)", "fontWeight": "{font.weight.regular}", "letterSpacing": "-0.01em", "lineHeight": 1.15 } }
    ```
+   A style may slant: `"fontStyle": "italic"` (or `"normal"`, `"oblique"`, `"oblique 8deg"`), drawn by the family's italic face or its `slnt` axis; a family of the library with neither is refused (422 `font-weight`, `italic: true`): import or upload the italic first. A node follows a style's slant with `font-style: "{type.<style>}"`.
 4. Roles: `type.role.heading1`, `type.role.body`, `type.role.lead`... alias a type style (`"{type.display}"`). Re-point a role to change every text that uses it.
 
 ## 4. Space, corners, shadows

@@ -66,6 +66,24 @@ Two keyframe patterns that go with them:
 
 **Text steps on a component.** `countTo` and `scrambleText` also play on a part of a component that holds text only, such as a stat's `{ "part": "value" }`. A refusal (`motion_invalid`) now says why in its message: the code, the node, and the parts the node offers.
 
+## Beyond the recipes
+
+No recipe builds these yet. Write scenes with `motion.replace` (read the page's scenes first and send them all, yours added; `discover_operations` with `names: ["motion.replace"]` gives a worked example of the first four) and node metadata with `tree.commit` `set_meta` (it replaces the node's whole `meta`: send the current keys, a `reveal` included, with yours).
+
+| Ask | Write | Limits and reduced motion |
+|---|---|---|
+| A logo that swings forever | a `load` scene (`{ "type": "event", "event": "load", "source": "page" }`), one entry from `rotate: "-6deg"` to `"6deg"`, `"easing": "gentle"`, scene field `"loop": { "repeat": "infinite", "yoyo": true }` | `repeat` 1 to 1000 or `"infinite"`. Refused on a scrubbed `scroll` and on `scroll-direction`, and `infinite` on `first-interaction`. Plays once under reduced motion. Holds still while a visitor drags its target. |
+| A bar that rides up scrolling down, back scrolling up | trigger `{ "type": "scroll-direction", "distance": { "value": 60, "unit": "px" }, "idleSnapMs": 150, "from": { "anchor": <second section>, "start": { "edge": "top", "viewport": 1 } }, "holdWhile": { "name": "data-page-menu-open", "value": "on" } }`, one entry `to` `transform.y: "-60px"`, `"easing": "linear"`, `"reducedMotion": "instant"` | Without `distance` it plays down and back. `idleSnapMs` needs `distance`. Under reduced motion it jumps (down: end, up: start). |
+| A full-screen menu | a click scene on the button: `"trigger": { "type": "event", "event": "click", "source": <button> }`, `"entries": []`, `"pageState": { "state": "menu-open", "lockScroll": true, "controls": <panel> }`; the panel's closed look in its base style, its open look under `pg:[data-page-menu-open="on"]`; its entrance a second scene with `{ "type": "page-state", "state": "menu-open" }` | Escape and a chosen link close it; the button gets `aria-expanded`. A menu dialog's `pageState` prop publishes its own open state under that name. Page states switch the same under reduced motion; keep the open look in styles, not in the tween. |
+| A heading that enters line by line | a keyframe entry on the text or richtext node itself with `"split": { "by": "lines" }` (or `"words"`; `{ "by": "lines", "words": 40 }` staggers the words inside each line), `"stagger": 80`, optionally `"staggerWithin": 600` so a long text still ends in time | Any other target is refused (`INVALID_SPLIT_TARGET`). Lines are measured as laid out, again after fonts load and on resize. Never split under reduced motion: the text plays whole by its `reducedMotion`. |
+| A node shown on some sections only | a node style, no scene: `display: none` in `base` and `display` back under `pg:[data-active-section="about"\|"contact"]` (or hide it under that scope) | The sections need an `anchor`. Works in the header, footer, `above` and `below` regions too, and with `bp:`. |
+| A node that hides while the page scrolls down | a node style under `pg:[data-scroll-dir="down"]`, its `transition` under `mq:(prefers-reduced-motion:no-preference)` | |
+| Sections that stack | `set_meta` on the page root `{ "meta": { "stack": { "base": true, "lg": false } } }` (per breakpoint, mobile first) | Each section needs its own background; `overflow: clip`, not `hidden`. Nothing stacks under reduced motion or without JavaScript. |
+| A logo visitors may drag | `set_meta` `{ "meta": { "drag": { "breakpoints": { "base": true }, "offWhile": { "name": "data-page-menu-open", "value": "on" } } } }` (`holdMs` 0 to 2000, default 260; `lift` 0 to 0.5) | Kept for the visit. A finger holds still first, so a swipe still scrolls. Drags under reduced motion, without lifting. Not in the editor preview. |
+| Motion in the header on every page | `motion.replace` with the header's page id (`region.read` answers it): the scenes name the region's own node ids, without `region` | A ref with `region`, or a node the region lacks, is refused (422 `motion_invalid`). The admin's motion panel does not author them. |
+
+The attributes on `<html>` that `pg:` reads: `data-scroll-dir` (`up`, `down`), `data-active-section` (the anchor being read), `data-page-<state>` (`on`), `data-motion-gate` (`closed`, `playing`, `done`). A `pg:` scope on any other name never matches.
+
 ## Hover and transitions
 
 A transition is a style: `set_style` in the node's state scope (for example `s::hover`) with `transition` and the properties that change, durations as tokens (`{motion.duration.fast}`, `{motion.duration.base}`, `{motion.duration.slow}`).
