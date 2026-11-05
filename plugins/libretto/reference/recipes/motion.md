@@ -66,8 +66,18 @@ Two keyframe patterns that go with them:
 
 **Text steps on a component.** `countTo` and `scrambleText` also play on a part of a component that holds text only, such as a stat's `{ "part": "value" }`. A refusal (`motion_invalid`) now says why in its message: the code, the node, and the parts the node offers.
 
-## Beyond the recipes
+## Common requests
 
+**Common requests, how to build them.** Before reporting a missing motion capability, check this table and the scene fields (triggers, entries, `stagger`, `split`, `scrub`, `pageState`, `pg:` styles).
+
+| Request | Build it with |
+|---|---|
+| An intro or page-load sequence | the `intro` or `build-up` recipe, or a `load` scene (`{ "type": "event", "event": "load", "source": "page" }`) whose entries use `stagger` over the children; letters or parts of an SVG are targets by their `data-part` names |
+| A header that differs per page | node styles scoped to page state: `pg:[data-page-<state>="on"]`, `pg:[data-active-section="<anchor>"]` or the home intro state (`pg:[data-motion-gate="closed"]`), with `bp:` where needed; or scenes of the header itself (`motion.replace` with the header's page id) |
+| A title that zooms or fades as the page scrolls | a `scroll` scene with `scrub` and keyframe entries on `scale` and `opacity` |
+| A logo that docks into the bar | the `dock` recipe (`motion.applyRecipe`) |
+
+## Beyond the recipes
 No recipe builds these yet. Write scenes with `motion.replace` (read the page's scenes first and send them all, yours added; `discover_operations` with `names: ["motion.replace"]` gives a worked example of the first four) and node metadata with `tree.commit` `set_meta` (it replaces the node's whole `meta`: send the current keys, a `reveal` included, with yours).
 
 | Ask | Write | Limits and reduced motion |

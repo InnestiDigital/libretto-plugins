@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.9
+
+### Motion
+
+- The motion recipe opens its hand-built part with the common requests (intro or page-load sequence, a header that differs per page, a title that zooms on scroll, a logo docking into the bar) and how to build each, so a missing recipe is not reported as a missing capability.
+
 ## 0.5.8
 
 ### Files
