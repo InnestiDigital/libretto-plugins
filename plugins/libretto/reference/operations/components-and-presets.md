@@ -120,7 +120,7 @@ List the site components: key, name and exposed props. Open one with tree.read o
 - permission `site.read` (admin, editor); class `read`; writes nothing.
 - Input: `{}`.
 
-Output: ({ pageId: string (min 1), key: string (max 64), name: string (min 1, max 80), propsSchema: ({ name: string, label?: string (min 1, max 60) \| Record<string, …>, default?: string \| number \| boolean \| null \| …[] \| Record<string, …>, bind: { nodeId: nodeId, prop: … \| … } })[] (≤32), unreadableLabels?: { name: string, stor… (full schema: discover_operations)
+Output: ({ pageId: string (min 1), key: string (max 64), name: string (min 1, max 80), propsSchema: ({ name: string, label?: string (min 1, max 60) \| Record<locale, …>, default?: string \| number \| boolean \| null \| …[] \| Record<string, …>, bind: { nodeId: nodeId, prop: … \| … } })[] (≤32), unreadableLabels?: { name: string, stor… (full schema: discover_operations)
 
 Example input:
 
@@ -130,7 +130,7 @@ Example input:
 
 ## component.createFromNode
 
-Make a site component from a page node and its subtree: the component gets a fresh copy, and the node is replaced by an instance of it. Refuses bindings the copy cannot keep.
+Make a site component from a page node and its subtree: the component gets a fresh copy, and the node is replaced by an instance of it. Refuses bindings the copy cannot keep. A prop's `label` is one text or a map keyed by the site's own locale codes, as its content is (`{ "it": "Titolo", "en": "Title" }` on an it, en site); a key the site has no locale for is refused.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `pages`, `tree:{pageId}`; undoable with `history.undo`.
 
@@ -140,7 +140,7 @@ Make a site component from a page node and its subtree: the component gets a fre
 | `nodeId` | nodeId | yes |
 | `key` | string (max 64) | yes |
 | `name` | string (min 1, max 80) | yes |
-| `propsSchema` | ({ name: string, label?: string (min 1, max 60) \| Record<string, string (min 1, max 60)>, default?: string \| number \| boolean \| null \| (string \| number \| boolean \| null \| …[] \| Record<string, …>)[] \| Record<string, string \| number \| boolean \| null \| …[] \| Record<string, …>>, bind: { nodeId: nodeId, prop: string \| "$the… (full schema: discover_operations) |  |
+| `propsSchema` | ({ name: string, label?: string (min 1, max 60) \| Record<locale, string (min 1, max 60)>, default?: string \| number \| boolean \| null \| (string \| number \| boolean \| null \| …[] \| Record<string, …>)[] \| Record<string, string \| number \| boolean \| null \| …[] \| Record<string, …>>, bind: { nodeId: nodeId, prop: string \| "$the… (full schema: discover_operations) |  |
 
 Output: { revision: integer ≥0, inverse: ({ op: "insert", parentId: nodeId, slot?: string, index: integer ≥0, node: { meta?: …, styles?: …, variant?: …, theme?: …, visibility?: …, attrs?: …, id: …, kind: …, type: …, children: … } \| { meta?: …, styles?: …, variant?: …, theme?: …, visibility?: …, attrs?: …, id: …, slot?: …, name… (full schema: discover_operations)
 
@@ -152,7 +152,7 @@ Example input:
 
 ## component.update
 
-Rename a site component or replace its exposed props (each binds a field of an inner node). Edit its tree with tree.commit on its pageId; every instance follows.
+Rename a site component or replace its exposed props (each binds a field of an inner node). Edit its tree with tree.commit on its pageId; every instance follows. A prop's `label` is one text or a map keyed by the site's own locale codes, as its content is (`{ "it": "Titolo", "en": "Title" }` on an it, en site); a key the site has no locale for is refused.
 
 - permission `site.edit` (admin, editor); class `transaction`; writes `pages`; undoable with `history.undo`.
 
@@ -160,9 +160,9 @@ Rename a site component or replace its exposed props (each binds a field of an i
 |---|---|---|
 | `key` | string (max 64) | yes |
 | `name` | string (min 1, max 80) |  |
-| `propsSchema` | ({ name: string, label?: string (min 1, max 60) \| Record<string, string (min 1, max 60)>, default?: string \| number \| boolean \| null \| (string \| number \| boolean \| null \| …[] \| Record<string, …>)[] \| Record<string, string \| number \| boolean \| null \| …[] \| Record<string, …>>, bind: { nodeId: nodeId, prop: string \| "$the… (full schema: discover_operations) |  |
+| `propsSchema` | ({ name: string, label?: string (min 1, max 60) \| Record<locale, string (min 1, max 60)>, default?: string \| number \| boolean \| null \| (string \| number \| boolean \| null \| …[] \| Record<string, …>)[] \| Record<string, string \| number \| boolean \| null \| …[] \| Record<string, …>>, bind: { nodeId: nodeId, prop: string \| "$the… (full schema: discover_operations) |  |
 
-Output: { pageId: string (min 1), key: string (max 64), name: string (min 1, max 80), propsSchema: ({ name: string, label?: string (min 1, max 60) \| Record<string, string (min 1, max 60)>, default?: string \| number \| boolean \| null \| (… \| … \| … \| … \| … \| …)[] \| Record<string, … \| … \| … \| … \| … \| …>, bind: { nodeId: nodeId, pro… (full schema: discover_operations)
+Output: { pageId: string (min 1), key: string (max 64), name: string (min 1, max 80), propsSchema: ({ name: string, label?: string (min 1, max 60) \| Record<locale, string (min 1, max 60)>, default?: string \| number \| boolean \| null \| (… \| … \| … \| … \| … \| …)[] \| Record<string, … \| … \| … \| … \| … \| …>, bind: { nodeId: nodeId, pro… (full schema: discover_operations)
 
 Example input:
 

@@ -189,6 +189,18 @@ try {
   const url = `http://127.0.0.1:${http.address().port}`
   const remote = start(process.execPath, [server], { cwd: work, env: { ...process.env, LIBRETTO_URL: url, LIBRETTO_MCP_TOKEN: 'test' } })
 
+  await check('a PDF has its own 20 MB ceiling, and one over it is told to compress, never to become a picture', async () => {
+    const documents = makeDir('documents')
+    writeFileSync(join(documents, 'brochure.pdf'), Buffer.alloc(12 * 1024 * 1024))
+    writeFileSync(join(documents, 'catalogo.pdf'), Buffer.alloc(20 * 1024 * 1024 + 1))
+    const accepted = await remote.call('upload_media_file', { path: join(documents, 'brochure.pdf'), dryRun: true })
+    assert.equal(accepted.error, undefined, JSON.stringify(accepted))
+    const { error } = await remote.call('upload_media_file', { path: join(documents, 'catalogo.pdf'), dryRun: true })
+    assert.match(error, /PDF documents up to 20 MB/)
+    assert.match(error, /Compress the PDF/)
+    assert.doesNotMatch(error, /sips|jpe?g|png/i)
+  })
+
   await check('a font file of any of the four formats is sent as it is, for the server to convert', async () => {
     const faces = makeDir('faces')
     const names = ['Sul.woff2', 'Sul.woff', 'Sul.ttf', 'Sul.otf', 'Upper.TTF']
@@ -221,7 +233,7 @@ try {
     assert.deepEqual(answer.uploaded, { 'a.jpg': 'm-a.jpg', 'b.png': 'm-b.png' })
     assert.deepEqual(answer.skipped, { 'gia.jpg': 'm-existing' })
     assert.deepEqual(Object.keys(answer.refused).sort(), ['grande.jpg', 'rifiuta.jpg'])
-    assert.match(answer.refused['grande.jpg'], /up to 5 MB/)
+    assert.match(answer.refused['grande.jpg'], /images up to 5 MB\. Shrink it first/)
     assert.equal(answer.refused['rifiuta.jpg'], 'refused for the test')
     assert.deepEqual(fake.stored, ['a.jpg', 'b.png'])
   })

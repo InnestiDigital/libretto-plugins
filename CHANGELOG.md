@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.8
+
+### Files
+
+- A PDF has its own ceiling, 20 MB, as Libretto's: a larger one is told to compress (export again with pictures at 300 ppi, or a smaller-file preset) and stays a PDF; nothing tells anyone to turn a PDF into a picture. Images and SVGs stay at 5 MB; videos go up to 20 MB through Claude, larger ones through the admin's Media.
+
+### Collections
+
+- A repeater points at another collection with the tree op `set_source` (its whole source: collection, filter, sort, limit); `set_props` on a repeater is refused, so the collections recipe no longer suggests it.
+- A component field's name is keyed by the site's own language codes (`{ "it": "Titolo", "en": "Title" }` on an it, en site); another key is refused.
+
 ## 0.5.7
 
 ### Motion

@@ -16,7 +16,19 @@ import { randomUUID } from 'node:crypto'
 import { createInterface } from 'node:readline'
 
 const SERVER = { name: 'libretto-files', version: '0.3.0' }
-const MAX_BYTES = 5 * 1024 * 1024
+const MiB = 1024 * 1024
+/**
+ * The largest file of each kind one upload takes, as media.upload's ceilings: images and SVGs 5 MB,
+ * PDF documents 20 MB; a video is capped at 20 MB here because the call carries the file as base64
+ * and Libretto's /api/mcp takes 28 MB a request (a larger video goes through the admin's Media).
+ */
+const MAX_BYTES = { image: 5 * MiB, document: 20 * MiB, video: 20 * MiB }
+/** What to do with a file over its ceiling, by kind: a PDF is compressed, never turned into a picture. */
+const TOO_LARGE_HINT = {
+  image: (file) => `Shrink it first (macOS: sips -Z 2400 "${file}" --out smaller${extname(file)}).`,
+  document: () => 'Compress the PDF (export it again with pictures downsampled to 300 ppi, or with a smaller-file preset) and upload it again; keep it a PDF.',
+  video: () => 'Compress it (H.264 or VP9 at a lower bitrate) or cut it shorter, or upload it in the admin (Media), which takes videos up to 100 MB.',
+}
 /** How many files one upload_media_files call takes: a call stays well inside a client's tool timeout, and the next call skips what is already up. */
 const MAX_FILES = 100
 /** How many pages of the media library a bulk upload reads to skip files already there (100 rows a page). */
@@ -30,6 +42,13 @@ const CONTENT_TYPES = new Map([
   ['.gif', 'image/gif'], ['.svg', 'image/svg+xml'], ['.pdf', 'application/pdf'],
   ['.mp4', 'video/mp4'], ['.webm', 'video/webm'],
 ])
+
+/** The size class of a content type: a PDF, a video, else an image (SVG included). */
+function sizeKindOf(contentType) {
+  if (contentType === 'application/pdf') return 'document'
+  if (contentType.startsWith('video/')) return 'video'
+  return 'image'
+}
 
 /** A refusal this server or the Libretto server gave, with the words to show the user. */
 class LibrettoError extends Error {
@@ -51,7 +70,7 @@ class TokenRefusal extends LibrettoError {
 const TOOLS = [
   {
     name: 'upload_media_file',
-    description: 'Upload a file from this computer (an absolute path, a path starting with ~/, or relative to the working directory) into the Libretto site\'s media library through media.upload, without putting its bytes in the conversation. Images up to 5 MB (shrink larger ones first, for example `sips -Z 2400 in.jpg --out out.jpg` on macOS). dryRun: true runs every check and stores nothing. The answer holds the media record (`id`, `url`, kind, dimensions) and the `requestId` that history.undo takes. Then place the image with `{ "$media": "<id>" }` and set its alt text with media.update. An SVG is also made an inline drawing for the svg primitive when it fits (the answer\'s `inline` says ready, or why not): `svgTextColor` names the colour that follows the text colour, `svgAccentColor` the one that becomes the accent part a node style colours (`p:accent`).',
+    description: 'Upload a file from this computer (an absolute path, a path starting with ~/, or relative to the working directory) into the Libretto site\'s media library through media.upload, without putting its bytes in the conversation. Images and SVGs up to 5 MB (shrink a larger image first, for example `sips -Z 2400 in.jpg --out out.jpg` on macOS), PDF documents up to 20 MB (compress a larger PDF and keep it a PDF; never turn it into a picture), videos up to 20 MB (larger ones through the admin\'s Media). dryRun: true runs every check and stores nothing. The answer holds the media record (`id`, `url`, kind, dimensions) and the `requestId` that history.undo takes. Then place the image with `{ "$media": "<id>" }` and set its alt text with media.update. An SVG is also made an inline drawing for the svg primitive when it fits (the answer\'s `inline` says ready, or why not): `svgTextColor` names the colour that follows the text colour, `svgAccentColor` the one that becomes the accent part a node style colours (`p:accent`).',
     inputSchema: {
       type: 'object',
       properties: {
@@ -69,7 +88,7 @@ const TOOLS = [
   },
   {
     name: 'upload_media_files',
-    description: 'Upload many files from this computer into the Libretto site\'s media library in one call: a list of `paths`, or the files of a `directory` whose name matches `pattern` (such as "*.jpg" or "*.{jpg,png,webp}"; `recursive` for its subfolders). At most ' + MAX_FILES + ' files a call: for more, call again with the rest. A file whose name and size match one already in the library is skipped (`skipExisting`, true by default), so calling again after an interruption uploads only what is missing. Each file is checked like upload_media_file (images up to 5 MB, known types) and uploaded as its own undoable change; one refused file does not stop the others. When a reference has the same picture in several widths (photo-480.jpg, photo-960.jpg, photo-1920.jpg), give only the largest: Libretto renders its own sizes. dryRun: true checks every file, the library and the quota, sends one file as a dry run, and stores nothing. The answer counts the files and maps each uploaded file to its media id (`uploaded`), each skipped one to the id already in the library (`skipped`), and each refused one to the reason (`refused`).',
+    description: 'Upload many files from this computer into the Libretto site\'s media library in one call: a list of `paths`, or the files of a `directory` whose name matches `pattern` (such as "*.jpg" or "*.{jpg,png,webp}"; `recursive` for its subfolders). At most ' + MAX_FILES + ' files a call: for more, call again with the rest. A file whose name and size match one already in the library is skipped (`skipExisting`, true by default), so calling again after an interruption uploads only what is missing. Each file is checked like upload_media_file (images and SVGs up to 5 MB, PDFs and videos up to 20 MB, known types) and uploaded as its own undoable change; one refused file does not stop the others. When a reference has the same picture in several widths (photo-480.jpg, photo-960.jpg, photo-1920.jpg), give only the largest: Libretto renders its own sizes. dryRun: true checks every file, the library and the quota, sends one file as a dry run, and stores nothing. The answer counts the files and maps each uploaded file to its media id (`uploaded`), each skipped one to the id already in the library (`skipped`), and each refused one to the reason (`refused`).',
     inputSchema: {
       type: 'object',
       properties: {
@@ -210,9 +229,14 @@ async function sendOperation(name, input, revisionKey, dryRun, siteId) {
 
 /** The content type media.upload takes for `file` of `bytes`, or a refusal saying how to fix it. */
 function mediaTypeOf(file, bytes) {
-  if (bytes > MAX_BYTES) throw new LibrettoError(`${basename(file)} is ${(bytes / 1048576).toFixed(1)} MB; Libretto takes images up to 5 MB. Shrink it first (macOS: sips -Z 2400 "${file}" --out smaller.jpg).`)
   const contentType = CONTENT_TYPES.get(extname(file).toLowerCase())
   if (!contentType) throw new LibrettoError(`Unknown file type ${extname(file) || '(none)'}; Libretto takes ${[...CONTENT_TYPES.keys()].join(' ')}`)
+  const kind = sizeKindOf(contentType)
+  const ceiling = MAX_BYTES[kind]
+  if (bytes > ceiling) {
+    const what = { image: 'images', document: 'PDF documents', video: 'videos through this tool' }[kind]
+    throw new LibrettoError(`${basename(file)} is ${(bytes / MiB).toFixed(1)} MB; Libretto takes ${what} up to ${ceiling / MiB} MB. ${TOO_LARGE_HINT[kind](file)}`)
+  }
   return contentType
 }
 

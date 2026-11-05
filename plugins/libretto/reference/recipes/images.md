@@ -12,7 +12,7 @@ Operations: [media and fonts](../operations/media-and-fonts.md), [pages and tree
 { "path": "~/Immagini/foto.jpg", "dryRun": true }
 ```
 
-Dry run first, then again without `dryRun`. The answer's `answer` holds the media record (`id`, `url`, kind, width, height) and `requestId` (undo with `history.undo`). Images are capped at 5 MB: shrink a larger one first (macOS: `sips -Z 2400 in.jpg --out in-2400.jpg`; keep JPEG for photos, PNG or SVG for flat graphics).
+Dry run first, then again without `dryRun`. The answer's `answer` holds the media record (`id`, `url`, kind, width, height) and `requestId` (undo with `history.undo`). Images and SVGs are capped at 5 MB: shrink a larger image first (macOS: `sips -Z 2400 in.jpg --out in-2400.jpg`; keep JPEG for photos, PNG or SVG for flat graphics). PDF documents are capped at 20 MB: compress a larger one (export it again with pictures downsampled to 300 ppi, or a smaller-file preset) and keep it a PDF; never turn a PDF into a picture. Videos go up to 20 MB through this tool, larger ones through the admin's Media (100 MB).
 
 **Many files** (a folder of photos, a reference's images): `upload_media_files` in one call per 100 files, never one call per photo.
 
@@ -20,7 +20,7 @@ Dry run first, then again without `dryRun`. The answer's `answer` holds the medi
 { "directory": "~/Immagini/sito", "pattern": "*.{jpg,png,webp}", "dryRun": true }
 ```
 
-Or `{ "paths": [ ... ] }` for a chosen list. The dry run checks every file, the library and its quota, and sends one file to the server; then call again without `dryRun`. A file whose name and size match one in the library is skipped (its id is in `skipped`), so after an interruption the same call uploads only what is missing; more than 100 files: call again with the rest. The answer maps each uploaded file to its media id (`uploaded`) and each refused one to the reason (`refused`): shrink the ones over 5 MB and send them again, tell the user about the rest. When the same picture comes in several widths (`foto-480.jpg`, `foto-1200.jpg`, `foto-2400.jpg`), upload only the largest: Libretto renders its own sizes from it. Then write the alt texts (step 2) for the ones you place, not for all.
+Or `{ "paths": [ ... ] }` for a chosen list. The dry run checks every file, the library and its quota, and sends one file to the server; then call again without `dryRun`. A file whose name and size match one in the library is skipped (its id is in `skipped`), so after an interruption the same call uploads only what is missing; more than 100 files: call again with the rest. The answer maps each uploaded file to its media id (`uploaded`) and each refused one to the reason (`refused`): shrink the images over 5 MB, compress the PDFs over 20 MB, and send them again, tell the user about the rest. When the same picture comes in several widths (`foto-480.jpg`, `foto-1200.jpg`, `foto-2400.jpg`), upload only the largest: Libretto renders its own sizes from it. Then write the alt texts (step 2) for the ones you place, not for all.
 
 **Without the `libretto-files` server** (Node not found: see `libretto-editing`, When Libretto does not connect): `media.upload` in an `apply_ops` batch takes the file as base64 in `data` (`{ filename, contentType, data, folderId }`, `baseRevisions` with `media`). That puts every byte in the conversation: only for small files (an icon, a logo under ~50 KB). For a photo, ask the user to upload it in the admin (Media) and give you the file name.
 

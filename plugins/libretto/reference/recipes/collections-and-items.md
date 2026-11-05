@@ -48,7 +48,13 @@ A repeater node clones its child for each item:
 
 - Bind a prop to a field with `{ "$bind": "item.<field>" }`; `item.$url` is the item's page address, `item.$index` its position; `{ "$bind": "item.date", "template": "Dal {value}" }` wraps the value.
 - `filter` (up to 8) and `sort` (up to 3) narrow and order; `limit` caps; `offset` skips.
-- Prefer a preset that already holds a repeater (a projects grid, a team list) and change its `source` with `set_props`/the node's source, rather than building the card by hand. Read an existing repeater first and copy its shape: find a `repeater` line in the outline, then `tree/<pageId>?node=<repeater id>&depth=2`.
+- Prefer a preset that already holds a repeater (a projects grid, a team list) and point it at your collection, rather than building the card by hand. A repeater's source is not a prop: change it with the tree op `set_source`, which replaces the whole source (collection, filter, sort, limit, offset, or a `field`):
+
+  ```json
+  { "op": "set_source", "id": "projrep1", "source": { "kind": "collection", "collection": "events", "sort": [{ "field": "date", "dir": "desc" }], "limit": 6 } }
+  ```
+
+  A repeater takes no props: `set_props` on it is refused (`I8.unknown_prop`). After changing the collection, rebind the card's `item.<field>` bindings to the new collection's fields. Read an existing repeater first and copy its shape: find a `repeater` line in the outline, then `tree/<pageId>?node=<repeater id>&depth=2`.
 - A dynamic page (one page per item) is a page set up by a platform admin; check `site_context` pages for one bound to the collection.
 
 ## Check

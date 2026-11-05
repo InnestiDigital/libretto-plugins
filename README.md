@@ -102,7 +102,7 @@ Con l'estensione Claude in Chrome collegata, Claude apre l'anteprima della bozza
 
 ### Immagini
 
-Indica a Claude il file sul tuo computer ("metti la foto ~/Immagini/foto.jpg nella sezione Restauro"): il server `libretto-files` la carica nella libreria Media (fino a 5 MB), poi Claude la usa e scrive il testo alternativo. Anche una cartella intera ("carica le foto di ~/Immagini/cantiere"): Claude le carica a gruppi di 100, salta quelle già nella libreria e ti dice quali non sono passate. Puoi anche caricare le immagini nell'admin (Media) e dire a Claude il nome del file.
+Indica a Claude il file sul tuo computer ("metti la foto ~/Immagini/foto.jpg nella sezione Restauro"): il server `libretto-files` la carica nella libreria Media (immagini fino a 5 MB, PDF e video fino a 20 MB; un PDF più grande va compresso, resta un PDF), poi Claude la usa e scrive il testo alternativo. Anche una cartella intera ("carica le foto di ~/Immagini/cantiere"): Claude le carica a gruppi di 100, salta quelle già nella libreria e ti dice quali non sono passate. Puoi anche caricare le immagini nell'admin (Media) e dire a Claude il nome del file.
 
 ### Segnalazioni
 
@@ -220,7 +220,7 @@ With the Claude in Chrome extension connected, Claude opens the draft preview an
 
 ### Images
 
-Point Claude at the file on your computer ("put ~/Pictures/photo.jpg in the Restauro section"): the `libretto-files` server uploads it into the Media library (up to 5 MB), then Claude places it and writes its alt text. A whole folder works too ("upload the photos in ~/Pictures/site"): Claude uploads them 100 at a time, skips the ones already in the library and tells you which did not go through. You can also upload images in the admin (Media) and give Claude the file name.
+Point Claude at the file on your computer ("put ~/Pictures/photo.jpg in the Restauro section"): the `libretto-files` server uploads it into the Media library (images up to 5 MB, PDFs and videos up to 20 MB; a larger PDF is compressed and stays a PDF), then Claude places it and writes its alt text. A whole folder works too ("upload the photos in ~/Pictures/site"): Claude uploads them 100 at a time, skips the ones already in the library and tells you which did not go through. You can also upload images in the admin (Media) and give Claude the file name.
 
 ### Tickets
 
