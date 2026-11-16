@@ -1,62 +1,43 @@
-# Collections and items
+# Collections and items: projects, events, team
 
-Use when the user has repeated content with the same fields: projects, events, team members, services, press. A **collection** defines the fields; **items** hold the values; a **repeater** node on a page draws the items.
+Use when the user has repeated content (projects, events, people, products) to add, import, change or list on a page.
 
-Operations: [collections](../operations/collections.md), [pages and trees](../operations/pages-and-trees.md).
+Ops: [collections and items](../operations/collections.md), [sections, presets and lists](../operations/sections-presets-and-lists.md) (`repeat.*`), [pages](../operations/pages.md) (`page.setItemRoute`).
 
-## Read what exists
+## Read
 
-- `collection.list` (read-only, through `dry_run_ops`): every collection with its `key`.
-- `collection.read` `{ collectionId }`: the fields (`key`, `type`, `label`, `localized`, `required`), `titleField`, `slugField`.
-- `item.list` `{ collectionId, status? }`: the draft items in order.
+`data`: the collections with their id, key, fields and items. Use the collection's **id** in item ops (`"collection": "<its id>"`) and its **key** where a repeat or a page names it.
 
-## Add or change items
+## Items
 
-- One item: `item.create` `{ collectionId, slug, values }`. `values` follow the fields, one value per field type:
-  - `text`: a string (`multiline: true` keeps line breaks);
-  - `richText`: a Tiptap document (`{ "type": "doc", "content": [...] }`);
-  - `url`: a link, as a link's or a button's `href` takes it: `https://…`, `mailto:`, `tel:`, a site path (`/contatti`) or `#anchor`. An `href` binds only to a `url` field, a `file` field or `item.$url`: bound to a `text` field it is refused (`I6.bind_type`);
-  - `number`: a finite number; `date`: `YYYY-MM-DD`;
-  - `media` and `file`: a media id; `mediaList`: an array of media ids;
-  - `reference`: the id of an item of the referenced collection, an array of ids when `multiple`;
-  - `select`: one option `value`; `list`: an array of objects of its sub-fields.
+| Goal | Op | Who may |
+|---|---|---|
+| One item | `item.create` `{ "collection": "<id>", "id": "<fresh UUID>", "slug": "casa-sul-lago", "status": "draft", "values": { "title": { "it": "Casa sul lago", "en": "Lake house" }, "year": 2023 } }` | Content author, Designer, Administrator |
+| Many at once (a file's rows, at most 500, all or none) | `item.import` `{ "collection": "<id>", "items": [{ "id", "slug", "status", "values" }, ...] }` | the same |
+| Change values, the slug, the status or the place | `item.set` (fields left out stay; null clears one) | the same |
+| Remove one | `item.remove` | the same |
+| Bring one back as an earlier step left it | read `item-history/<collectionId>?item=<itemId>`, then send the `item.revert` it names | the same |
 
-  A localized field takes a plain value or a locale map (`{ "it": "...", "en": "..." }`). A required field must be filled in, in the default locale for a locale map.
-- Many items: `item.import` `{ collectionId, rows: [{ slug?, values }] }`, all or none. Media values may be the exact file name of a file already in the media library.
-- Change: `item.update` `{ collectionId, itemId, slug?, values }` merges key by key; `null` removes a value.
-- Order: `item.reorder` `{ collectionId, itemIds }` names every item once.
-- Delete: `item.delete` (ask first).
-- **Status**: a new item is a draft. `item.setStatus` `{ collectionId, itemId, status: "published" }` marks it for the next publish; it needs `content.publish` (an editor's token has it). The public site shows only published items of a published version: the item appears after `publication.publish` ([publish skill](../../skills/libretto-publish/SKILL.md)).
-- History of one item: `item.history` lists the published versions that hold it; `item.rollback` `{ collectionId, itemId, versionId }` restores the draft item from one of them.
+**An import** (a CSV of events, a spreadsheet of products): read the file, map its columns to the collection's fields (`data` gives each field's key and type), make a fresh UUID and a slug per row, and **dry-run** the `item.import` first: a refusal names its row (`detail.row`, from 1) and the bad cell (`item.value`, `item.field`, `item.slug`). Fix those rows and dry-run again; then apply. A field the collection lacks is refused: add it first (below), with the person's yes.
 
-## Change the collection itself
+**Online**: an item goes live only with `status: "published"` and only at the next publish, on the human's go (`libretto-publish`). Put the items in with status `published` when the person wants them online, or `item.set` the status after.
 
-- `collection.create` `{ collection: { key, label, titleField, slugField, fields } }`. The key never changes: choose a plain one (`projects`).
-- `collection.update` patches label, fields, title or slug field. Removing or retyping a field that an item uses is refused: clear those values first (ask the user).
-- `collection.delete` needs `"confirmed": ["destructive"]` and the user's yes.
+A value in more than one language is a map by language (`{ "it": "...", "en": "..." }`) for a field that is `localized`.
 
-## Show items on a page
+## Collections and fields (a Designer's)
 
-A repeater node clones its child for each item:
+`collection.create` `{ "id": "<fresh UUID>", "key": "progetti", "label": { ... }, "fields": [ ... ] }`, `collection.setField` (add or change one field: its type, label, whether it is required, a select's options, a reference's target), `collection.removeField`, `collection.set` (label, key, the title and slug fields), `collection.remove` (an empty collection nothing reads).
 
-```json
-{ "op": "insert", "parentId": "<grid id>", "index": 0, "node": {
-  "id": "projrep1", "kind": "repeater", "type": "repeater",
-  "source": { "kind": "collection", "collection": "projects", "sort": [{ "field": "$position", "dir": "asc" }], "limit": 12 },
-  "children": [ { "id": "projcard", "kind": "primitive", "type": "text", "props": { "text": { "$bind": "item.title" } }, "children": [] } ] } }
-```
+## Show a collection on a page
 
-- Bind a prop to a field with `{ "$bind": "item.<field>" }`; `item.$url` is the item's page address, `item.$index` its position; `{ "$bind": "item.date", "template": "Dal {value}" }` wraps the value.
-- `filter` (up to 8) and `sort` (up to 3) narrow and order; `limit` caps; `offset` skips.
-- Prefer a preset that already holds a repeater (a projects grid, a team list) and point it at your collection, rather than building the card by hand. A repeater's source is not a prop: change it with the tree op `set_source`, which replaces the whole source (collection, filter, sort, limit, offset, or a `field`):
+The guide's recipe: a repeat draws a template once per item. `repeat.insert` `{ "at": { "page": "<pageId>" }, "parent": "<sectionId>", "index": 1, "id": "<new id>", "repeat": { "name": "Progetti", "source": { "kind": "data", "from": { "collection": "progetti", "sort": [{ "field": "year", "dir": "desc" }], "limit": 6 } } }, "template": { "root": "<card id>", "nodes": { ... } } }`; in the template a text shows an item's field with `{ "$item": "title" }` (or `{ "$bind": "item.title" }`), a picture its `src` the same way.
 
-  ```json
-  { "op": "set_source", "id": "projrep1", "source": { "kind": "collection", "collection": "events", "sort": [{ "field": "date", "dir": "desc" }], "limit": 6 } }
-  ```
+To turn a part that exists into a repeat: `tree.remove` the part and `repeat.insert` its nodes as the template at its place, in one batch; then `translation.set` for each translation its texts had. `repeat.setSource` changes the collection, the filter, the sort or the limit; `repeat.setSubset` names some items to style apart.
 
-  A repeater takes no props: `set_props` on it is refused (`I8.unknown_prop`). After changing the collection, rebind the card's `item.<field>` bindings to the new collection's fields. Read an existing repeater first and copy its shape: find a `repeater` line in the outline, then `tree/<pageId>?node=<repeater id>&depth=2`.
-- A dynamic page (one page per item) is a page set up by a platform admin; check `site_context` pages for one bound to the collection.
+## A page per item
+
+A dynamic page (address segment `[slug]`) shows one item per address. `page.setItemRoute` `{ "pageId", "route": "root" }` puts the items at the top of the site instead of under the page. `tree.set_show_on` shows a part only on the list or only on the item pages. Look at one item with `render_preview` `{ "pageId", "item": "<itemId>" }`.
 
 ## Check
 
-Look at the page with the items ([preview and visual check](preview-and-verify.md)): the preview shows draft items to a signed-in user; the public site shows published ones only.
+`render_preview` of the page with the repeat, desktop and mobile; one item page with `item`.

@@ -1,41 +1,55 @@
-# Add sections from presets
+# Add a section: from a kind, a component, a copy or a saved preset
 
-Use when the user wants a new section (a hero, a services table, a gallery, a contact band) on a page or in the header or footer. A preset is a ready-made subtree that already follows the design system; inserting one is better than building a section node by node.
+Use when the user wants a new section on a page, a section copied from another page, a saved part placed again, or one item more in a list (a slide, a card, a question).
 
-Operations: [components and presets](../operations/components-and-presets.md), [pages and trees](../operations/pages-and-trees.md).
+Ops: [sections, presets and lists](../operations/sections-presets-and-lists.md), [components](../operations/components.md) (`instance.setProp`, `instance.setVariant`).
 
-## 1. Choose the preset
+## 1. Read what can be added
 
-1. `read_resources` `libretto://site/<siteId>/presets?kind=section` (`preset.index`; kinds: `section`, `box`, `element`; `&source=site` for the site's own): each preset's `id`, `kind`, `source`, `label`, `category`, `description` and `keywords`, without trees. Read the tree of the one you are about to insert, if you need it, with `preset/<presetId>?kind=section`. Do not use `preset.list`: it answers every preset with its tree.
-2. Each preset has a `source`: `theme` (built in) or `site` (saved by someone on this site with `preset.save`).
-3. Pick by role (what the section does), not by its sample text. Tell the user which one and why; offer two when the brief is open.
+- `sections`: the section kinds, the site's section components, the saved presets, and the sections of every page (to copy). Pick from it with the user; never guess a key.
+- `page/<pageId>`: the page's sections in order, with their ids, to say where the new one goes.
 
-## 2. Find where it goes
+## 2. Pick the source
 
-- On a page: the parent is the page root, the first line of `libretto://site/<siteId>/outline/<pageId>`. `index` is its position among the root's children (0 is first). Read the outline to pick the index between the right sections.
-- In the header or footer: `region.read` `{ "region": "header" }` through `dry_run_ops`; its `pageId` and the tree's root id are the target. A section preset goes under the region root only (never inside a section: refused as `I5.section_placement`).
+| The user wants | Op | Who may |
+|---|---|---|
+| A section of a kind every site can add (text and picture, questions and answers, contact form, banner, gallery, cards), the first time | `section.addKind` `{ "at": { "page": "<pageId>" }, "after": "<sectionId>", "kind": "questions-and-answers" }` | Content author, Designer, Administrator |
+| Another section of a component the site has (`kind.<kind>` once added, or its own section components) | `section.insert` `{ "at": { "page": "<pageId>" }, "after": "<sectionId>", "source": { "component": "kind.text-and-picture" } }`; `source.props` sets its first values | Content author, Designer, Administrator |
+| A copy of a section of a page | `section.insert` with `"source": { "page": "<pageId>", "node": "<sectionId>", "name": "Clienti, seconda parte" }` | Content author, Designer, Administrator |
+| A saved preset (a section, a part, a bar) | `preset.insert` `{ "at": { "page": "<pageId>" }, "key": "<preset>", "parent": "<parentId>", "index": 2 }`, or `"before": "<nodeId>"` | Designer, Administrator |
 
-## 3. Insert, then fill
+`after` or `before` names a section of the page; with neither the section goes at the end. A Content author asking for a preset is refused with who can and the editor's link: hand it on, or offer the nearest kind instead.
 
-```json
-{ "format": "libretto.batch", "v": 1, "requestId": "<uuid>", "baseRevisions": { "tree:<pageId>": 41 },
-  "operations": [
-    { "name": "preset.insert", "ref": "hero",
-      "input": { "pageId": "<pageId>", "parentId": "<root id>", "index": 1, "kind": "section", "presetId": "hero-split", "source": "theme" } }
-  ] }
-```
+Each answer's `outputs` holds the new section's `root`. Keep it: the next batch fills it.
 
-1. `dry_run_ops`, then `apply_ops` (fresh `requestId`). The answer's `nodeId` is the new section.
-2. Read the outline again: the new section's nodes have fresh ids. Replace the sample texts with the user's with `set_props` in a second `tree.commit` (keep a locale map a map: see [translations](translations.md)). Replace the sample images ([images](images.md)).
-3. Set the section's anchor if a menu should point at it: `set_meta` `{ id, anchor: "servizi" }` ([header, footer and menus](header-footer-and-menus.md)).
-4. Look at it ([preview and visual check](preview-and-verify.md)).
+## 3. Fill it
 
-Insert and fill can be one batch: give `preset.insert` a `ref`, but the inner ids are known only after the insert, so filling texts in the same batch is practical only for the section node itself (`{ "$ref": { "operation": "hero", "path": ["nodeId"] } }`). Two batches are simpler.
+One batch per change the user would name:
 
-## Save a section for later
+- Words: `tree.set_text` on its texts, or `instance.setProp` on the instance's props (`{ "node": "<instance>", "prop": "title", "value": "..." }`); then `translation.set` for each other language.
+- Pictures: `tree.set_props` `{ "props": { "src": { "$media": "<mediaId>" }, "alt": "..." } }` (see [images](images.md)).
+- Its look: `instance.setVariant` (a tone, a size), never raw styles.
 
-The user likes a section and wants it again elsewhere: `preset.save` `{ pageId, nodeId, label, kind: "section", category }`. A preset is a copy; for a block that should stay the same everywhere, use a site component (`component.createFromNode`) instead.
+## Lists inside a section
 
-## When nothing fits
+A carousel's slides, a list's items and a grid's cards are the items of an instance's slot:
 
-Say so. Do not fake a missing kind of section with a pile of boxes: build it from catalogue types only if the user agrees, and open a ticket for the missing preset ([report an issue](../../skills/libretto-report-issue/SKILL.md)).
+| Goal | Op |
+|---|---|
+| One item more, a copy of another | `slot.add` `{ "at", "node": "<instance>", "slot": "default", "source": { "copy": "<itemId>", "name": "Foto in cantiere" } }` |
+| One item more, built new | `slot.add` with `"source": { "root": "<new id>", "nodes": { ... } }` |
+| Reorder, remove | `slot.move` `{ "item", "index" }`, `slot.remove` `{ "item" }` |
+
+`slot.full` and `slot.at_least` say the slot's most and least items. `instance.fillSlot` replaces a slot's whole content: use it only when the user wants that.
+
+## Move, copy and remove sections
+
+`section.move` `{ "node", "after" }`, `section.remove` `{ "node" }` (with the motion wholly inside it). A part inside a section moves with `tree.move` and copies with `tree.duplicate`.
+
+## Save a section as a preset
+
+`preset.save` `{ "key": "apertura-con-foto", "label": "Apertura con foto", "at": { "page": "<pageId>" }, "node": "<sectionId>" }` (a Designer's): a section becomes a section preset, the bar of a header or footer a bar, anything else a part. Pages that inserted a copy keep it when the preset changes.
+
+## Check
+
+`render_preview` with `crop: { "nodeId": "<the new section>" }`, desktop and mobile; `findings/<pageId>` for a section that needs values (a required prop left empty, a picture without words).

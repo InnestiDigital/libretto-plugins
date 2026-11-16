@@ -1,43 +1,41 @@
-# Contrast and accessibility checks
+# Contrast and accessibility
 
-Use before reporting any visual change, and whenever the user asks "is it readable", "is it accessible", or brings colours that look close.
+Use when the user asks "is it readable", "is it accessible", when a write came back with `corrections` or a contrast refusal, or before a publish.
 
-Operations: [design system](../operations/design-system.md), [pages and trees](../operations/pages-and-trees.md).
+Ops: [design system](../operations/design-system.md) (`token.set`; the contrast records), [parts and styles](../operations/parts-and-styles.md) (`tree.set_style`, `tree.set_attrs`, `tree.set_props`, `tree.set_type`), [media](../operations/media.md) (`media.setMeta`).
 
-## What Libretto checks by itself
+## Read what Checks finds
 
-| Check | Where it runs | What you get |
-|---|---|---|
-| AA contrast of every text and icon pair in every theme | every design-system change, on the end state of the batch | `422` refusing the batch, with each failing pair and ratio (4.5:1 text, 3:1 non-text) |
-| AAA contrast | the same | `warning` findings, not blocking |
-| Contrast of a node's local colours | `tree.commit` findings | `design.contrast-aa` (below 4.5:1), `design.contrast-aaa` (below 7:1), on the node |
-| Heading order | `tree.commit` findings | `a11y.heading-order`: a heading skips a level |
-| Empty structure | `tree.commit` findings | `structure.empty-section`, `structure.empty-box-paint` |
-| Local values over the system | `tree.commit` findings | `design.detached`: the node overrides its variant or mixin |
-| Missing translations, field formats | `tree.commit` findings | `translation.missing`, `field.format` |
+- `contrast/<pageId>`: the page's text and ground colour pairs and how readable each is, with its ratio and the one it needs.
+- `findings/<pageId>?locale=<locale>`: what Editor › Checks finds on a page: a picture with no words, a link that says nothing, the main heading and the heading levels, a required value missing.
+- `site-findings`: how many findings each page of the site has; start with the pages that have most.
 
-Findings cover the whole page: filter by the `nodeId`s you touched, and mention pre-existing ones separately.
+Libretto measures; never compute a ratio with code.
 
-## Run a check on demand
+## How the contrast check works
 
-Libretto computes every ratio: never work one out with Bash, Python or Node (the person's Claude may not be allowed to run code, and the gate's number is the one that counts).
+Every write is judged on its end state, in every theme. When a text falls below AA on its ground, Libretto corrects the text's colour in the same step and says so in the answer's `corrections` (the text, both colours, both ratios), or refuses the batch (`contrast.uncorrectable`) when no correction keeps it readable. One undo takes a change and its corrections back together.
 
-1. `designSystem.lint` through `dry_run_ops`: a summary, `findingsBySeverity.error` must be 0; `worst` lists the 20 pairs furthest below what they need, each with `foreground`, `background`, `ratio` and `required`.
-2. A colour that is not in the design system yet ("is #C0C0C0 readable on white?"): `dry_run_ops` a `designSystem.setTokens` that puts it on the role, nothing is saved. A `422` lists each failing pair with its ratio (at most 20 lines, the rest counted in `omitted`); an accepted dry run lists in the result's `warnings` the pairs below AAA (7:1) that name what you changed, with their `ratio`: 5 in the default receipt, up to 20 with `"answer": "full"` on the dry run (use it here). A pair missing from that list has no number: say it passes AA rather than guess one. For the nearest readable shade, dry-run one step darker or lighter at a time.
-3. For one page: there is no page lint operation; the page-wide findings come with every `tree.commit` dry run. Dry-run the batch you are about to apply and read its findings (a dry run changes nothing): the receipt counts them by rule (`findingsByRule`) and lists the first 20; `"answer": "full"` lists them all.
-4. Look at the result ([preview and visual check](preview-and-verify.md)): contrast over images and gradients is not computed by the gate; judge it on the screenshot and say so.
+## Fix a pair
 
-## When the gate refuses
+1. Read `contrast/<pageId>` and find the pair: which text, on which ground.
+2. Fix it at its source, in this order of preference:
+   - the role the text uses, for every page: `token.set` on `color.text.*` (an Administrator's), or the palette step under it with a literal colour (a Designer may);
+   - the text's own colour on this page: `tree.set_style` with a token (`{ "$token": "color.text.primary" }`);
+   - one instance's text: `instance.override`.
+3. To try a colour first, `dry_run_ops` the batch and read its `corrections`: what Libretto would change, and the ratios. Nothing is stored.
+4. Tell the person the ratio before and after, in their words ("il testo grigio sulle schede era 2,8:1, ora 6,7:1; il minimo è 4,5:1").
 
-- Read every pair in the `detail`: `theme light components/button.json ...: {color.text.on-accent} on {color.bg.accent} is 3.9:1, below 4.5:1`. Tell the user in their words: "il testo bianco sul pulsante d'accento ha un contrasto 3,9:1, serve almeno 4,5:1", not the token paths.
-- Fix by moving the role to another palette step (darker text, lighter background), or change the palette step and its role together in one `designSystem.setTokens`.
-- Never set `acknowledgeContrast` (only `brand.setup` has it) without the user's explicit "save it anyway", and say which pairs stay below AA.
+**Keeping a hard-to-read pair** (a brand grey kept on purpose, a ground that cannot be measured) is a person's decision, the site administrator's: `contrast.bypass` for one page, `component.acceptContrast` for every instance of a component. An agent is refused both, whatever its role; give the person Editor › Checks (`urls.places["editor.checks"]`), where they accept it with a reason.
 
-## Beyond the gate (judge and report)
+## Other findings
 
-- Alt text on every meaningful image, in every language (`media.update`, or the node's alt prop).
-- Link and button texts that make sense alone ("Scopri i servizi", not "Clicca qui").
-- One `heading1` per page; headings in order.
-- Tap targets on the phone width at least 44 px high (look at the phone screenshot).
-- Motion: content visible without it (`hidden-at-rest` findings, see [motion](motion.md)).
-- Text over images: enough contrast in the darkest and lightest part of the picture.
+| Finding | Fix |
+|---|---|
+| A picture with no words | `media.setMeta` `{ "id", "alt" }` for the file everywhere, or the part's own `alt` with `tree.set_props` ([images](images.md)); an empty alt for a decorative one |
+| A link that says nothing ("clicca qui") | its words with `tree.set_text`, or a name for assistive technology with `tree.set_attrs` `{ "attrs": { "aria-label": "..." } }` |
+| The main heading missing or twice, levels that skip | `tree.set_type` `{ "node", "as": "h1" }` (or `h2`, `h3`) |
+| A required value missing in a component | `instance.setProp` with the value |
+| Missing translations | [translations](translations.md) |
+
+After each fix, read `findings/<pageId>` again: the count must go down, not up.

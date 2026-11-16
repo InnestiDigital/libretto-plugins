@@ -1,54 +1,74 @@
-# Header, footer and menus
+# Header, footer, menus and redirects
 
-Use when the user wants to change what every page shows at the top or bottom (logo, menu, contact line, social links), or what a menu lists.
+Use when the user wants to change the bar at the top or the bottom of every page, its links, a menu, or where an old address leads.
 
-Operations: [pages and trees](../operations/pages-and-trees.md) (`region.read`, `tree.commit`), [navigation](../operations/navigation.md), [components and presets](../operations/components-and-presets.md).
+Ops: [components](../operations/components.md) (`component.edit`), [parts and styles](../operations/parts-and-styles.md), [sections, presets and lists](../operations/sections-presets-and-lists.md) (`preset.insert`), [menus and redirects](../operations/navigation.md), [pages](../operations/pages.md) (`page.setLayout`).
 
-## How it is built
+## Where the header and footer live
 
-- The header, footer, `above` and `below` are **regions**: trees shared by every page. Each lives on its own page row named `region-*`, which is not a page of the site (it has no URL and is not in menus).
-- A **menu** is site data (key, label, items), edited with `navigation.*`. A `nav-list` node in a region (or a page) draws one: its props are `source` (`menu` or `pages`), `menu` (the menu key), `layout`, `label` (what screen readers announce).
-- Menus are versioned with the site: the public site shows the published ones.
+On a core site the header, the footer and the frame around each page are **components**, not parts of a page:
 
-## Change the header or footer
+- `region.header` and `region.footer`: the bars every page shows;
+- the layouts (`layout.default`, and others the site has): the component of role `layout` that draws the header, the footer and the frame round the page; each page names its layout.
 
-1. Find the region's page in `site_context`: the pages named `region-header`, `region-footer`, `region-above`, `region-below`. Read its outline (`outline/<region pageId>`): the first line is the region root.
-2. Read the node you change: `tree/<region pageId>?node=<nodeId>&depth=1`; `tree/<region pageId>` is the region's outline. (`region.read` `{ "region": "header" }` and the `regions` resource answer whole region trees: use them only to copy a large subtree.)
-3. A `tree.commit` on the region's `pageId`, exactly like a page: `set_props`, `set_style`, `set_variant`, `insert`, `move`, `remove`. The base revision is `tree:<region pageId>` (in `site_context.baseRevisions`).
-4. New section in a region: `preset.insert` with the region's `pageId` and the region root as `parentId` ([sections from presets](sections-from-presets.md)).
-5. Apply, look at two pages (every page shows the change): [preview and visual check](preview-and-verify.md). The draft preview renders the draft's header and footer. To check a text there, `render_preview` `{ "pageId": "<any page>", "find": "<a few words>" }` (it searches the page, its header and its footer) or the node in the region's tree; to see it, a screenshot cropped to the header or footer node (`"crop": { "nodeId": "<its id>" }`). If the node has your text and the draft preview does not, that is a bug: tell the user and open a ticket (`libretto-report-issue`).
+`site_context` lists their keys with the other definitions. A change there reaches every page that uses them, so say so to the user.
 
-## Header motion, menus and safe areas
+## Read
 
-- **Motion on every page:** scenes on the region's own page row (`motion.replace` with the region's `pageId`) play on every page that renders the region, naming the region's node ids without `region` ([motion](motion.md), "Beyond the recipes"). A page scene may still move a header node with `"region": "header"`.
-- **A full-screen menu, a bar that rides away scrolling down, a node shown on some sections only:** page states, the `scroll-direction` trigger and the `pg:` scope, in the same table. The menu dialog's `pageState` prop (such as `"menu-open"`) writes `data-page-menu-open="on"` on `<html>` while its drawer is open, so any node, in the header or on the page, can style itself under `pg:[data-page-menu-open="on"]`.
-- **Stacking:** the header stacks over the page content, so a header node with `position: fixed` (or an open menu) is drawn over the page and placed against the viewport.
-- **Phone safe areas:** inside `calc()`, `clamp()`, `min()` or `max()` a length may read `env(safe-area-inset-top|right|bottom|left)`, with an optional length fallback: `"padding-bottom": "calc(16px + env(safe-area-inset-bottom, 0px))"` keeps a fixed bar above the home indicator. A bare `env()` is refused: write `max(0px, env(safe-area-inset-bottom))`.
+1. `definition/<key>` (`definition/region.header`): the component's tree, props, slots and parts, with its node ids.
+2. Or one part as a page shows it: `node/<pageId>?node=<nodeId>&owner=layout&component=<key>`.
+3. What one page shows of its layout (its variant and props, the header and footer shown or hidden, their words on this page): `page-layout/<pageId>`.
+4. The menus: `navigation`, the menus with their items and what an item may point to.
 
-## Free content in the footer
+## Change a part of the header or footer
 
-The `footer` node draws its columns from props and menus, but its **brand column** (the logo or wordmark) also takes free nodes: a sentence under the logo, a link, an image, a `ds.*` component. Use it for anything the footer's props have no field for, never a fake menu item.
+Every op on a component's own tree goes inside one `component.edit`, each with `at: { "component": "<key>" }`, in one batch:
 
-1. Insert the node as a child of the `footer` node with `"slot": "brand"`: `{ "op": "insert", "parentId": "<footer node id>", "slot": "brand", "index": 0, "node": { "id": "<8 chars>", "kind": "primitive", "type": "text", "props": { "text": "Uno studio che ..." } } }`. Several nodes are drawn after the logo in `index` order. A child without the slot is refused (`I3.slot_required`), and only primitives and `ds.*` components fit (`I4.accepts`).
-2. Style each node with its own node styles (`set_style` on its id), like any text.
-3. The column itself is the footer's `brand` part, a wrapping row: to put the sentence under the logo, `set_style` on the footer node with scope `p:brand` and `{ "flex-direction": "column", "align-items": "flex-start" }`.
+```json
+{ "name": "component.edit", "input": { "key": "region.header", "ops": [
+  { "name": "tree.set_text", "input": { "at": { "component": "region.header" }, "node": "<ctaId>", "text": "Contattaci" } },
+  { "name": "tree.set_style", "input": { "at": { "component": "region.header" }, "node": "<barId>", "scope": "base", "declarations": { "background-color": { "$token": "color.bg.page" } } } }
+] } }
+```
 
-## Change a menu
+`component.edit` carries the tree, repeat and instance ops, `tree.duplicate` and `preset.insert`. Its words in another language need no `component.edit`: `translation.set` `{ "at": { "component": "region.header" }, "locale": "en", "pointer": "/tree/nodes/<nodeId>/text", "value": "Contact us" }`.
 
-1. `navigation.read` through `dry_run_ops`: every menu with its `key`, `label`, `items` (each `id`, `label`, `target`, `children`).
-2. `navigation.anchors` (read-only): every page with the anchors of its tree, then the header and footer anchors, marked with their `region`.
-3. `navigation.upsert` `{ "menu": { key, label, items } }` writes the **whole** menu: copy the current items, change what the user asked, send them all. Targets:
-   - a page: `{ "kind": "page", "pageId": "<id>" }`;
-   - a section of a page: `{ "kind": "anchor", "pageId": "<id>", "anchor": "servizi" }` (the section's `anchor`, set with `set_meta`);
-   - a header or footer anchor: `{ "kind": "anchor", "pageId": "<home page id>", "anchor": "<region anchor>" }`, never the region's own page id;
-   - outside: `{ "kind": "external", "href": "https://..." }`;
-   - the language switcher: `{ "kind": "languages" }`.
-   Item ids are 8 characters `[0-9a-z]`; keep the existing ids, make fresh ones for new items. Labels may be locale maps (`{ "it": "Servizi", "en": "Services" }`).
-4. `navigation.reorder` changes the order of the menus; `navigation.delete` removes a menu (ask first: a `nav-list` may draw it).
-5. A new menu shows only where a `nav-list` names it: set the node's `menu` prop with `set_props` in the region.
+A **Content author** may run `component.edit` for words and links (`tree.set_text`, `tree.set_props` of a link); styles and structure inside it need a Designer, as on a page. The refusal says who.
 
-## Checks
+## Replace the bar with a saved one
 
-- An anchor that no section carries yet is a finding, not a refusal: add the anchor on the section, or fix the item.
-- A page in `draft` status is not on the public site even if a menu points at it.
-- Changing the menu or region is a site-wide change: tell the user, and show both a desktop and a phone screenshot (the phone menu often differs).
+The guide's recipe, one batch: read `sections` for the saved presets (a header or footer bar saved with `preset.save` is one), then
+
+```json
+{ "name": "component.edit", "input": { "key": "region.header", "ops": [
+  { "name": "preset.insert", "input": { "at": { "component": "region.header" }, "key": "<preset>", "before": "<old bar>", "menus": "<old bar>" } },
+  { "name": "tree.remove", "input": { "at": { "component": "region.header" }, "node": "<old bar>" } }
+] } }
+```
+
+`menus` gives the copy the menus the old bar shows. To keep the current bar for later, `preset.save` it first (`{ "key", "label", "at": { "component": "region.header" }, "node": "<bar>" }`).
+
+## One page different
+
+- Another layout for a page, or the layout's variant and props for this page alone: `page.setLayout` `{ "pageId", "layout": { "key": "layout.default", ... } }`.
+- A part shown only to members or only to guests: `tree.set_audience` inside `component.edit` (see [members and access](members-and-access.md)).
+- Header motion that plays on every page is the component's own timeline (`component.setTimeline`, an Administrator's); see [motion](motion.md).
+
+## Menus
+
+| Goal | Op |
+|---|---|
+| A link in a menu | `menuItem.add` `{ "menu": "footer", "item": { "id": "<new 8-character id>", "label": "Lo studio", "target": { "kind": "page", "pageId": "<pageId>" } } }`; under a top-level item: `parent`; a column title: `group` |
+| Change its words or where it leads | `menuItem.update` `{ "menu", "id", "label": { "it": "Persone", "en": "People" } }` or `"target"` |
+| Move it, remove it | `menuItem.move`, `menuItem.remove` |
+| A new menu, rename, delete | `menu.create`, `menu.rename`, `menu.delete` (refused while a page, a layout or a component reads it) |
+
+A Content author adds, changes and moves links (`menuItem.*`); making, renaming or deleting a menu is a Designer's. A menu links each page once (`menu.pageTwice`). A label is one string, or one per language.
+
+## Redirects
+
+Read `redirects`, then `redirect.add` `{ "redirect": { "from": "/studio-vecchio", "to": "/cosa-facciamo", "status": 301 } }` (`/progetti/*` takes the path and everything under it; `to` is a path of the site or an https address), `redirect.update`, `redirect.remove`. The server answers a redirect before any page, so a source that is a published page's address is refused (`redirect.hidesPage`). Redirects are a Designer's; a Content author is refused with who can.
+
+## Check
+
+Look at two pages, desktop and mobile, with the header or footer in the crop (`render_preview` `crop: { "nodeId": "<a header part>" }`): a change reaches every page. A header link: also open it from the screenshot's page in the other language.

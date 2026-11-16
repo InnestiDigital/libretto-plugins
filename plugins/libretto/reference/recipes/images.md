@@ -1,60 +1,47 @@
-# Images
+# Pictures, videos and documents
 
-Use when the user gives you a picture to put on the site, wants an image replaced, or asks for alt text.
+Use when the user wants a photo placed or swapped, its alt text written, a file uploaded, a folder of photos brought in, or a file in use replaced.
 
-Operations: [media and fonts](../operations/media-and-fonts.md), [pages and trees](../operations/pages-and-trees.md).
+Ops: [media](../operations/media.md) (the `media.uploadFile` door, `media.setMeta`, `media.move`, `mediaFolder.*`), [parts and styles](../operations/parts-and-styles.md) (`tree.set_props`).
 
-## 1. Get the image into the media library
+## Upload from this computer
 
-**A file on this computer** (the usual case): call `upload_media_file` of the plugin's `libretto-files` server with its path. It reads the file and sends `media.upload` for you, so the bytes never pass through the conversation.
+The plugin's `libretto-files` server reads the file and sends it through the `media.uploadFile` door, so its bytes never enter the conversation:
 
-```json
-{ "path": "~/Immagini/foto.jpg", "dryRun": true }
-```
+- **One file**: `upload_media_file` `{ "path": "~/Immagini/facciata.jpg", "alt": "La facciata restaurata di via San Quintino" }` (`folderId`, `caption`, `credit` too). `dryRun: true` makes every check and stores nothing.
+- **A folder**: `upload_media_files` `{ "directory": "~/Immagini/cantiere", "pattern": "*.{jpg,png}", "dryRun": true }`, then without `dryRun`. At most 50 files a call: call again for the rest; files already in the library (same name and size) are skipped. A reference that ships each picture in several widths: give only the largest; Libretto renders its own sizes.
+- **Into a folder**: read `media` for the folders' ids, or make one first with `mediaFolder.create` `{ "id": "<fresh UUID>", "name": "Cantieri", "parentId": null }`.
 
-Dry run first, then again without `dryRun`. The answer's `answer` holds the media record (`id`, `url`, kind, width, height) and `requestId` (undo with `history.undo`). Images and SVGs are capped at 5 MB: shrink a larger image first (macOS: `sips -Z 2400 in.jpg --out in-2400.jpg`; keep JPEG for photos, PNG or SVG for flat graphics). PDF documents are capped at 20 MB: compress a larger one (export it again with pictures downsampled to 300 ppi, or a smaller-file preset) and keep it a PDF; never turn a PDF into a picture. Videos go up to 20 MB through this tool, larger ones through the admin's Media (100 MB).
+The answer holds the file's media `id`, its step (`entryId`) and the `undo` that takes it back.
 
-**Many files** (a folder of photos, a reference's images): `upload_media_files` in one call per 100 files, never one call per photo.
+What the door takes: JPEG, PNG, GIF, WebP, SVG, MP4, WebM or PDF, at most 20 MB in one call; Libretto checks the file as Admin › Media does (type, size, content, the site's space) and says why when it refuses. The doors take 60 uploads a minute per token. A file over 20 MB (`upload_too_large`) or a ZIP archive (`upload_archive`) is a person's: they upload it in Admin › Media (`urls.places["media"]`), where a ZIP becomes a folder; then read `media` and place it by its name. The library's space: `media-space`.
 
-```json
-{ "directory": "~/Immagini/sito", "pattern": "*.{jpg,png,webp}", "dryRun": true }
-```
+Without the plugin's files server (it failed to start), the same door takes the file as base64 in `data` inside `apply_ops`; never write a large file's base64 into the conversation. Ask the person to upload it in Admin › Media instead.
 
-Or `{ "paths": [ ... ] }` for a chosen list. The dry run checks every file, the library and its quota, and sends one file to the server; then call again without `dryRun`. A file whose name and size match one in the library is skipped (its id is in `skipped`), so after an interruption the same call uploads only what is missing; more than 100 files: call again with the rest. The answer maps each uploaded file to its media id (`uploaded`) and each refused one to the reason (`refused`): shrink the images over 5 MB, compress the PDFs over 20 MB, and send them again, tell the user about the rest. When the same picture comes in several widths (`foto-480.jpg`, `foto-1200.jpg`, `foto-2400.jpg`), upload only the largest: Libretto renders its own sizes from it. Then write the alt texts (step 2) for the ones you place, not for all.
+## Place a picture
 
-**Without the `libretto-files` server** (Node not found: see `libretto-editing`, When Libretto does not connect): `media.upload` in an `apply_ops` batch takes the file as base64 in `data` (`{ filename, contentType, data, folderId }`, `baseRevisions` with `media`). That puts every byte in the conversation: only for small files (an icon, a logo under ~50 KB). For a photo, ask the user to upload it in the admin (Media) and give you the file name.
+1. The part: `page/<pageId>`, then `node/<pageId>?node=<nodeId>` (a picture part, `kind: "image"`).
+2. One batch: `tree.set_props` `{ "at": { "page": "<pageId>" }, "node": "<pictureId>", "props": { "src": { "$media": "<mediaId>" } } }`.
+3. Its words: every place that shows a file reads the file's own alt text, set with `media.setMeta` `{ "id": "<mediaId>", "alt": { "it": "...", "en": "..." } }`. A part that holds its own `alt` prop shows that one instead: write it there with `tree.set_props`, or clear it (`"alt": null`) in the same batch as the `media.setMeta` so the file's words show.
 
-**Already in the library**: `media.list` `{ "search": "foto", "kinds": ["image"] }` (read-only) finds it by file name.
+A picture in a component instance (a card, a hero) is one of its props: `instance.setProp` `{ "node": "<instance>", "prop": "<its picture prop>", "value": { "$media": "<mediaId>" } }`. A picture of a collection's item is its field (`item.set`). A gallery's slides are items of its slot ([sections from presets](sections-from-presets.md), Lists).
 
-## 2. Describe it
+## Alt text that says something
 
-Look at the picture once (`Read` the file) to write its alt text; do not read it again.
+Say what the picture shows for someone who cannot see it, in the page's language, in a sentence; for a decorative picture, an empty alt. Never "image", the file name, or "foto di". `findings/<pageId>` names the pictures with no words.
 
+## Replace a file that is in use
 
-`media.update` `{ mediaId, alt: { "it": "...", "en": "..." }, caption?, credit? }`. Alt text says what the picture shows for someone who cannot see it, in each site language; ask the user when the content is not obvious. A purely decorative image gets an empty alt only when the user agrees.
+`upload_media_file` with `"replaces": "<mediaId>"`: the new file becomes that entry's file, of the same kind (a picture for a picture); its words and folder stay, and every page, component and item that shows it follows. Never remove a file that is in use: `media.remove` is refused (`media.inUse`, naming the places), and `media-uses/<mediaId>` lists them.
 
-## 3. Place it
+## Tidy the library
 
-- On an image node: `set_props` `{ id, patch: { "src": { "$media": "<media id>" } } }` in a `tree.commit`. Find the node in the outline (`kind:type` such as `primitive:image`); the prop names come from `catalog/<type>` for that type (some types name it `media` or `image`, and carry their own alt prop).
-- A new image: `insert` an image node of a type listed in the catalogue, with `props.src` `{ "$media": "<id>" }` and a fresh 8-character id.
-- In a collection item: the media field takes the media id ([collections](collections-and-items.md)).
-- As a page's featured or social image: `page.update` with the field `page.read` shows (`ogImageId`; `ogImages` for another language's own share image).
-- A picture with words in it, one per language (a chart, a poster, an SVG drawing): `src` (or an svg node's `media`) as a locale map of pictures, the default language's required ([translations](translations.md), Where texts live).
-- Replacing a file everywhere it is used: `media.usage` `{ mediaId }` lists the pages, articles, tokens and settings that use it; `media.replace` swaps the bytes of a row staged by the admin's upload, which MCP cannot stage. To swap from here, upload the new file and re-point each use.
+`media.setMeta` (alt, caption, credit, name, focal point), `media.move` `{ "mediaIds", "folderId" }`, `mediaFolder.rename`, `mediaFolder.move`, `mediaFolder.delete` (an empty folder only).
 
-## Icons, illustrations and charts in the site's colours (SVG)
+## Icons, logos, the site's icon
 
-An SVG on an image node is a picture: the site's colours never reach it. To draw it in the page with the site's tokens, place it on an `svg` node (the **SVG drawing** primitive).
+The site's icon and the logo search engines show are settings: upload the file, then `settings.setGeneral` `{ "general": { "favicon": "<mediaId>" } }`. An SVG that should take the text colour of the part drawing it: `upload_media_file` with `svgTextColor` (and `svgAccentColor` for its one accent element).
 
-1. **Prepare the file.** Lines and fills that follow the text colour use `currentColor`. Mark the one element in the second colour `data-role="accent"`, or name its colour at upload. Keep it to geometry and presentation attributes or plain class rules (`.a { stroke: … }`): no filters, embedded pictures, links or animations; at most 96 KB and 1,500 elements.
-2. **Upload it.** `upload_media_file` with its path; if the file paints its text colour or accent with a literal colour, name them: `{ "path": "~/glifi/cricchetto.svg", "svgTextColor": "#f5f4ee", "svgAccentColor": "#3ccb7f" }`. The answer's `inline` is `ready` (with `elements`, whether it has an `accent` part, and the `colors` left as drawn, which no token reaches) or `refused` with the reason (`svg_inline_too_large`, `svg_inline_too_many_elements`, `svg_inline_unsupported`, `svg_inline_styled`, `svg_inline_no_viewbox`): fix the file and upload it again. `media.read` `{ mediaId }` answers the same later.
-3. **Place it.** `insert` `{ "kind": "primitive", "type": "svg", "props": { "media": { "$media": "<id>" }, "label": { "it": "…", "en": "…" } } }`; `decorative: true` (no label) for one that only decorates text that says the same. An svg node whose media is not a ready SVG is refused at the node (`media_invalid`, with the reason).
-4. **Colour and size it with tokens** in the node's styles: `color` (the `currentColor` lines), `color` under `p:accent` (the accent part), `width` and `height` (an icon is `icon.size.inline` square by default; an illustration fills its container's width).
+## Check
 
-## 4. Check
-
-Look at the page at desktop and phone width ([preview and visual check](preview-and-verify.md)): crop, focus and size come from the node's styles and the variant, not from the file.
-
-## Folders
-
-`media.createFolder`, `media.renameFolder`, `media.deleteFolder`, `media.move`; `upload_media_file` and `upload_media_files` take a `folderId`.
+`render_preview` with `crop` on the part, desktop and mobile; `findings/<pageId>`.

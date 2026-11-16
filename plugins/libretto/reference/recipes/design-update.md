@@ -1,73 +1,53 @@
-# Apply a design update to an existing site
+# A design update across the site
 
-Use when the user brings a new look (a reference, a Figma file, a brief): colours, type, spacing, corners, component looks, a dark theme. The update lives in the design system so every page follows; pages are touched only where they hard-code a value.
+Use when the user brings a new look for the whole site: a brief, a brand book, a reference site or a Figma file with colours, type, spacing and component looks. One page only: [restyle a page](restyle-page.md). Rebuilding a whole site from a finished design: [rebuild from a reference](rebuild-from-reference.md).
 
-Operations: [design-system](../operations/design-system.md), [media-and-fonts](../operations/media-and-fonts.md), [brand](../operations/brand.md).
+Ops: [design system](../operations/design-system.md), [components](../operations/components.md) (`cell.set`, `mixin.set`, `component.setVariantAxes`). The skill: `libretto-design-system`.
 
-## 1. Take stock
+## 0. Read and plan
 
-1. `site_context`, then `read_resources` on `libretto://site/<siteId>/design-system`: a small index (sets, themes, each component's variant keys, each token group's size). Then read only the groups the brief touches, one query each (a query answers only what it asks; `index=true` adds the index back):
-   - colours: `design-system?tokens=color.palette.brand` (the steps you will change), then `?tokens=color.text` or `?tokens=color.bg` for the roles on them (a role answers `value` when light and dark resolve it alike, `values` by theme when they differ);
-   - type: `design-system?tokens=font.family`, then `?tokens=type.role`;
-   - space and shape: `design-system?tokens=space.section-y` (or the one group the brief names), `?tokens=radius`.
-   The index gives each group's size: read the small groups, one or two per call. Asking for `color,space,font,type` at once answered 32 KB on one site.
-   Never read the whole design system (`css=true` adds a 240 KB stylesheet you do not need).
-2. `designSystem.diff` through `dry_run_ops`: a summary of what the site already changed from its blueprint (`overrideCount`, the first 100 `overrides`). `access.read`: your level in each design-system area.
-3. Write the user a short plan before changing anything, one line per change they would name, in their words ("il colore d'accento", "la dimensione dei titoli di sezione", "il pulsante principale"), with the values in their units. Keep the token paths, scale keys and variant keys to yourself. Ask about anything the brief leaves open.
-4. **Plan the batches: one per change the user would name.** A brief with four items is four batches, even when the user asks for one dry run of everything. The batch is the unit of undo: a component look that shares a batch with the token changes cannot be undone alone, and the user then needs a hand-made edit to get it back. Put in each batch everything that one change needs (the palette steps and the roles on them; a new token and the nodes re-pointed at it), and nothing else. Apply them in order on the `revisions` of the previous answer and report each (dry-run each first when the user asked to see them before they land). A batch that needs a token another batch creates goes after that batch is applied.
+1. `tokens` and `design`: the token sets and their tokens, the themes, the fonts and what uses each, the site's styles (mixins), the breakpoints.
+2. Look at two or three pages as they are now (`render_preview`, desktop and mobile): the "before".
+3. Write the plan in the user's words, one line per change they would name: the palette, the text styles, the spacing, the corners, the button's look, the dark theme. Each is one batch (rule 6 of `libretto-editing`), except the brand setup below.
+4. Check who may do it: a Designer repaints palette colours with values of their own; roles, type, space, radius, themes, cells and fonts are an Administrator's (`discover_operations` says it per op).
 
-## 2. Colours
+## 1. Fonts first
 
-- The palette lives in set `core` (`color.palette.<name>.<step>`); roles live in `semantic-light` and `semantic-dark` (`color.text.*`, `color.bg.*`, `color.border.*`) and are aliases of palette steps (`{color.palette.brand.500}`).
-- A new brand colour: change the palette steps. A colour that moves to another role: change the role's alias. Prefer aliases to hex in roles.
-- The colour change is one batch: one `designSystem.setTokens` with the palette steps and the roles that sit on them, so the contrast gate judges the end state. `type` is `color`.
-- "Is this colour readable on white?" is a question for the gate, not for a script: dry-run the candidate and read the ratio in the `422` detail or in the answer's `warnings` ([design-system skill](../../skills/libretto-design-system/SKILL.md), Measure contrast with the gate). To find the nearest readable shade, dry-run one darker step at a time.
-- If the gate refuses (422 lists each pair and ratio), pick a darker or lighter step, then dry run again. Never set `acknowledgeContrast` without the user's explicit yes.
-- A full rebrand from three colours, a type pairing and a scale is `brand.setup` (it rewrites palettes, roles, type, space and radii in one undoable change). Use it only when the user wants the whole brand replaced, and dry run it first.
+The text styles name font families, so the families come first:
 
-## 3. Type
+- A Google Fonts family: the `font.addGoogle` door `{ "family": "Inter", "weights": [400, 700], "italic": false }`, alone in its batch.
+- A licensed file on this computer: `upload_font_file` (one face per call; a variable file is one face for its range). Check the licence with the person first.
+- A face's loading and fallback: the `font.setFace` door.
 
-1. Fonts: a Google family is `font.importGoogle` `{ "family", "weights", "styles" }` (`display` is `swap` unless you give another; 409 `font_face_exists` if already there). It stores every subset Google serves (cyrillic, the numbered slices of a Korean, Japanese or Chinese family included), each with its `unicode-range`, so a page downloads only what its text draws. A font file (a foundry's face):
-   1. Licence first: ask the user under which licence the studio holds the face and whether it covers web use on this site; do not upload without it.
-   2. Upload each face (one file per weight and style, WOFF2, WOFF, TTF or OTF: Libretto converts the last three to WOFF2, convert nothing yourself) with `upload_font_file` of the `libretto-files` server: `{ "path", "name": "Sul Sans", "weight": 400, "style": "normal", "licence": "<the licence>", "dryRun": true }`, then without `dryRun`. A variable file is one face per style for its whole range: `"weight": [200, 800]`, or leave `weight` out to use the range the file declares. A variable file with a slant axis (`slnt`) is uploaded with `"style": "normal"`: its italic and oblique are the axis, no italic file needed. It sends `font.upload`; 409 `font_face_exists` means the face is there already (`replace: true` only on the user's word).
-   3. Point a family token at it (step 2). A Libretto without `font.upload` answers `unknown_operation`: then upload the faces on the admin's Typography page with Chrome (`libretto-admin-browser`), or ask the user to.
-2. Families: `font.family.display`, `font.family.heading`, `font.family.body`, `font.family.ui`... in set `core`, type `fontFamily`, value an array (`["DM Sans", "sans-serif"]`).
-3. Type styles: `type.<style>` tokens (`type.section-title`, `type.body`) are composites. `setToken` needs the **whole** value: copy `sets.core` of the token (its raw value, aliases included; not the resolved `value`, which has the aliases filled in), change what the brief asks, write it back with `"type": "typography"`:
-   ```json
-   { "set": "core", "path": "type.section-title", "type": "typography",
-     "value": { "fontFamily": "{font.family.display}", "fontSize": "clamp(1.5rem, 5vw, 2rem)", "fontWeight": "{font.weight.regular}", "letterSpacing": "-0.01em", "lineHeight": 1.15 } }
-   ```
-   A style may slant: `"fontStyle": "italic"` (or `"normal"`, `"oblique"`, `"oblique 8deg"`), drawn by the family's italic face or its `slnt` axis; a family of the library with neither is refused (422 `font-weight`, `italic: true`): import or upload the italic first. A node follows a style's slant with `font-style: "{type.<style>}"`.
-4. Roles: `type.role.heading1`, `type.role.body`, `type.role.lead`... alias a type style (`"{type.display}"`). Re-point a role to change every text that uses it.
+## 2. The brand setup: colours, type, scale, spacing, corners
 
-## 4. Space, corners, shadows
+The guide's recipe, **one batch** so one undo takes it all back: read `tokens`, then `token.set` on the tokens the site already has:
 
-`space.*`, `radius.*`, `shadow.*`, `border.width.*` in `core`, one `setTokens` per family of tokens, one batch per change the user named. Keep the scale's order (a larger step stays larger).
+- each step of a palette family repainted in the new colour at its own lightness (`color.palette.<family>.<step>`);
+- the heading and body font tokens (`$type: "fontFamily"`);
+- each text size a step of the ratio around the body size;
+- each space and each radius the same multiple of the new unit.
 
-- A percentage change across a space group ("section spacing 25 % tighter") is one token: a `number` named `scale` in that group multiplies every dimension in it and in its subgroups, `{ "set": "core", "path": "space.section-y.scale", "type": "number", "value": 0.75 }` (above 0; 1 is no change). Use `space.scale` for every space token of the site. Do not rewrite each step by hand ([design-system skill](../../skills/libretto-design-system/SKILL.md), Space scale factors).
-- Spaces written by hand on the sections do not follow the tokens, nor the factor. Find them with each page's outline and the declarations on each line (`tree/<pageId>?styles=padding-top,padding-bottom`), never with whole documents (`?full=true`: 77,000 to 304,000 characters each in a real session). Tell the user how many sections and pages hold them, and propose pointing them at the nearest space token so the factor reaches them too; that is one change, so one batch, apart from the factor.
+Never invent paths: `token.set` on a path that does not exist creates a token. Dry-run the batch first and read its `corrections`: the texts the contrast check would recolour to stay readable. Show the user what moved, then apply.
 
-## 5. Component looks
+## 3. Roles, one batch each
 
-1. Read only the cells you will change: `read_resources` `libretto://site/<siteId>/component/<key>?variant=primary&state=hover&own=true` (add `part`, `property`, `breakpoint` to narrow further; page with `cursor` while `nextCursor` is set). A cell is `<variant>.<size|all>.<state>.<part>.<breakpoint>.<property>`; `design-system?components=true` lists each component's sizes, states and parts.
-2. `designSystem.setComponentCell` `{ "component": "button", "cells": [{ "cell": "primary.all.hover.container.base.background", "value": "{color.bg.accent-strong}" }] }`. Values are tokens.
-3. A look the site lacks: `designSystem.createVariant` `{ component, variant, label, from }`, then its cells; then `set_variant` on the nodes that should use it (`libretto-editing`).
-4. A node that already looks right through local overrides: `designSystem.promoteVariant` `{ pageId, nodeId, variant, label }` turns them into a variant and re-attaches the node.
+The semantic roles (`color.text.accent`, `color.bg.section`, ...) are aliases of palette steps in `semantic-light` (and the dark set): `token.set` `{ "set": "semantic-light", "path": "color.text.accent", "token": { "$type": "color", "$value": "{color.palette.brand.600}" } }`. Change a role, not a palette step, when the user means "the accent text".
 
-## 6. Themes
+## 4. Component looks, one batch each
 
-- Light and dark come from stacking sets: a theme is `{ key, label, sets }`. `designSystem.createTheme`, `designSystem.updateTheme`, `designSystem.activateSet` / `designSystem.createSet` for a new layer.
-- Put a section on a theme: `designSystem.setScheme` `{ pageId, nodeId, theme }` (or `set_theme` in a `tree.commit`).
+Read `definition/<key>` for the component's variants, parts and cells. A look is a cell: `cell.set` `{ "key", "cell": "<variant>.<size>.<state>.<part>.<breakpoint>.<property>", "value": { "$token": "..." } }` (`*` for any). "The primary button on hover" is `primary.*.hover.<its part>.*.background-color`. A new variant is a value on an axis (`component.setVariantAxes`, the axes whole) and its cells.
 
-## 7. Pages that do not follow
+## 5. Themes
 
-- `tree.commit` answers carry `design.detached` findings: nodes whose local declarations override the system. Read those nodes; replace raw values with tokens (`set_style` with `{token.path}`), or remove the declaration (`null`) so the variant shows.
-- Text with a hand-set size: apply a type role on its five properties (see [restyle a page](restyle-page.md)).
-- Hand-set sizes that differ a lot from the token (a display heading at `clamp(…, 8rem)` where `type.section-title` stops at 2rem): re-pointing them at the token would shrink them. List them for the user with today's size and the size the token would give, and propose new size tokens per family of headings (`font.size.display`) to re-point them at, rather than collapsing them onto one token or scaling raw values. Ask before choosing.
-- Before the type and colour steps, read `access.read`: an area at `view` refuses writes with `403` and `data.kind: "access"` ([design-system skill](../../skills/libretto-design-system/SKILL.md), Who may change what). Tell the user at the start, not half-way through the update.
+A dark theme: `theme.set` (its label, the sets it reads in order, `activation` by colour scheme) and its own set with `themeSet.set` (the set whole). A section in it: `tree.set_theme`. Look at it with `render_preview` `{ "theme": "dark" }` or `{ "colorScheme": "dark" }`.
 
-## 8. Check and report
+## 6. Shared styles and breakpoints
 
-- `designSystem.lint` (through `dry_run_ops`): errors must be zero; AAA warnings are information.
-- `render_preview` `{ "pageId", "device": "desktop" | "tablet" | "mobile", "mode": "screenshot" }` on the home page and two other key pages (`"area": "viewport"` for the first screen, `"crop": { "nodeId" }` for one section), then once more with `"theme": "dark"` (or another theme the update touched) and with the site's second locale at tablet width (`"locale": "en-US", "device": "tablet"`). Every screenshot stays in the conversation: prefer the first screen and crops of the sections the change reaches, and take each picture once. Against a reference, `compare_reference` `{ pageId, device, referenceMediaId }` or `{ pageId, device, referenceUrl }` for a public https image.
-- Tell the user what each change did, in their words, and that each can be undone alone; keep each `requestId` and the receipt's undo call to yourself. Nothing is public until the user asks to publish (`libretto-publish`).
+A style several parts share (a caption, a band): `mixin.set`, then `tree.set_mixins` on the parts. Breakpoints: `breakpoint.set`, `breakpoint.rename` (it rewrites every style that names it).
+
+## 7. Check
+
+After each batch, two pages that use the change, desktop and mobile (`libretto-visual-check`); `site-findings` before and after: a jump means the change hurt pages elsewhere. Tell the user each change can be undone alone.
+
+A whole token file (Tokens Studio, DTCG, Figma variables) is imported by a person in Editor › Design (Import and export); an agent sends its tokens with `token.set`. `design-export` reads the design system as DTCG files.

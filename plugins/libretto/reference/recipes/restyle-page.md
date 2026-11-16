@@ -1,48 +1,62 @@
-# Restyle or restructure a page
+# Restyle or restructure one page
 
-Use when the user wants one page to look or read differently: new spacing, another theme on a band, a column layout, sections in another order, a section split or merged. For a change meant for every page, go to the design system first ([design update](design-update.md)).
+Use when the user wants one page to look or read differently: spacing, a heading's size, a section's background, parts in another order, two parts in a box, a section in the dark theme. For a change across the site, see [design update](design-update.md).
 
-Operations: [pages and trees](../operations/pages-and-trees.md), [components and presets](../operations/components-and-presets.md).
+Ops: [parts and styles](../operations/parts-and-styles.md) (`tree.set_style`, `tree.move`, `tree.insert`, `tree.set_theme`, `tree.set_mixins`), [components](../operations/components.md) (`instance.setVariant`, `instance.override`).
 
-## 1. Read the page
+## 1. Read
 
-1. `site_context`: the page id and `baseRevisions` (you need `tree:<pageId>`).
-2. `read_resources` `libretto://site/<siteId>/outline/<pageId>`: one line per node, indented, `id kind:type "name"`, then what the node sets (`variant=`, `theme=`, `ref=` for a component instance). Mixins and styles are only in the tree.
-3. For each node you will touch, read it alone: `tree/<pageId>?node=<nodeId>&depth=1` (props, styles, variant, theme, and its children one level down). Never the whole tree.
-4. `catalog` resource (`catalog.index`): the node types this site can place, one line each. Before inserting one, read its props with `catalog/<type>` (`catalog.entry`, such as `catalog/ds.button`). Insert only types listed there.
+- `page/<pageId>`: its parts in order, with ids.
+- `style/<pageId>?node=<nodeId>`: where each style value of a part comes from (its component, the site's styles, its theme): change it at its source.
+- `node/<pageId>?node=<nodeId>`: one part's props and its own styles by scope.
+- `tokens`: the values to use.
 
-## 2. Say the plan
+Before you write, look at the page (`render_preview`, desktop and mobile) and agree on the changes with the user, one by one.
 
-Write the user the change as a list of node edits before building it: "move section `x` above `y`", "put band `z` on theme `dark`", "space between cards: `{space.6}`". Ask about anything unclear.
+## 2. Pick the right level
 
-## 3. Build one `tree.commit` per intent
+From the most shared to the most local; take the first that fits:
 
-| Want | Op |
+1. **A token** changes it on every page (`libretto-design-system`).
+2. **A variant** of a component instance: `instance.setVariant` `{ "node", "axis": "tone", "value": "dark" }`.
+3. **A theme** on a section: `tree.set_theme` `{ "node", "theme": "dark" }`; its tokens follow there.
+4. **A mixin** the site has: `tree.set_mixins` `{ "node", "mixins": ["didascalia"] }`.
+5. **The part's own style**: `tree.set_style`, with tokens.
+6. **One instance's inner part**: `instance.override` `{ "node": "<instance>", "inner": "<part>", "override": { "style": { "base": { ... } } } }`; null clears it.
+
+## Styles and scopes
+
+`tree.set_style` `{ "at", "node", "scope", "declarations" }` sets the declarations of one scope; `null` clears one:
+
+| Scope | Holds |
 |---|---|
-| Different spacing, size, alignment | `set_style` `{ id, scope: "base", patch: { "gap": "{space.6}" } }`; per breakpoint `scope: "bp:md"`; `null` removes a declaration |
-| Text styled as another role | `set_style` with the role's five properties (`font-family`, `font-size`, `font-weight`, `line-height`, `letter-spacing`) as tokens of `type.role.*`, or better a mixin that carries them (`set_mixins`) |
-| Another look of a component | `set_variant` `{ id, variant: ["secondary"] }` (variants from the `design-system` resource) |
-| Dark or light band | `set_theme` `{ id, theme: "dark" }` (themes from the `design-system` resource), or `designSystem.setScheme` |
-| A named style sheet | `set_mixins` `{ id, mixins: ["band"] }` |
-| Reorder | `move` `{ id, parentId, index }` |
-| New element | `insert` `{ parentId, index, node }` with a fresh 8-character id (`[0-9a-z]{8}`) for every node in it |
-| Remove | `remove` `{ id }`: ask first when it holds content |
-| Change a node's type (a `text` to a `heading`) | `set_type` `{ id, type }` |
-| Show only on some devices | `set_visibility` `{ id, visibility }` (shape from `discover_operations` `tree.commit`) |
-| Rename, anchor | `set_meta` `{ id, name, anchor }` |
-| An inner node of a component instance | `set_override` `{ id: <instance id>, target: <inner node id>, patch }` |
+| `base` | always |
+| `bp:md` | from the site's `md` breakpoint up (the `design` read lists them) |
+| `mq:(max-width: 767.98px)` | under a media query of your own |
+| `s:hover` | while the part is hovered (its own state); `a:hover` while an ancestor is |
+| `pg:menu=open` | while a page state holds |
+| `p:<part>` | a named part of a component |
+| `t:<selector>` | descendants |
+| `th:<theme>` | under a theme |
 
-Rules: tokens for every colour, size and space (`{space.4}`, not `16px`); a section belongs directly under the page root; keep one intent per batch.
+Join them with `|`: `bp:md|s:hover`. `discover_operations` `{ "names": ["tree.set_style"] }` gives the whole grammar. A value is CSS text, a number or `{ "$token": "<path>" }`. Hide a part on phones only with `display: none` in a `bp:` or `mq:` scope; from every visitor, `tree.set_visibility`.
 
-## 4. Apply, verify
+## Structure
 
-1. `apply_ops` with a fresh `requestId` (a dry run first only in the cases of rule 5 in `libretto-editing`).
-2. Read the receipt's `findings` for the nodes you touched (`a11y.heading-order`, `structure.empty-section`, `design.contrast-aa`) and its errors; `findingsByRule` counts the info ones (`design.detached`). Fix with the next batch, or undo.
-3. Read the outline again; look at it ([preview and visual check](preview-and-verify.md)).
-4. Tell the user what changed, in their words; keep each `requestId` to undo with `history.undo`.
+The guide's recipes, each one batch:
 
-## Restructure with reuse
+- **Put parts in a box**: `tree.insert` `{ "at", "parent": "<their parent>", "index": <the first part's index>, "root": "<new id>", "nodes": { "<new id>": { "kind": "frame", "as": "div", "children": [] } } }`, then `tree.move` each part into it `{ "node", "parent": "<new id>", "index": 0 }`, 1, 2...
+- **Take them out**: `tree.move` each part inside it to the box's parent at the box's index + 1 + k, then `tree.remove` the box.
+- **Another element**: `tree.set_type` `{ "node", "as": "h2" }` (a heading's level, a box made a section).
+- **Whole sections**: `section.move`, `section.remove` ([sections from presets](sections-from-presets.md)).
+- **Make a component of a part**: `component.define`, `tree.remove`, `instance.insert` (an Administrator's; the guide has the recipe).
 
-- The same block on several pages: make it a site component, `component.createFromNode` `{ pageId, nodeId, key, name }`, then `component.instantiate` where it should appear. Edit the component once.
-- A block the user may want again: `preset.save` `{ pageId, nodeId, label, kind: "section" | "element", category }`, then `preset.insert` ([sections from presets](sections-from-presets.md)).
-- A new page is `page.create` (and `page.forkTemplate` from a template, `page.delete` to remove one, ask first). They need `site.structure`: a platform admin, or the workspace owner on the sites of their workspace. Another editor gets 403: ask the user to have the workspace owner create the page (in the admin, Pagine), then build its content here. The layout frames (`layout.update`) follow the same rule.
+A new id is 8 lower-case letters and digits, unique in the tree.
+
+## Contrast
+
+A colour that leaves a text below AA is corrected in the same step (the answer's `corrections`) or refused: see [contrast and accessibility](contrast-and-a11y.md).
+
+## Check
+
+One batch per change the user would name; after each, `render_preview` with `crop` on the section, desktop and mobile, and `findings/<pageId>`.
