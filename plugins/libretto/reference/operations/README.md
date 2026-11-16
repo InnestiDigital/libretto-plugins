@@ -2,7 +2,7 @@
 
 # Libretto operations on a core site
 
-What a token of a core site is offered: 8 tools, 160 ops, 31 doors, 10 acts only a person does and 42 resources. Every op and door runs in a batch sent to `apply_ops` (or judged by `dry_run_ops`); `discover_operations` with a name gives the live description, examples and schema. This reference is the same registry, written for reading: [tools, resources and plain words](tools-and-resources.md), [what only a person does](person-only.md).
+What a token of a core site is offered: 8 tools, 160 ops, 31 doors, 11 acts only a person does and 42 resources. Every op and door runs in a batch sent to `apply_ops` (or judged by `dry_run_ops`); `discover_operations` with a name gives the live description, examples and schema. This reference is the same registry, written for reading: [tools, resources and plain words](tools-and-resources.md), [what only a person does](person-only.md).
 
 | Domain | Ops and doors |
 |---|---|

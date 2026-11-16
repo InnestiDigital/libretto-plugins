@@ -126506,6 +126506,15 @@
       "who": "a person",
       "place": "account.reports",
       "description": "An agent cannot triage or close reports, whatever its role: the people who run Libretto answer them. They do it in Account › Reports; read your own with the reports resource. Hand them its link: urls.places[\"account.reports\"] in site_context."
+    },
+    {
+      "name": "brand.studio",
+      "also": [],
+      "prefixes": [],
+      "class": "person",
+      "who": "a person",
+      "place": "brand-studio",
+      "description": "An agent cannot draw, print or export a brand canvas (a logo, a business card, a poster) or its print and image files, whatever its role: no door draws one on this engine. A person does it in Brand studio, in the previous admin; the format, outputProfile, surface and output ops edit a canvas. Hand them its link: urls.places[\"brand-studio\"] in site_context."
     }
   ],
   "resources": [
@@ -128009,12 +128018,119 @@
       ]
     },
     {
-      "code": "agent_principal",
+      "code": "role_not_allowed",
       "kinds": [
+        "agentToken",
         "refusal"
       ],
-      "says": [],
+      "says": [
+        "Your role cannot connect agents: only a content author, a designer or an administrator makes agent tokens. Ask an administrator to make one, or to change your role."
+      ],
       "from": [
+        "shared/contracts/admin/agentTokens.ts",
+        "server/services/auth/agentTokens.ts"
+      ]
+    },
+    {
+      "code": "agent_principal",
+      "kinds": [
+        "agentToken",
+        "refusal"
+      ],
+      "says": [
+        "An agent cannot make or revoke agent tokens, whatever its role: a token it made would outlive its own. A person does it in Account › Agents."
+      ],
+      "from": [
+        "shared/contracts/admin/agentTokens.ts",
+        "server/services/auth/agentTokens.ts"
+      ]
+    },
+    {
+      "code": "site_not_found",
+      "kinds": [
+        "agentToken",
+        "refusal"
+      ],
+      "says": [
+        "The site asked for no longer exists, so no token can name it. Read the list of sites again and choose another.",
+        "Site not found",
+        "Site <siteId> not found"
+      ],
+      "from": [
+        "shared/contracts/admin/agentTokens.ts",
+        "server/services/auth/agentTokens.ts",
+        "server/services/collections/itemService.ts",
+        "server/services/core/agent/agentUrls.ts",
+        "server/services/core/agent/siteCreateEntry.ts",
+        "server/services/mcp/resources.ts",
+        "server/services/navigation/menuService.ts",
+        "server/services/ops/dispatch.ts",
+        "server/services/ops/domains/brand.ts",
+        "server/services/ops/domains/components.ts",
+        "server/services/ops/domains/entries.ts",
+        "server/services/ops/domains/maintenance.ts",
+        "server/services/ops/domains/motion.ts",
+        "server/services/ops/domains/motionDiagnose.ts",
+        "server/services/ops/domains/pages.ts",
+        "server/services/ops/domains/publication.ts",
+        "server/services/ops/domains/redirects.ts",
+        "server/services/ops/domains/settings.ts",
+        "server/services/ops/domains/site.ts",
+        "server/services/presets/presetLibrary.ts",
+        "server/services/tree/templateIndex.ts"
+      ]
+    },
+    {
+      "code": "site_denied",
+      "kinds": [
+        "agentToken"
+      ],
+      "says": [
+        "You no longer reach the site asked for, so no token can name it. Ask an administrator of its workspace for access, or choose another site."
+      ],
+      "from": [
+        "shared/contracts/admin/agentTokens.ts"
+      ]
+    },
+    {
+      "code": "workspace_not_found",
+      "kinds": [
+        "agentToken",
+        "refusal"
+      ],
+      "says": [
+        "The workspace asked for no longer exists, so no token can name it. Read the list of workspaces again."
+      ],
+      "from": [
+        "shared/contracts/admin/agentTokens.ts",
+        "server/services/auth/agentTokens.ts"
+      ]
+    },
+    {
+      "code": "workspace_denied",
+      "kinds": [
+        "agentToken",
+        "refusal"
+      ],
+      "says": [
+        "A workspace token is made only for your own workspace, and this one is another's. A platform administrator makes tokens for any workspace."
+      ],
+      "from": [
+        "shared/contracts/admin/agentTokens.ts",
+        "server/services/auth/agentTokens.ts"
+      ]
+    },
+    {
+      "code": "token_not_found",
+      "kinds": [
+        "agentToken",
+        "refusal"
+      ],
+      "says": [
+        "That token no longer exists, or is not yours: nothing was revoked. Read the list of tokens again."
+      ],
+      "from": [
+        "shared/contracts/admin/agentTokens.ts",
         "server/services/auth/agentTokens.ts"
       ]
     },
@@ -128193,7 +128309,10 @@
       "kinds": [
         "refusal"
       ],
-      "says": [],
+      "says": [
+        "Stored item values do not fit the changed fields: <issueText(issues)>",
+        "Items still hold values for the removed field(s) <fields.join(', ')>; confirm the destructive change to drop them"
+      ],
       "from": [
         "server/services/collections/errors.ts"
       ]
@@ -128472,6 +128591,7 @@
         "refusal"
       ],
       "says": [
+        "Libretto can't check that <which> readable: what lies beneath is a picture or an effect it can't measure. Nothing was saved. Add a solid backdrop under the text, or have it accepted with a reason in Checks.",
         "<each.key> in <labelOf(each.condition)> cannot be verified for the item (<each.result.reason>)"
       ],
       "from": [
@@ -128622,9 +128742,12 @@
       "kinds": [
         "refusal"
       ],
-      "says": [],
+      "says": [
+        "Another entry under the same page already has the address (slug) asked for: nothing was made. Send another slug, or none to have one made from the title."
+      ],
       "from": [
-        "server/services/ops/domains/entries.ts"
+        "server/services/ops/domains/entries.ts",
+        "scripts/lib/agentCodes.ts"
       ]
     },
     {
@@ -129063,7 +129186,12 @@
       "kinds": [
         "refusal"
       ],
-      "says": [],
+      "says": [
+        "page <input.pageId> is no dynamic page of a collection: its subject has no item to read from",
+        "subject.from: <…> is no field of collection <key>",
+        "subject.from.author: \"<from.author>\" is no reference field",
+        "subject.from.authorName: \"<authorName>\" is no field of the author's collection"
+      ],
       "from": [
         "packages/core/src/doc4/headOps.ts"
       ]
@@ -129282,6 +129410,7 @@
         "component \"<key>\" is still placed on a page: detach or remove its instances first",
         "pageType: a folder stays a folder and a page stays a page; create the one you need and move the pages",
         "<extra.join(', ')>: a folder only gives its pages a path segment; it takes <[...FOLDER_FIELDS].join(', ')>",
+        "slug: a component's slug is the key its instances name, and it never changes",
         "runs: <total> cells to paint; at most <PATTERN_STROKE_MAX_CELLS> in one call",
         "nodeId: <input.nodeId> is not a pattern node of this page",
         "cells: <error.message>",
@@ -129300,6 +129429,7 @@
         "The parent website must be a website of the same workspace",
         "Site routing changed after this batch; undo would overwrite it",
         "Site history contains foreign domains",
+        "Site blueprint \"<request.blueprintId>\" cannot be read",
         "No submissions document <key>",
         "The form of these submissions no longer exists; undo cannot put them back",
         "This request ID belongs to a different external operation",
@@ -129399,9 +129529,12 @@
       "kinds": [
         "refusal"
       ],
-      "says": [],
+      "says": [
+        "The address (slug) asked for the new entry cannot be used: <why>. Send a slug of lower-case letters, digits and hyphens, or a title one can be made from."
+      ],
       "from": [
-        "server/services/ops/domains/entries.ts"
+        "server/services/ops/domains/entries.ts",
+        "scripts/lib/agentCodes.ts"
       ]
     },
     {
@@ -129687,7 +129820,9 @@
       "kinds": [
         "finding"
       ],
-      "says": [],
+      "says": [
+        "Drawn in the page's own colours: the site's <miss.words> (<miss.text> on <miss.ground>) read at <miss.ratio>:1, under 4.5:1. Setting <miss.token> to <miss.proposed> gives it its own."
+      ],
       "from": [
         "packages/core/src/doc4/sectionKinds.ts"
       ]
@@ -129721,7 +129856,9 @@
       "kinds": [
         "finding"
       ],
-      "says": [],
+      "says": [
+        "The <…> on <page> has no <many>: visitors see it empty"
+      ],
       "from": [
         "packages/core/src/doc4/versionOps.ts"
       ]
@@ -129779,10 +129916,13 @@
       "kinds": [
         "refusal"
       ],
-      "says": [],
+      "says": [
+        "The email could not be sent: <the mail server's reason>. Nothing was saved or sent. Try again in a while; if it keeps failing, read how the site sends email with mail.read and test it with mail.test."
+      ],
       "from": [
         "server/services/ops/domains/forms.ts",
-        "server/services/ops/domains/members.ts"
+        "server/services/ops/domains/members.ts",
+        "scripts/lib/agentCodes.ts"
       ]
     },
     {
@@ -130034,7 +130174,9 @@
       "kinds": [
         "refusal"
       ],
-      "says": [],
+      "says": [
+        "The member role <roleName(doc, key)> still opens <listWords(named)>. Nothing was deleted. Take it off their access and their parts first."
+      ],
       "from": [
         "packages/core/src/doc4/memberRoleOps.ts"
       ]
@@ -130449,7 +130591,8 @@
         "no node <id> on the page",
         "<id> is not a part of a frame of the page",
         "no node <source.node> on page <source.page>",
-        "<to.parent> is not a frame of the page"
+        "<to.parent> is not a frame of the page",
+        "That part is no longer on the page. Nothing was changed."
       ],
       "from": [
         "packages/core/src/doc4/audienceOps.ts",
@@ -130485,6 +130628,8 @@
         "refusal"
       ],
       "says": [
+        "This role cannot run this operation (<refusal.reason>, needs <refusal.permission>)",
+        "This principal cannot run this operation",
         "Your role on this site reports no issues, so it has no reports to read"
       ],
       "from": [
@@ -130540,7 +130685,10 @@
       "kinds": [
         "finding"
       ],
-      "says": [],
+      "says": [
+        "The colour “<path>” has no print ink, so <profileName(print.key)> will not print this canvas. Give the colour an ink in the design system.",
+        "The colour “<path>” has no print ink, so <profileName(print.key)> converts it through its printing condition. Give the colour an ink to print it exactly."
+      ],
       "from": [
         "packages/core/src/doc4/outputOps.ts"
       ]
@@ -130974,7 +131122,9 @@
       "kinds": [
         "refusal"
       ],
-      "says": [],
+      "says": [
+        "An earlier change cannot be played again: <error.message>. Nothing was changed: report it to the people who run Libretto."
+      ],
       "from": [
         "packages/core/src/log/commit.ts"
       ]
@@ -131008,7 +131158,9 @@
       "kinds": [
         "refusal"
       ],
-      "says": [],
+      "says": [
+        "The redirect was not saved: <problems>."
+      ],
       "from": [
         "packages/core/src/doc4/settingsOps.ts"
       ]
@@ -131030,9 +131182,12 @@
       "kinds": [
         "refusal"
       ],
-      "says": [],
+      "says": [
+        "The redirect list was not saved: <its problems, one per line> (a source given twice, a chain that loops, a rule that hides a published page). Fix each rule and send the whole list again."
+      ],
       "from": [
-        "server/services/ops/domains/redirects.ts"
+        "server/services/ops/domains/redirects.ts",
+        "scripts/lib/agentCodes.ts"
       ]
     },
     {
@@ -131088,7 +131243,10 @@
       "kinds": [
         "refusal"
       ],
-      "says": [],
+      "says": [
+        "<tool>: the capture queue is too long (a wait of about <retryAfter> s); try again in <retryAfter> s",
+        "<tool> waited <Math.round(queuedMs / 1000)> s for a capture slot, every slot busy with other captures; try again in <retryAfter> s"
+      ],
       "from": [
         "server/services/core/preview/renderBound.ts"
       ]
@@ -131200,16 +131358,6 @@
       ],
       "from": [
         "server/services/core/agent/agentReads.ts"
-      ]
-    },
-    {
-      "code": "role_not_allowed",
-      "kinds": [
-        "refusal"
-      ],
-      "says": [],
-      "from": [
-        "server/services/auth/agentTokens.ts"
       ]
     },
     {
@@ -131361,38 +131509,6 @@
       ]
     },
     {
-      "code": "site_not_found",
-      "kinds": [
-        "refusal"
-      ],
-      "says": [
-        "Site not found",
-        "Site <siteId> not found"
-      ],
-      "from": [
-        "server/services/auth/agentTokens.ts",
-        "server/services/collections/itemService.ts",
-        "server/services/core/agent/agentUrls.ts",
-        "server/services/core/agent/siteCreateEntry.ts",
-        "server/services/mcp/resources.ts",
-        "server/services/navigation/menuService.ts",
-        "server/services/ops/dispatch.ts",
-        "server/services/ops/domains/brand.ts",
-        "server/services/ops/domains/components.ts",
-        "server/services/ops/domains/entries.ts",
-        "server/services/ops/domains/maintenance.ts",
-        "server/services/ops/domains/motion.ts",
-        "server/services/ops/domains/motionDiagnose.ts",
-        "server/services/ops/domains/pages.ts",
-        "server/services/ops/domains/publication.ts",
-        "server/services/ops/domains/redirects.ts",
-        "server/services/ops/domains/settings.ts",
-        "server/services/ops/domains/site.ts",
-        "server/services/presets/presetLibrary.ts",
-        "server/services/tree/templateIndex.ts"
-      ]
-    },
-    {
       "code": "site_not_live",
       "kinds": [
         "refusal"
@@ -131462,9 +131578,12 @@
       "kinds": [
         "refusal"
       ],
-      "says": [],
+      "says": [
+        "The site has no public address yet, so an invitation link could not lead to it: no one was invited. Add the site's domain with domain.add (or in Settings › Domains), then invite again."
+      ],
       "from": [
-        "server/services/ops/domains/members.ts"
+        "server/services/ops/domains/members.ts",
+        "scripts/lib/agentCodes.ts"
       ]
     },
     {
@@ -131526,7 +131645,9 @@
       "kinds": [
         "refusal"
       ],
-      "says": [],
+      "says": [
+        "That item is not in the <found.title.toLowerCase()> any more. Nothing was changed."
+      ],
       "from": [
         "packages/core/src/doc4/slotOps.ts"
       ]
@@ -131536,7 +131657,9 @@
       "kinds": [
         "refusal"
       ],
-      "says": [],
+      "says": [
+        "This part holds no list of items. Nothing was changed."
+      ],
       "from": [
         "packages/core/src/doc4/slotOps.ts"
       ]
@@ -131546,7 +131669,9 @@
       "kinds": [
         "refusal"
       ],
-      "says": [],
+      "says": [
+        "The <title.toLowerCase()> has no list called “<slot>”. Nothing was changed."
+      ],
       "from": [
         "packages/core/src/doc4/slotOps.ts"
       ]
@@ -131706,16 +131831,6 @@
       ]
     },
     {
-      "code": "table_close",
-      "kinds": [
-        "refusal"
-      ],
-      "says": [],
-      "from": [
-        "shared/tiptap/markdownToTiptap.ts"
-      ]
-    },
-    {
       "code": "template_node",
       "kinds": [
         "refusal"
@@ -131815,21 +131930,13 @@
       ]
     },
     {
-      "code": "token_not_found",
-      "kinds": [
-        "refusal"
-      ],
-      "says": [],
-      "from": [
-        "server/services/auth/agentTokens.ts"
-      ]
-    },
-    {
       "code": "token.extension_unknown",
       "kinds": [
         "refusal"
       ],
-      "says": [],
+      "says": [
+        "Libretto does not read \"<unknown.key>\" in the $extensions.libretto of the <unknown.where>: <knownAt(unknown.place)>"
+      ],
       "from": [
         "packages/core/src/doc4/extensionKeys.ts"
       ]
@@ -132039,26 +132146,6 @@
       ],
       "from": [
         "server/services/core/publish/livePublish.ts"
-      ]
-    },
-    {
-      "code": "workspace_denied",
-      "kinds": [
-        "refusal"
-      ],
-      "says": [],
-      "from": [
-        "server/services/auth/agentTokens.ts"
-      ]
-    },
-    {
-      "code": "workspace_not_found",
-      "kinds": [
-        "refusal"
-      ],
-      "says": [],
-      "from": [
-        "server/services/auth/agentTokens.ts"
       ]
     }
   ]
