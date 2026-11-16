@@ -1,6 +1,6 @@
 {
   "name": "libretti",
-  "description": "Edit Libretto sites from Claude Code through Libretto's MCP server",
+  "description": "Edit Libretto sites on the core engine from Claude Code through Libretto's MCP server",
   "owner": {
     "name": "Innesti Digital"
   },
@@ -8,7 +8,7 @@
     {
       "name": "libretto",
       "source": "./plugins/libretto",
-      "description": "Connects Claude Code to a Libretto site and teaches it to edit pages, the design system and publication safely"
+      "description": "Connects Claude Code to a Libretto site on the core engine and teaches it to edit pages, the design system and publication safely (1.0; sites on the old engine use 0.5.x)"
     }
   ]
 }

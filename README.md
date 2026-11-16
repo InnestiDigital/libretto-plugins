@@ -4,26 +4,26 @@
 
 ## Italiano
 
-Questo plugin collega Claude Code a un sito Libretto. Claude lavora sul sito attraverso il server MCP di Libretto, con le stesse operazioni dell'admin: ogni modifica viene controllata, registrata e si può annullare. Le modifiche finiscono nella bozza; il sito pubblico cambia solo quando decidi di pubblicare.
+Questo plugin (1.0) collega Claude Code a un sito Libretto sul motore core. Per i siti sul motore precedente resta la versione 0.5.x. Claude lavora sul sito attraverso il server MCP di Libretto, con le stesse operazioni dell'admin: ogni modifica viene controllata, registrata e si può annullare. Le modifiche finiscono nella bozza; il sito pubblico cambia solo quando decidi di pubblicare.
 
 Il plugin contiene:
 
 - il server MCP `libretto`, che si collega a `https://librettocms.com/api/mcp` con il tuo token;
-- il piccolo server locale `libretto-files`, che carica nella libreria Media le immagini che hai sul computer (serve Node 18 o successivo);
+- il piccolo server locale `libretto-files`, che carica nella libreria Media le immagini, i PDF e i video che hai sul computer, e i file dei font nel sito (serve Node 18 o successivo);
 - sei skill che insegnano a Claude come lavorare su Libretto:
-  - `libretto-editing`: testi, stili, sezioni da preset, varianti, immagini, header e footer, menu, collezioni, traduzioni, animazioni, sempre con un dry run prima di applicare;
-  - `libretto-design-system`: token, varianti, mixin e temi, con il controllo del contrasto AA;
-  - `libretto-visual-check`: guarda la pagina prima e dopo, in Chrome, su desktop e telefono;
-  - `libretto-admin-browser`: fa nell'admin, con Chrome, le poche cose che il server MCP non sa fare (caricare file di font, pubblicare dall'admin quando lo chiedi) e controlla il sito pubblico;
-  - `libretto-publish`: pubblicare o tornare a una versione precedente, solo quando lo dici tu;
+  - `libretto-editing`: testi, stili, sezioni e preset, componenti, immagini, header e footer, menu, collezioni, traduzioni, animazioni; ogni passo si annulla da solo;
+  - `libretto-design-system`: token, temi, varianti, mixin, breakpoint e font, con il controllo del contrasto che corregge o rifiuta un testo poco leggibile;
+  - `libretto-visual-check`: guarda la pagina prima e dopo, con gli screenshot del server o in Chrome, su desktop e telefono;
+  - `libretto-admin-browser`: quando una cosa spetta a una persona (le impostazioni email, un contrasto da accettare, un file oltre i 20 MB), apre nel tuo Chrome il punto dell'admin dove farla e ti dice cosa fare; controlla anche il sito pubblico;
+  - `libretto-publish`: pubblicare, rendere live una versione salvata o tornare a una precedente, solo quando lo dici tu;
   - `libretto-report-issue`: apre una segnalazione per il team di Libretto quando qualcosa manca o non funziona;
 - le ricette passo passo (`plugins/libretto/reference/recipes/`) e il riferimento di tutte le operazioni (`plugins/libretto/reference/operations/`).
 
 ### Cosa serve
 
 - [Claude Code](https://code.claude.com/docs) installato.
-- Un account su Libretto con accesso al sito, come editor (anche proprietario dello spazio di lavoro) o amministratore.
-- Un token. Nell'admin, nella barra laterale, apri **Persone e accessi** › **Agenti e accessi MCP**, dai un nome al token (per esempio `Claude Code, portatile`), scegli per cosa vale (un sito, i siti che scegli o tutti i siti del tuo spazio di lavoro, anche quelli creati dopo) e la durata (30 o 90 giorni), e copia il token: viene mostrato una volta sola.
+- Un sito Libretto sul motore core, e un account con accesso al sito come Content author, Designer o Administrator.
+- Un token. Nell'admin apri **Account › Agenti**, dai un nome al token (per esempio `Claude Code, portatile`), scegli per cosa vale (un sito, i siti che scegli o tutti i siti del tuo spazio di lavoro, anche quelli creati dopo) e la durata (30 o 90 giorni), e copia il token: viene mostrato una volta sola.
 
 Il token agisce per te, sui siti che raggiunge, con il tuo ruolo su ciascuno (mai più alto di quello che hai oggi). Con un token di più siti, Claude ti chiede su quale lavorare se non l'hai detto, indica il sito a ogni chiamata e ogni risposta lo ripete.
 
@@ -76,7 +76,7 @@ L'app desktop legge il token solo dalle impostazioni del plugin. Una variabile i
 
 ### Se la connessione dà 401
 
-Il token è sbagliato, scaduto, revocato o creato prima che il tuo Libretto venisse azzerato. Creane uno nuovo nella barra laterale dell'admin, **Persone e accessi** › **Agenti e accessi MCP**, sostituiscilo nelle impostazioni del plugin (`/plugin configure libretto@libretti`, o `/plugin` › **libretto** › **Configure** nell'app desktop) e apri una nuova sessione. Se usi `LIBRETTO_MCP_TOKEN` in un terminale, sostituiscilo lì: vale di più.
+Il token è sbagliato, scaduto, revocato o creato prima che il tuo Libretto venisse azzerato. Creane uno nuovo nell'admin, in **Account › Agenti**, sostituiscilo nelle impostazioni del plugin (`/plugin configure libretto@libretti`, o `/plugin` › **libretto** › **Configure** nell'app desktop) e apri una nuova sessione. Se usi `LIBRETTO_MCP_TOKEN` in un terminale, sostituiscilo lì: vale di più.
 
 ### Se `libretto-files` non si collega
 
@@ -94,54 +94,55 @@ Usa Libretto: nella pagina Servizi cambia il titolo della sezione "Restauro" in 
 Fai prima un dry run, mostrami cosa cambia e applica solo se è tutto a posto. Non pubblicare.
 ```
 
-Claude legge la pagina, prepara la modifica, la prova, la applica, la guarda e ti dice il `requestId` con cui annullarla. Pubblica quando vuoi (anche chiedendolo a Claude: "pubblica").
+Claude legge la pagina, prepara la modifica, la prova, la applica e la guarda; la modifica è un passo della Cronologia, che Claude può annullare finché è l'ultimo. Pubblica quando vuoi (anche chiedendolo a Claude: "pubblica").
 
 ### Vedere il risultato in Chrome
 
-Con l'estensione Claude in Chrome collegata, Claude apre l'anteprima della bozza e l'editor dell'admin nel tuo Chrome, fa gli screenshot prima e dopo (desktop e telefono) e ti dice cosa non corrisponde. Prima entra nell'admin in quel Chrome: Claude non scrive mai password e non accetta finestre di conferma del browser. Per guardare non tocca niente; agisce nell'admin solo per quello che il server MCP non sa fare (per esempio caricare i file di un font), e pubblica o cancella solo quando glielo dici. Senza Chrome usa gli screenshot del server o rilegge la pagina.
+Con l'estensione Claude in Chrome collegata, Claude apre l'anteprima della bozza e l'editor dell'admin nel tuo Chrome, fa gli screenshot prima e dopo (desktop e telefono) e ti dice cosa non corrisponde. Prima entra nell'admin in quel Chrome: Claude non scrive mai password e non accetta finestre di conferma del browser. Guarda senza toccare niente; quando una cosa spetta a te, apre il punto dell'admin dove farla e ti dice cosa fare, ma il pulsante lo premi tu. Senza Chrome usa gli screenshot del server.
 
 ### Immagini
 
-Indica a Claude il file sul tuo computer ("metti la foto ~/Immagini/foto.jpg nella sezione Restauro"): il server `libretto-files` la carica nella libreria Media (immagini fino a 5 MB, PDF e video fino a 20 MB; un PDF più grande va compresso, resta un PDF), poi Claude la usa e scrive il testo alternativo. Anche una cartella intera ("carica le foto di ~/Immagini/cantiere"): Claude le carica a gruppi di 100, salta quelle già nella libreria e ti dice quali non sono passate. Puoi anche caricare le immagini nell'admin (Media) e dire a Claude il nome del file.
+Indica a Claude il file sul tuo computer ("metti la foto ~/Immagini/foto.jpg nella sezione Restauro"): il server `libretto-files` la carica nella libreria Media (immagini, SVG, PDF e video fino a 20 MB l'uno), poi Claude la usa e scrive il testo alternativo. Anche una cartella intera ("carica le foto di ~/Immagini/cantiere"): Claude le carica a gruppi di 50, salta quelle già nella libreria e ti dice quali non sono passate. Un file più grande di 20 MB o uno ZIP lo carichi tu, in **Media**; poi dici a Claude il nome del file. Lo stesso per i font: Claude carica un file WOFF2, WOFF, TTF o OTF di cui hai la licenza, e importa una famiglia da Google Fonts.
 
 ### Segnalazioni
 
-Quando Libretto non sa fare qualcosa, rifiuta una modifica che sembra corretta o sbaglia, Claude apre una segnalazione per il team di Libretto (la vedono nell'admin, in Segnalazioni) e te ne dà il numero.
+Quando Libretto non sa fare qualcosa, rifiuta una modifica che sembra corretta o sbaglia, Claude apre una segnalazione per il team di Libretto (la vedi in **Account › Segnalazioni**, con le loro risposte) e te ne dà il numero.
 
 ### Revocare il token
 
-Nell'admin, **Agenti e accessi MCP**: accanto al token premi **Revoca**. Smette di funzionare subito. Poi disinstalla il plugin con `/plugin uninstall libretto@libretti` (toglie anche il token salvato) e, se l'avevi impostata, togli `LIBRETTO_MCP_TOKEN` dal profilo della shell. Il token smette di funzionare anche quando scade, quando perdi l'accesso al sito o quando il tuo ruolo cambia in uno senza accesso agli agenti.
+Nell'admin, **Account › Agenti**: nel menu «…» del token scegli **Revoca**. Smette di funzionare subito. Poi disinstalla il plugin con `/plugin uninstall libretto@libretti` (toglie anche il token salvato) e, se l'avevi impostata, togli `LIBRETTO_MCP_TOKEN` dal profilo della shell. Il token smette di funzionare anche quando scade, quando perdi l'accesso al sito o quando il tuo ruolo cambia in uno senza accesso agli agenti.
 
 ### Limiti
 
 - Funziona con Claude Code. Claude Desktop e claude.ai richiedono un connettore con login OAuth, che Libretto non offre ancora.
-- Creare o eliminare pagine richiede il proprietario dello spazio di lavoro o un amministratore della piattaforma; cambiare le lingue del sito, un amministratore della piattaforma.
-- I file dei font (WOFF2) Claude li carica con `libretto-files` quando il tuo Libretto ha l'operazione `font.upload`; altrimenti si caricano nell'admin (Font). I Google Fonts si importano sempre da Claude.
+- Claude fa quello che il tuo ruolo permette sul sito: un Content author cambia testi, pagine, sezioni e collezioni; un Designer anche la struttura, le lingue e le impostazioni; un Administrator anche il design system e le integrazioni. Un rifiuto dice chi può farlo.
+- Alcune cose le fa solo una persona, qualunque sia il ruolo: le impostazioni email del sito (Impostazioni › Email), accettare un contrasto poco leggibile (Editor › Controlli), le persone e i token (Account), eliminare un sito, esportare i messaggi dei moduli. Claude ti dà il link.
+- Claude pubblica o torna indietro solo quando lo dici tu.
 
 ---
 
 ## English
 
-This plugin connects Claude Code to a Libretto site. Claude works on the site through Libretto's MCP server, with the same operations as the admin: every change is validated, recorded and undoable. Changes land in the draft; the public site changes only when you decide to publish.
+This plugin (1.0) connects Claude Code to a Libretto site on the core engine. Sites on the old engine keep version 0.5.x. Claude works on the site through Libretto's MCP server, with the same operations as the admin: every change is validated, recorded and undoable. Changes land in the draft; the public site changes only when you decide to publish.
 
 The plugin holds:
 
 - the `libretto` MCP server, which connects to `https://librettocms.com/api/mcp` with your token;
-- the small local `libretto-files` server, which uploads images from your computer into the Media library (needs Node 18 or later);
+- the small local `libretto-files` server, which uploads images, PDFs and videos from your computer into the Media library, and font files into the site (needs Node 18 or later);
 - six skills that teach Claude how to work on Libretto:
-  - `libretto-editing`: texts, styles, sections from presets, variants, images, header and footer, menus, collections, translations, motion, always with a dry run before applying;
-  - `libretto-design-system`: tokens, variants, mixins and themes, under the AA contrast gate;
-  - `libretto-visual-check`: looks at the page before and after, in Chrome, at desktop and phone width;
-  - `libretto-admin-browser`: does in the admin, with Chrome, the few things the MCP server cannot (uploading font files, publishing from the admin when you ask) and checks the public site;
-  - `libretto-publish`: publishing or going back to an earlier version, only when you say so;
+  - `libretto-editing`: texts, styles, sections and presets, components, images, header and footer, menus, collections, translations, motion; each step can be undone on its own;
+  - `libretto-design-system`: tokens, themes, variants, mixins, breakpoints and fonts, with the contrast check that corrects or refuses hard-to-read text;
+  - `libretto-visual-check`: looks at the page before and after, with the server's screenshots or in Chrome, at desktop and phone width;
+  - `libretto-admin-browser`: when something is a person's to do (the email settings, accepting a contrast, a file over 20 MB), opens the admin place for it in your Chrome and tells you what to do there; and checks the public site;
+  - `libretto-publish`: publishing, making a saved version live or going back to an earlier one, only when you say so;
   - `libretto-report-issue`: opens a ticket for the Libretto team when something is missing or broken;
 - step-by-step recipes (`plugins/libretto/reference/recipes/`) and a reference of every operation (`plugins/libretto/reference/operations/`).
 
 ### Prerequisites
 
 - [Claude Code](https://code.claude.com/docs) installed.
-- An account on Libretto with access to the site, as an editor (a workspace owner too) or an admin.
-- A token. In the admin sidebar, open **Persone e accessi** (People & access) › **Agenti e accessi MCP**, name the token (for example `Claude Code, laptop`), choose what it reaches (one site, the sites you pick, or every site of your workspace, including ones made later) and how long it lasts (30 or 90 days), and copy the token: it is shown once.
+- A Libretto site on the core engine, and an account with access to it as a Content author, a Designer or an Administrator.
+- A token. In the admin, open **Account › Agents**, name the token (for example `Claude Code, laptop`), choose what it reaches (one site, the sites you pick, or every site of your workspace, including ones made later) and how long it lasts (30 or 90 days), and copy the token: it is shown once.
 
 The token acts for you, on the sites it reaches, with your role on each (never above the role you have now). With a token of several sites, Claude asks which site to work on unless you named it, names the site on every call, and every answer names it back.
 
@@ -194,7 +195,7 @@ The desktop app reads the token only from the plugin settings. A variable in `~/
 
 ### If the connection answers 401
 
-The token is wrong, expired, revoked, or was made before your Libretto was reset. Make a new one in the admin sidebar, **Persone e accessi** (People & access) › **Agenti e accessi MCP**, replace it in the plugin settings (`/plugin configure libretto@libretti`, or `/plugin` › **libretto** › **Configure** in the desktop app) and start a new session. If you use `LIBRETTO_MCP_TOKEN` in a terminal, replace it there: it wins.
+The token is wrong, expired, revoked, or was made before your Libretto was reset. Make a new one in the admin, in **Account › Agents**, replace it in the plugin settings (`/plugin configure libretto@libretti`, or `/plugin` › **libretto** › **Configure** in the desktop app) and start a new session. If you use `LIBRETTO_MCP_TOKEN` in a terminal, replace it there: it wins.
 
 ### If `libretto-files` does not connect
 
@@ -212,29 +213,30 @@ Use Libretto: on the Servizi page, change the heading of the "Restauro" section 
 Dry run first, show me what changes, and apply only if it is clean. Do not publish.
 ```
 
-Claude reads the page, builds the change, tries it, applies it, looks at it and gives you the `requestId` that undoes it. Publish when you are ready (you can ask Claude: "publish").
+Claude reads the page, builds the change, tries it, applies it and looks at it; the change is one step of History, which Claude can undo while it is the newest. Publish when you are ready (you can ask Claude: "publish").
 
 ### Seeing the result in Chrome
 
-With the Claude in Chrome extension connected, Claude opens the draft preview and the admin editor in your Chrome, takes screenshots before and after (desktop and phone) and tells you what does not match. Sign in to the admin in that Chrome first: Claude never types passwords and never accepts a browser confirmation dialog. To look it touches nothing; it acts in the admin only for what the MCP server cannot do (uploading a font's files, for example), and publishes or deletes only when you say so. Without Chrome it uses the server's screenshots or re-reads the page.
+With the Claude in Chrome extension connected, Claude opens the draft preview and the admin editor in your Chrome, takes screenshots before and after (desktop and phone) and tells you what does not match. Sign in to the admin in that Chrome first: Claude never types passwords and never accepts a browser confirmation dialog. It looks without touching anything; when something is yours to do, it opens the admin place for it and tells you what to do, but you press the button. Without Chrome it uses the server's screenshots.
 
 ### Images
 
-Point Claude at the file on your computer ("put ~/Pictures/photo.jpg in the Restauro section"): the `libretto-files` server uploads it into the Media library (images up to 5 MB, PDFs and videos up to 20 MB; a larger PDF is compressed and stays a PDF), then Claude places it and writes its alt text. A whole folder works too ("upload the photos in ~/Pictures/site"): Claude uploads them 100 at a time, skips the ones already in the library and tells you which did not go through. You can also upload images in the admin (Media) and give Claude the file name.
+Point Claude at the file on your computer ("put ~/Pictures/photo.jpg in the Restauro section"): the `libretto-files` server uploads it into the Media library (images, SVGs, PDFs and videos up to 20 MB each), then Claude places it and writes its alt text. A whole folder works too ("upload the photos in ~/Pictures/site"): Claude uploads them 50 at a time, skips the ones already in the library and tells you which did not go through. A file over 20 MB or a ZIP you upload yourself, in **Admin › Media**; then give Claude the file name. Fonts too: Claude uploads a WOFF2, WOFF, TTF or OTF file you hold the licence for, and adds a Google Fonts family.
 
 ### Tickets
 
-When Libretto cannot do something, refuses a change that looks right, or gets it wrong, Claude opens a ticket for the Libretto team (they read it in the admin, under Segnalazioni) and gives you its id.
+When Libretto cannot do something, refuses a change that looks right, or gets it wrong, Claude opens a ticket for the Libretto team (you see it in **Account › Reports**, with their answers) and gives you its id.
 
 ### Revoke the token
 
-In the admin, **Agenti e accessi MCP**: press **Revoca** (Revoke) next to the token. It stops working at once. Then uninstall the plugin with `/plugin uninstall libretto@libretti` (which also removes the stored token) and, if you set it, remove `LIBRETTO_MCP_TOKEN` from your shell profile. A token also stops working when it expires, when you lose access to the site, or when your role changes to one without agent access.
+In the admin, **Account › Agents**: in the token's "…" menu, choose **Revoke**. It stops working at once. Then uninstall the plugin with `/plugin uninstall libretto@libretti` (which also removes the stored token) and, if you set it, remove `LIBRETTO_MCP_TOKEN` from your shell profile. A token also stops working when it expires, when you lose access to the site, or when your role changes to one without agent access.
 
 ### Limits
 
 - Works with Claude Code. Claude Desktop and claude.ai need a connector with OAuth sign-in, which Libretto does not offer yet.
-- Creating or deleting pages needs the workspace owner or a platform admin; changing the site's languages, a platform admin.
-- Claude uploads font files (WOFF2) through `libretto-files` when your Libretto has the `font.upload` operation; otherwise they are uploaded in the admin (Font). Google Fonts are always imported from Claude.
+- Claude does what your role allows on the site: a Content author changes texts, pages, sections and collections; a Designer also the structure, the languages and the settings; an Administrator also the design system and the integrations. A refusal says who can do it.
+- Some things only a person does, whatever the role: the site's email settings (Settings › Email), accepting hard-to-read contrast (Editor › Checks), people and tokens (Account), deleting a site, downloading form messages. Claude gives you the link.
+- Claude publishes or goes back only when you say so.
 
 ### How it is built
 
@@ -253,8 +255,9 @@ plugins/libretto/server/libretto-files.mjs the local upload server, no dependenc
 plugins/libretto/server/run-node.sh        starts it with a Node 18+ wherever Node is installed (sh, or node on Windows)
 plugins/libretto/skills/*/SKILL.md         the six skills
 plugins/libretto/reference/recipes/        hand-written recipes, one per job
-plugins/libretto/reference/operations/     GENERATED from data/ by scripts/build-reference.mjs
-data/                                      Libretto's registry.json and mcp-tools.json, plus the notes the generator adds
+plugins/libretto/reference/operations/     GENERATED from data/agent-registry.json by scripts/reference-from-registry.mjs
+data/agent-registry.json                   what core offers an agent: tools, ops, doors, person-only acts, resources (Libretto's scripts/agent-registry.ts)
+scripts/check-names.mjs                    fails on any op, door or resource the plugin names that the registry lacks
 ```
 
 The servers read `${LIBRETTO_MCP_TOKEN:-${user_config.libretto_token}}` and `${LIBRETTO_URL:-${user_config.libretto_url}}`: the environment wins, the plugin settings are the fallback. No secret is stored in this repository.
@@ -262,10 +265,11 @@ The servers read `${LIBRETTO_MCP_TOKEN:-${user_config.libretto_token}}` and `${L
 Maintenance:
 
 ```bash
-node scripts/build-reference.mjs --sync ../splash-cms   # copy the registry and tool catalogue from a Libretto checkout, regenerate
-node scripts/build-reference.mjs --check                # fails on a stale file, an uncovered operation, an unknown name or a broken link
-node scripts/test-libretto-files.mjs                    # the launcher on an app's PATH, path resolution, bulk upload against a fake Libretto
-LIBRETTO_URL=... LIBRETTO_MCP_TOKEN=... node scripts/build-reference.mjs --live   # compare with a running server
+# in a Libretto checkout: npx tsx scripts/agent-registry.ts --out /tmp/agent-registry.json
+node scripts/reference-from-registry.mjs --sync /tmp/agent-registry.json   # copy the registry into data/, regenerate reference/operations
+node scripts/reference-from-registry.mjs --check                          # fails when reference/operations is stale
+node scripts/check-names.mjs                                              # fails on a name the registry lacks, or a broken link
+node scripts/test-libretto-files.mjs                                      # the launcher, path resolution, uploads against a fake Libretto
 claude plugin validate .
 ```
 

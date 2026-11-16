@@ -1,8 +1,8 @@
 {
   "name": "libretto",
   "displayName": "Libretto",
-  "version": "0.5.9",
-  "description": "Edit a Libretto site from Claude Code: the Libretto MCP server plus skills for editing pages, the design system, visual checks, publishing and reporting issues",
+  "version": "1.0.0",
+  "description": "Edit a Libretto site on the core engine from Claude Code: the Libretto MCP server, a file uploader and skills for editing pages, the design system, visual checks, publishing and reporting issues. For sites on the old engine, use 0.5.x.",
   "author": {
     "name": "Innesti Digital"
   },
@@ -18,7 +18,7 @@
     "libretto_token": {
       "type": "string",
       "title": "Token del sito Libretto / Libretto site token",
-      "description": "Il token creato nell'admin di Libretto: barra laterale, Persone e accessi > Agenti e accessi MCP. Resta nel portachiavi del sistema, mai in un file; LIBRETTO_MCP_TOKEN, se impostata, vale di più. / The token made in the Libretto admin: sidebar, Persone e accessi (People & access) > Agenti e accessi MCP. Kept in the system keychain, never in a file; LIBRETTO_MCP_TOKEN, when set, wins.",
+      "description": "Il token creato nell'admin di Libretto, in Account › Agenti. Resta nel portachiavi del sistema, mai in un file; LIBRETTO_MCP_TOKEN, se impostata, vale di più. / The token made in the Libretto admin, in Account › Agents. Kept in the system keychain, never in a file; LIBRETTO_MCP_TOKEN, when set, wins.",
       "sensitive": true
     },
     "libretto_url": {
