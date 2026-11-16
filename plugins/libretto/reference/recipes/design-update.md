@@ -50,4 +50,4 @@ A style several parts share (a caption, a band): `mixin.set`, then `tree.set_mix
 
 After each batch, two pages that use the change, desktop and mobile (`libretto-visual-check`); `site-findings` before and after: a jump means the change hurt pages elsewhere. Tell the user each change can be undone alone.
 
-A whole token file (Tokens Studio, DTCG, Figma variables) goes in through the `design.import` door: dry-run it for the plan, then apply it as one step ([importing a design system](../../skills/libretto-design-system/SKILL.md#importing-a-design-system)). `design-export` reads the design system as DTCG files; the `design.export` door answers them as a zip.
+A whole token file (Tokens Studio, DTCG, Figma variables) goes in through the `design.import` door, sent from its path by `import_design_file`: dry-run it for the plan, then apply it as one step ([importing a design system](../../skills/libretto-design-system/SKILL.md#importing-a-design-system)). `design-export` reads the design system as DTCG files; the `design.export` door answers them as a zip.

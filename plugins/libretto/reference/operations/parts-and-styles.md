@@ -10,7 +10,7 @@ The parts of a page's tree, or of a component's own tree (`at: { component: <key
 
 Insert new nodes (one part and what it holds) as child `index` of a parent node, on a page or in a component's own tree. Use it for a part built from scratch: a text, a picture, a box holding them. For a whole section built from one of the site's components use section.insert or section.addKind; for a saved preset, preset.insert; for one component, instance.insert. Every node of `nodes` hangs from `root`; the motion wholly inside them (`motion`) and their translations (`l10n`) may come with them. Refusals: `op_target` (no such parent, or an index past its children), `not_a_parent` (a text or a picture holds no children), `duplicate_id`, `orphan_node`, `invalid_input`; the tree it leaves is validated, a broken rule refusing with its id (`tree.content-model`: an element that may not hold another; `css.grammar`; `ref.token`).
 
-- **op**; class `structure` (Designer, Administrator); dry_run_ops judges it; one undo in History takes it back.
+- **op**; class `content` (Content author, Designer, Administrator); dry_run_ops judges it; one undo in History takes it back.
 - Found by the plain words: "wrap", "group".
 
 | Input | Type | Required | Says |
@@ -38,7 +38,7 @@ Example inputs:
 
 Remove a node and everything under it, with its translations and the motion wholly inside it. The timelines and states that name only its nodes go with it, and the waits on that motion (a gate that opens when one of its timelines ends); `motion: false` leaves that motion where it is, `waits: false` those waits. For a whole section of a page use section.remove, for one item of a list slot.remove. Refusals: `op_target` (no such node, or the tree's root), `template_node` (a part a repeat or an instance draws: remove the repeat or the instance), `lock.removed` (a locked node or one under it: tree.set_locked unlocks it), `motion.starts_from_wait` (a timeline that stays starts from a wait it would take). Output: `{ took: { timelines, states, locks } }` of the motion it took (`locks`: the gates among its states that held the page's scroll), else null.
 
-- **op**; class `structure` (Designer, Administrator); dry_run_ops judges it; one undo in History takes it back.
+- **op**; class `content` (Content author, Designer, Administrator); dry_run_ops judges it; one undo in History takes it back.
 - Found by the plain words: "unwrap".
 
 | Input | Type | Required | Says |
@@ -61,7 +61,7 @@ Example inputs:
 
 Move a node, with everything under it, to another parent or to another place among its siblings. `index` counts the parent's children once the node has left. To wrap parts in a new box: tree.insert an empty frame where the first part is, then tree.move each part into it (index 0, 1, 2) in one batch; to unwrap, tree.move the box's children out after it, then tree.remove the box. Refusals: `op_target` (no such node or parent, or a node a repeat or an instance holds), `cycle` (the parent is inside the node), `not_a_parent`, `lock.moved` (a locked node keeps its parent).
 
-- **op**; class `structure` (Designer, Administrator); dry_run_ops judges it; one undo in History takes it back.
+- **op**; class `content` (Content author, Designer, Administrator); dry_run_ops judges it; one undo in History takes it back.
 - Found by the plain words: "wrap", "unwrap", "group", "reorder".
 
 | Input | Type | Required | Says |
@@ -270,7 +270,7 @@ Example inputs:
 
 Change the HTML element a frame, a text or a media node renders as: a heading's level, a box made a section or a link, a video made audio. Other kinds are refused (`invalid_input`), an element the kind does not take too (`invalid_node`); the validator refuses one its place forbids (`tree.content-model`).
 
-- **op**; class `structure` (Designer, Administrator); dry_run_ops judges it; one undo in History takes it back.
+- **op**; class `content` (Content author, Designer, Administrator); dry_run_ops judges it; one undo in History takes it back.
 
 | Input | Type | Required | Says |
 |---|---|---|---|

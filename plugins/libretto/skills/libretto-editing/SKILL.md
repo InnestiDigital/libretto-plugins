@@ -9,7 +9,7 @@ The site runs on Libretto's core engine. Every change is an **op**; ops travel i
 
 This plugin (1.0) is for core sites. If `site_context` answers an `engine` other than `core`, stop and tell the person: that site runs on Libretto's old engine, which the Libretto plugin 0.5 serves.
 
-Tools of the `libretto` server: `site_context`, `discover_operations`, `read_resources`, `apply_ops`, `dry_run_ops`, `render_preview`, `compare_reference`, `report_issue`. The plugin's local `libretto-files` server adds `upload_media_file`, `upload_media_files` and `upload_font_file`, which send a file from this computer through the upload doors.
+Tools of the `libretto` server: `site_context`, `discover_operations`, `read_resources`, `apply_ops`, `dry_run_ops`, `render_preview`, `compare_reference`, `report_issue`. The plugin's local `libretto-files` server adds `upload_media_file`, `upload_media_files`, `upload_font_file` and `import_design_file`, which send a file from this computer through the upload doors and the `design.import` door.
 
 **The server's guide comes first.** `site_context` answers `guide`: the server's own rules and recipes for this site (wrap and unwrap, make a component, repeat a part, replace a bar, add a section, animate, brand setup, main language, import items, import a design system, write a new article, member roles) and where an agent cannot go (Brand studio, files over 20 MB and ZIPs, a publish at a set time). Read it once per conversation and follow it; where it and this skill differ, the guide is right.
 
@@ -114,7 +114,7 @@ Never route around a refusal: no raw value instead of a token, no other op that 
 5. **Apply ordinary edits directly; dry-run only what needs it** (the loop, step 5).
 6. **One user-visible change per batch.** A batch is the unit of undo: one undo takes back a whole batch, never part of it. List the changes the user would name on their own ("the accent colour", "the hero title", "the footer text") and give each its own batch, even when they came in one message. Everything one change needs goes in its batch (a new token and the parts re-pointed at it; the tree.insert and tree.move of a wrap). Tell the user each change can be undone alone.
 7. **Never publish on your own.** Only on the human's explicit go (`libretto-publish`).
-8. **Files go through the upload doors.** A file on this computer: `upload_media_file` with its path (many: `upload_media_files` with the folder); see [images](../../reference/recipes/images.md). Never paste a file's base64 yourself, and never send `media.add`, `media.replaceBlob` or `font.add`: they record bytes the admin's upload stored, so discovery lists them `offered: false` with the `door` that sends them, and a batch that holds one is refused with `operation_forbidden` naming it. Use `media.uploadFile` (with `replaces` for a new file of an entry) and `font.uploadFace`. A design system file goes through the `design.import` door (`libretto-design-system`).
+8. **Files go through the upload doors.** A file on this computer: `upload_media_file` with its path (many: `upload_media_files` with the folder); see [images](../../reference/recipes/images.md). Never paste a file's base64 yourself, and never send `media.add`, `media.replaceBlob` or `font.add`: they record bytes the admin's upload stored, so discovery lists them `offered: false` with the `door` that sends them, and a batch that holds one is refused with `operation_forbidden` naming it. Use `media.uploadFile` (with `replaces` for a new file of an entry) and `font.uploadFace`. A design system file goes through `import_design_file`, which sends it to the `design.import` door (`libretto-design-system`).
 9. **MCP first.** Use an op or a door whenever one exists. Chrome (`libretto-admin-browser`) opens the place a refusal names for the person, and shows the live site; it never does what MCP refuses.
 10. **Look at the result** before saying it is done (`libretto-visual-check`).
 11. **Blocked?** Tell the user, do what you can, and report what is missing or wrong (`libretto-report-issue`).
@@ -151,7 +151,7 @@ The person you work for is a designer or a client, not a developer.
 | To publish or go back | `libretto-publish` |
 | Libretto cannot do it, or refuses something that looks right | `libretto-report-issue` |
 
-Not offered to an agent on a core site: posters, flyers and print files of a brand canvas (canvas formats and output profiles are ops, but nothing renders or prints a canvas through MCP: the person does it in the admin); assistant job tools. Say so plainly, and report the need when the person asks for it.
+Not offered to an agent on a core site: posters, flyers and print files of a brand canvas (canvas formats and output profiles are ops, but nothing renders or prints a canvas through MCP: the person does it in Brand studio, `urls.places["brand-studio"]`, and an old `brand.*` op is refused with that place); assistant job tools. Say so plainly, and report the need when the person asks for it.
 
 ## Worked examples
 

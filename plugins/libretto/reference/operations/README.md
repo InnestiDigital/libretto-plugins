@@ -2,7 +2,7 @@
 
 # Libretto operations on a core site
 
-What a token of a core site is offered: 8 tools, 160 ops, 31 doors, 10 acts only a person does and 41 resources. Every op and door runs in a batch sent to `apply_ops` (or judged by `dry_run_ops`); `discover_operations` with a name gives the live description, examples and schema. This reference is the same registry, written for reading: [tools, resources and plain words](tools-and-resources.md), [what only a person does](person-only.md).
+What a token of a core site is offered: 8 tools, 160 ops, 31 doors, 10 acts only a person does and 42 resources. Every op and door runs in a batch sent to `apply_ops` (or judged by `dry_run_ops`); `discover_operations` with a name gives the live description, examples and schema. This reference is the same registry, written for reading: [tools, resources and plain words](tools-and-resources.md), [what only a person does](person-only.md).
 
 | Domain | Ops and doors |
 |---|---|
@@ -61,7 +61,7 @@ The `guide` field of `site_context`, as the server answers it:
 >
 > Where you cannot go, a person can:
 >
-> - Brand canvases and their print and image files: the format, outputProfile, surface and output ops edit a canvas, but no door draws or prints one. A person does it in Brand studio, in the previous admin: "Brand studio" at the end of the row of the website's sections, beside Open editor, in the admin urls.admin opens (shown to who runs the website).
+> - Brand canvases and their print and image files: the format, outputProfile, surface and output ops edit a canvas, but no door draws, prints or exports one. A person (Administrator) does it in Brand studio, in the previous admin: hand them urls.places["brand-studio"]. A call of the old engine's brand ops is refused with that place.
 >
 > - A file over 20 MB, or a ZIP of files: a person uploads it in Admin › Media (urls.places["media"]); a font file over 20 MB in Design › Fonts (urls.places["editor.design"]). A design system zip goes through design.import.
 >

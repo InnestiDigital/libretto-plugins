@@ -14,19 +14,21 @@ For Libretto sites on the core engine only. Sites on the old engine keep the 0.5
 - **Upload records.** `media.add`, `media.replaceBlob` and `font.add` are listed `offered: false` with the door that sends them (`media.uploadFile`, `font.uploadFace`), and refused in an agent's batch with words naming it.
 - **Contrast.** Judged at WCAG AA: 4.5:1 for text, 3:1 for large text (at least 24 px, or 18.66 px at weight 700 or more), 3:1 for the graphic of a link or button with no text. A write that leaves a pair short is corrected in the same step (the answer's `corrections`) or refused with `contrast.uncorrectable`. Keeping a hard-to-read pair is a person's decision in Editor › Checks.
 - **Person-only acts.** The site's email settings, deleting a site, packages, people, tokens, downloading messages and triaging reports are refused with `operation_forbidden`, the place and its link: the skills hand the person that link, and `libretto-admin-browser` opens it for them.
-- **Reads.** 41 resources, the admin's own reads; long lists are cut and named in `bounded` with the URI that reads on. `reports` holds the issues the agent reported and the owner's answers.
+- **Reads.** 42 resources, the admin's own reads; long lists are cut and named in `bounded` with the URI that reads on. `reports` holds the issues the agent reported and the owner's answers. A published version's pictures come back as images: `version-screenshots/<version>` lists them by their `version-screenshot` URIs, at most 4 in one answer.
+- **Places.** `site_context.urls.places` holds a link for every place a refusal or the guide sends a person to, Brand studio among them (`brand-studio`, in the previous admin).
 - **Screenshots.** `render_preview` shows the draft or the live page at a device or a width, in a language, under a theme, as a guest, a member or a role, one item of a collection, the first or the last frame of motion, scrolled; `compare_reference` takes the same view against an image or a public page.
 
 ### Files
 
 - `libretto-files` uploads through the `media.uploadFile` and `font.uploadFace` doors, the file as base64 in `data`, at most 20 MB a call, every kind of media and WOFF2, WOFF, TTF and OTF fonts. A ZIP or a larger file is refused with "upload it in Admin › Media". A folder goes 50 files a call; what the library holds is skipped, read through the `media` resource; the space left through `media-space`.
+- `import_design_file` sends a design system file (.zip or .json, at most 20 MB) from its path to the `design.import` door: a dry run first, which answers the plan; then, unless only the dry run is asked or the file changes nothing, the import as one step. The file never travels through the conversation.
 - It refuses a site on the old engine and a token of several sites without `siteId`.
 
 ### Reference
 
-- `reference/operations/` is generated from `data/agent-registry.json`, the registry Libretto writes for agents (`scripts/reference-from-registry.mjs`): 160 ops and 31 doors in 14 domains, the 10 acts only a person does, the 8 tools, the 41 resources and the 25 places of `site_context.urls.places`, with the server's guide.
+- `reference/operations/` is generated from `data/agent-registry.json`, the registry Libretto writes for agents (`scripts/reference-from-registry.mjs`): 160 ops and 31 doors in 14 domains, the 10 acts only a person does, the 8 tools, the 42 resources and the 26 places of `site_context.urls.places`, with the server's guide.
 - The recipes are rewritten for core. New: blogs and articles, members and private pages. Gone: brand canvases (no core door renders or prints a canvas) and blogs and templates.
-- `scripts/check-names.mjs` fails on any op, door, resource, tool or `urls.places` key the skills, recipes, server or README name that the registry lacks.
+- `scripts/check-names.mjs` fails on any op, door, resource, tool, code or `urls.places` key the skills, recipes, server or README name that the registry lacks. The codes are the registry's own list (`codes`: every refusal, said and finding code an agent can meet, with its words), not a list kept here.
 
 ## 0.5.9
 

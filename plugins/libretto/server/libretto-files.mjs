@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // libretto-files: a local MCP server (stdio) that hands files on this computer to a core Libretto site: media files
-// through the media.uploadFile door, font faces through the font.uploadFace door.
+// through the media.uploadFile door, font faces through the font.uploadFace door, a design system file through the
+// design.import door.
 //
 // A door takes its file as base64 in `data`, inside an apply_ops batch of its own. Written by the model, a photo would
 // cost hundreds of thousands of tokens; this server reads the file from disk and sends the same batch itself, so the
@@ -20,7 +21,7 @@ const MiB = 1024 * 1024
 /** The most of a file one door call carries, as the doors say: a larger file goes up through the admin. */
 const MAX_CALL_BYTES = 20 * MiB
 /** Where a person uploads what an agent may not send, in the admin's own words. */
-const PERSON_PLACE = { media: 'Admin › Media', font: 'the editor\'s Design › Fonts' }
+const PERSON_PLACE = { media: 'Admin › Media', font: 'the editor\'s Design › Fonts', design: 'the editor\'s Design › Import and export' }
 /** How many files one upload_media_files call takes: a call stays inside a client's tool timeout and the doors' rate. */
 const MAX_FILES = 50
 /** How many pages of the media library a bulk upload reads to skip files already there. */
@@ -36,6 +37,8 @@ const CONTENT_TYPES = new Map([
 /** The font containers font.uploadFace reads; Libretto stores each as WOFF2. */
 const FONT_TYPES = new Map([['.woff2', 'font/woff2'], ['.woff', 'font/woff'], ['.ttf', 'font/ttf'], ['.otf', 'font/otf']])
 const ARCHIVES = new Set(['.zip'])
+/** The design system files design.import reads: a zip of JSON files, or one JSON file (Tokens Studio, DTCG, Figma variables). */
+const DESIGN_FILES = new Set(['.zip', '.json'])
 /** The tools of the remote server that take `siteId`; read_resources names the site in each URI instead. */
 const TAKES_SITE = new Set(['site_context', 'apply_ops', 'dry_run_ops'])
 
@@ -133,6 +136,21 @@ const TOOLS = [
     },
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
   },
+  {
+    name: 'import_design_file',
+    description: 'Import a design system file from this computer into the core Libretto site through the design.import door, as Editor › Design (Import and export) takes one, without putting its bytes in the conversation: a zip of Tokens Studio\'s multi-file layout (or the zip design.export answers), one Tokens Studio file, one plain DTCG file or a Figma variables export, .zip or .json, at most 20 MB in one call. It is an Administrator\'s. Every call dry-runs the door first. With dryRun true it stops there and answers the plan: how many values the file adds (`added`), changes (`changed`), keeps (`same`) and skips (`skipped`), each value in `rows`, the sets it adds (`newSets`) and the themes it makes or changes (`themes`); tell the person and wait for their yes. Without dryRun it then applies the import as one step, unless the plan changes nothing (`changes: 0`, `applied: false`). Libretto\'s refusals come back in its own words (a design that moved since the dry run: `stale_revision`, dry-run again). The answer holds Libretto\'s answer: the `plan`, and applied, `entryId`, `revisions`, `corrections` and `undo`, the call that takes the whole import back while it is the newest step.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        path: { type: 'string', minLength: 1, description: 'The design system file: a .zip or a .json (absolute, starting with ~/, or relative to the working directory).' },
+        dryRun: { type: 'boolean', description: 'Only the dry run: the plan, nothing stored. Each call counts toward the 60 uploads a minute, its dry run too.' },
+        siteId: SITE_ID,
+      },
+      required: ['path'],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+  },
 ]
 
 const NEW_TOKEN = 'make a new token in the admin, in Account › Agents, set it with /plugin configure libretto@libretti and start a new session.'
@@ -224,6 +242,11 @@ async function localFile(path) {
 
 const mb = bytes => `${(bytes / MiB).toFixed(1)} MB`
 
+/** A refusal for a file larger than one door call carries, saying where a person sends it; undefined when the call can carry it. */
+function sizeRefusal(file, bytes, where) {
+  return bytes > MAX_CALL_BYTES ? `${basename(file)} is ${mb(bytes)}: an agent sends at most ${mb(MAX_CALL_BYTES)} in one call. A person uploads it in ${PERSON_PLACE[where]}.` : undefined
+}
+
 /** A refusal for a file one door call cannot carry: an archive, or more than 20 MB. Undefined when the call can carry it. */
 function callRefusal(file, bytes, where) {
   if (ARCHIVES.has(extname(file).toLowerCase())) {
@@ -231,8 +254,7 @@ function callRefusal(file, bytes, where) {
       ? `${basename(file)} is a ZIP archive: an agent uploads one file per call. Upload the archive in Admin › Media, which makes a folder of it, or unzip it and upload the folder's files.`
       : `${basename(file)} is a ZIP archive: upload each font file on its own, or the archive in ${PERSON_PLACE.font}.`
   }
-  if (bytes > MAX_CALL_BYTES) return `${basename(file)} is ${mb(bytes)}: an agent sends at most ${mb(MAX_CALL_BYTES)} in one call. A person uploads it in ${PERSON_PLACE[where]}.`
-  return undefined
+  return sizeRefusal(file, bytes, where)
 }
 
 /** The content type media.uploadFile takes for `file` of `bytes`, or a refusal saying how to go on. */
@@ -407,7 +429,28 @@ async function uploadFontFile({ path, name, weight, style, display, fallbackStac
   return { dryRun, file, bytes, answer }
 }
 
-const TOOL_HANDLERS = { upload_media_file: uploadMediaFile, upload_media_files: uploadMediaFiles, upload_font_file: uploadFontFile }
+/**
+ * A design system file through the design.import door: a dry run first, which answers the plan; then, unless only the
+ * dry run is asked or the plan changes nothing, the import applied as one step. Libretto's refusals as it words them.
+ */
+async function importDesignFile({ path, dryRun = false, siteId }) {
+  const { file, bytes } = await localFile(path)
+  if (!DESIGN_FILES.has(extname(file).toLowerCase())) {
+    throw new LibrettoError(`${basename(file)} is not a design system file: design.import reads a .zip (Tokens Studio's multi-file layout, or the zip design.export answers) or one .json file (Tokens Studio, plain DTCG or a Figma variables export).`)
+  }
+  const refusal = sizeRefusal(file, bytes, 'design')
+  if (refusal) throw new LibrettoError(refusal)
+  const input = { fileName: basename(file), data: (await readFile(file)).toString('base64') }
+  const remote = await remoteSession(siteId)
+  await coreSite(remote)
+  const message = `Imported the design system file ${basename(file)}`
+  const planned = await sendDoor(remote, 'design.import', input, true, message)
+  if (dryRun || planned?.changes === 0) return { dryRun, applied: false, file, bytes, answer: planned }
+  const answer = await sendDoor(remote, 'design.import', input, false, message)
+  return { dryRun, applied: answer?.changes !== 0, file, bytes, answer }
+}
+
+const TOOL_HANDLERS = { upload_media_file: uploadMediaFile, upload_media_files: uploadMediaFiles, upload_font_file: uploadFontFile, import_design_file: importDesignFile }
 
 const handlers = {
   initialize: params => ({

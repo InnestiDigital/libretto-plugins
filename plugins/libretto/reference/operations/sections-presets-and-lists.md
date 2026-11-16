@@ -40,7 +40,7 @@ Example input:
 
 Replace where a repeat's items come from: another collection, a filter or a sort, how many (`limit`), the site's pages or a menu. On a list of records, keep each record's `id` (one without gets one): its translations follow it when records move, and go with it when it goes (undo puts them back). Refused for a node that is not a repeat (`invalid_input`); the validator checks the collection and its fields (`collection.known`, `repeat.caps`).
 
-- **op**; class `structure` (Designer, Administrator); dry_run_ops judges it; one undo in History takes it back.
+- **op**; class `content` (Content author, Designer, Administrator); dry_run_ops judges it; one undo in History takes it back.
 
 | Input | Type | Required | Says |
 |---|---|---|---|

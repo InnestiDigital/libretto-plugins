@@ -9,7 +9,7 @@ Questo plugin (1.0) collega Claude Code a un sito Libretto sul motore core. Per 
 Il plugin contiene:
 
 - il server MCP `libretto`, che si collega a `https://librettocms.com/api/mcp` con il tuo token;
-- il piccolo server locale `libretto-files`, che carica nella libreria Media le immagini, i PDF e i video che hai sul computer, e i file dei font nel sito (serve Node 18 o successivo);
+- il piccolo server locale `libretto-files`, che carica nella libreria Media le immagini, i PDF e i video che hai sul computer, i file dei font nel sito e un file del design system (Tokens Studio, DTCG, variabili di Figma) nel design system del sito (serve Node 18 o successivo);
 - sei skill che insegnano a Claude come lavorare su Libretto:
   - `libretto-editing`: testi, stili, sezioni e preset, componenti, immagini, header e footer, menu, collezioni, traduzioni, animazioni; ogni passo si annulla da solo;
   - `libretto-design-system`: token, temi, varianti, mixin, breakpoint e font, con il controllo del contrasto che corregge o rifiuta un testo poco leggibile;
@@ -128,7 +128,7 @@ This plugin (1.0) connects Claude Code to a Libretto site on the core engine. Si
 The plugin holds:
 
 - the `libretto` MCP server, which connects to `https://librettocms.com/api/mcp` with your token;
-- the small local `libretto-files` server, which uploads images, PDFs and videos from your computer into the Media library, and font files into the site (needs Node 18 or later);
+- the small local `libretto-files` server, which uploads images, PDFs and videos from your computer into the Media library, font files into the site, and a design system file (Tokens Studio, DTCG, Figma variables) into the site's design system (needs Node 18 or later);
 - six skills that teach Claude how to work on Libretto:
   - `libretto-editing`: texts, styles, sections and presets, components, images, header and footer, menus, collections, translations, motion; each step can be undone on its own;
   - `libretto-design-system`: tokens, themes, variants, mixins, breakpoints and fonts, with the contrast check that corrects or refuses hard-to-read text;
