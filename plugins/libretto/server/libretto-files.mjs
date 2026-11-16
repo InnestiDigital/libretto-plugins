@@ -1,54 +1,43 @@
 #!/usr/bin/env node
-// libretto-files: a local MCP server (stdio) that hands files on this computer to Libretto:
-// images and other media through media.upload, font faces through font.upload.
+// libretto-files: a local MCP server (stdio) that hands files on this computer to a core Libretto site: media files
+// through the media.uploadFile door, font faces through the font.uploadFace door.
 //
-// The remote Libretto MCP server takes an upload as base64 inside the tool call
-// (media.upload). Written by the model, a photo would cost hundreds of thousands
-// of tokens; this server reads the file from disk and sends the same media.upload
-// batch itself, so the conversation carries only the path and the answer.
+// A door takes its file as base64 in `data`, inside an apply_ops batch of its own. Written by the model, a photo would
+// cost hundreds of thousands of tokens; this server reads the file from disk and sends the same batch itself, so the
+// conversation carries only the path and Libretto's answer.
 //
-// It talks to ${LIBRETTO_URL}/api/mcp with ${LIBRETTO_MCP_TOKEN} (both set by the
-// plugin's .mcp.json) and needs nothing but Node 18 or later.
+// It talks to ${LIBRETTO_URL}/api/mcp with ${LIBRETTO_MCP_TOKEN} (both set by the plugin's .mcp.json) and needs
+// nothing but Node 18 or later.
 import { readdir, readFile, stat } from 'node:fs/promises'
 import { basename, extname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { homedir } from 'node:os'
 import { randomUUID } from 'node:crypto'
 import { createInterface } from 'node:readline'
+import { setTimeout as sleep } from 'node:timers/promises'
 
-const SERVER = { name: 'libretto-files', version: '0.3.0' }
+const SERVER = { name: 'libretto-files', version: '1.0.0' }
 const MiB = 1024 * 1024
-/**
- * The largest file of each kind one upload takes, as media.upload's ceilings: images and SVGs 5 MB,
- * PDF documents 20 MB; a video is capped at 20 MB here because the call carries the file as base64
- * and Libretto's /api/mcp takes 28 MB a request (a larger video goes through the admin's Media).
- */
-const MAX_BYTES = { image: 5 * MiB, document: 20 * MiB, video: 20 * MiB }
-/** What to do with a file over its ceiling, by kind: a PDF is compressed, never turned into a picture. */
-const TOO_LARGE_HINT = {
-  image: (file) => `Shrink it first (macOS: sips -Z 2400 "${file}" --out smaller${extname(file)}).`,
-  document: () => 'Compress the PDF (export it again with pictures downsampled to 300 ppi, or with a smaller-file preset) and upload it again; keep it a PDF.',
-  video: () => 'Compress it (H.264 or VP9 at a lower bitrate) or cut it shorter, or upload it in the admin (Media), which takes videos up to 100 MB.',
-}
-/** How many files one upload_media_files call takes: a call stays well inside a client's tool timeout, and the next call skips what is already up. */
-const MAX_FILES = 100
-/** How many pages of the media library a bulk upload reads to skip files already there (100 rows a page). */
+/** The most of a file one door call carries, as the doors say: a larger file goes up through the admin. */
+const MAX_CALL_BYTES = 20 * MiB
+/** Where a person uploads what an agent may not send, in the admin's own words. */
+const PERSON_PLACE = { media: 'Admin › Media', font: 'the editor\'s Design › Fonts' }
+/** How many files one upload_media_files call takes: a call stays inside a client's tool timeout and the doors' rate. */
+const MAX_FILES = 50
+/** How many pages of the media library a bulk upload reads to skip files already there. */
 const MAX_LIBRARY_PAGES = 50
-/** font.upload's `data` holds at most 16 MiB of base64 characters; the server's FONT_MAX_FILE_MB may be lower. */
-const MAX_FONT_BASE64 = 16 * 1024 * 1024
-/** The font containers Libretto reads; it stores each as WOFF2. */
-const FONT_EXTENSIONS = new Set(['.woff2', '.woff', '.ttf', '.otf'])
+/** How long to wait when the doors' upload limit (per token, per minute) is spent, before one more try. */
+const RATE_WAIT_MS = 61_000
+/** The media types media.uploadFile takes, by extension. */
 const CONTENT_TYPES = new Map([
   ['.jpg', 'image/jpeg'], ['.jpeg', 'image/jpeg'], ['.png', 'image/png'], ['.webp', 'image/webp'],
   ['.gif', 'image/gif'], ['.svg', 'image/svg+xml'], ['.pdf', 'application/pdf'],
   ['.mp4', 'video/mp4'], ['.webm', 'video/webm'],
 ])
-
-/** The size class of a content type: a PDF, a video, else an image (SVG included). */
-function sizeKindOf(contentType) {
-  if (contentType === 'application/pdf') return 'document'
-  if (contentType.startsWith('video/')) return 'video'
-  return 'image'
-}
+/** The font containers font.uploadFace reads; Libretto stores each as WOFF2. */
+const FONT_TYPES = new Map([['.woff2', 'font/woff2'], ['.woff', 'font/woff'], ['.ttf', 'font/ttf'], ['.otf', 'font/otf']])
+const ARCHIVES = new Set(['.zip'])
+/** The tools of the remote server that take `siteId`; read_resources names the site in each URI instead. */
+const TAKES_SITE = new Set(['site_context', 'apply_ops', 'dry_run_ops'])
 
 /** A refusal this server or the Libretto server gave, with the words to show the user. */
 class LibrettoError extends Error {
@@ -67,19 +56,28 @@ class TokenRefusal extends LibrettoError {
   }
 }
 
+const SITE_ID = { type: 'string', minLength: 1, description: 'The site to upload to, one of the ids libretto\'s site_context lists: needed with a token of several sites, left out with a one-site token.' }
+const DRY_RUN = { type: 'boolean', description: 'Run every check the door makes (type, size, content, the site\'s space) and store nothing. A dry run counts toward the 60 uploads a minute.' }
+const WORDS = { anyOf: [{ type: 'string', maxLength: 1000 }, { type: 'object', additionalProperties: { type: 'string', maxLength: 1000 } }] }
+const COLOUR = { type: 'string', pattern: '^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$' }
+
 const TOOLS = [
   {
     name: 'upload_media_file',
-    description: 'Upload a file from this computer (an absolute path, a path starting with ~/, or relative to the working directory) into the Libretto site\'s media library through media.upload, without putting its bytes in the conversation. Images and SVGs up to 5 MB (shrink a larger image first, for example `sips -Z 2400 in.jpg --out out.jpg` on macOS), PDF documents up to 20 MB (compress a larger PDF and keep it a PDF; never turn it into a picture), videos up to 20 MB (larger ones through the admin\'s Media). dryRun: true runs every check and stores nothing. The answer holds the media record (`id`, `url`, kind, dimensions) and the `requestId` that history.undo takes. Then place the image with `{ "$media": "<id>" }` and set its alt text with media.update. An SVG is also made an inline drawing for the svg primitive when it fits (the answer\'s `inline` says ready, or why not): `svgTextColor` names the colour that follows the text colour, `svgAccentColor` the one that becomes the accent part a node style colours (`p:accent`).',
+    description: 'Upload one file from this computer (an absolute path, a path starting with ~/, or relative to the working directory) into the core Libretto site\'s media library through the media.uploadFile door, without putting its bytes in the conversation. JPEG, PNG, GIF, WebP, SVG, MP4, WebM or PDF, at most 20 MB in one call; Libretto checks the file as Admin › Media does (type, size, content, the site\'s space) and says why when it refuses. A larger file or a ZIP archive goes up in Admin › Media, by a person. Give its alt text, caption and credit here (one string in the site\'s main language, or one per language); or, with `replaces` (a media id), the file becomes the new file of that entry, which keeps its words and folder, so every place that shows it follows. The upload is one step in History. The answer holds Libretto\'s answer: `id` (the media id: place it with tree.set_props `src: { "$media": "<id>" }`), `entryId` and `undo` (the call that takes the step back while it is the newest). For an SVG, `svgTextColor` names its colour that follows the text colour of the part drawing it, `svgAccentColor` the one that becomes its accent part.',
     inputSchema: {
       type: 'object',
       properties: {
         path: { type: 'string', minLength: 1, description: 'The file to upload.' },
-        folderId: { type: ['string', 'null'], description: 'A media folder id (media.list answers folders); null or absent for the root.' },
-        svgTextColor: { type: 'string', pattern: '^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$', description: 'SVG only: the colour of the file that should follow the text colour of the node drawing it, such as "#1a1a1a" (currentColor already does).' },
-        svgAccentColor: { type: 'string', pattern: '^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$', description: 'SVG only: the colour of the file\'s one accent element, which becomes the accent part (elements marked data-role="accent" in the file already are).' },
-        dryRun: { type: 'boolean', description: 'Check the upload without storing it.' },
-        siteId: { type: 'string', minLength: 1, description: 'The site to upload to, one of the ids libretto\'s site_context lists: needed with a token of several sites, left out with a one-site token.' },
+        folderId: { type: ['string', 'null'], description: 'A media folder id (the media resource lists the folders); null or absent for the top of the library. Not with replaces.' },
+        alt: { ...WORDS, description: 'Its alt text: what the picture shows, for a visitor who cannot see it. Not with replaces.' },
+        caption: { ...WORDS, description: 'Its caption. Not with replaces.' },
+        credit: { type: 'string', maxLength: 512, description: 'Who made it. Not with replaces.' },
+        replaces: { type: 'string', minLength: 1, description: 'A media id: this file becomes that entry\'s new file, of the same kind (a picture for a picture).' },
+        svgTextColor: { ...COLOUR, description: 'SVG only: the file\'s colour that should follow the text colour of the part drawing it, such as "#1a1a1a" (currentColor already does).' },
+        svgAccentColor: { ...COLOUR, description: 'SVG only: the colour of the file\'s one accent element, which becomes its accent part.' },
+        dryRun: DRY_RUN,
+        siteId: SITE_ID,
       },
       required: ['path'],
       additionalProperties: false,
@@ -88,18 +86,18 @@ const TOOLS = [
   },
   {
     name: 'upload_media_files',
-    description: 'Upload many files from this computer into the Libretto site\'s media library in one call: a list of `paths`, or the files of a `directory` whose name matches `pattern` (such as "*.jpg" or "*.{jpg,png,webp}"; `recursive` for its subfolders). At most ' + MAX_FILES + ' files a call: for more, call again with the rest. A file whose name and size match one already in the library is skipped (`skipExisting`, true by default), so calling again after an interruption uploads only what is missing. Each file is checked like upload_media_file (images and SVGs up to 5 MB, PDFs and videos up to 20 MB, known types) and uploaded as its own undoable change; one refused file does not stop the others. When a reference has the same picture in several widths (photo-480.jpg, photo-960.jpg, photo-1920.jpg), give only the largest: Libretto renders its own sizes. dryRun: true checks every file, the library and the quota, sends one file as a dry run, and stores nothing. The answer counts the files and maps each uploaded file to its media id (`uploaded`), each skipped one to the id already in the library (`skipped`), and each refused one to the reason (`refused`).',
+    description: `Upload many files from this computer into the core Libretto site's media library in one call: a list of \`paths\`, or the files of a \`directory\` whose name matches \`pattern\` (such as "*.jpg" or "*.{jpg,png,webp}"; \`recursive\` for its subfolders). At most ${MAX_FILES} files a call: for more, call again with the rest. A file whose name and size match one already in the library is skipped (\`skipExisting\`, true by default), so calling again after an interruption uploads only what is missing. Each file goes through the media.uploadFile door as its own step in History, checked as upload_media_file checks one; one refused file does not stop the others. The doors take 60 uploads a minute per token: past that the call waits a minute and goes on. A ZIP or a file over 20 MB is refused with where a person uploads it (Admin › Media). When a reference has the same picture in several widths (photo-480.jpg, photo-960.jpg, photo-1920.jpg), give only the largest: Libretto renders its own sizes. dryRun: true checks every file, the library and the site's space, sends one file as a dry run, and stores nothing. The answer counts the files and maps each uploaded file to its media id (\`uploaded\`), each skipped one to the id already in the library (\`skipped\`), and each refused one to the reason (\`refused\`).`,
     inputSchema: {
       type: 'object',
       properties: {
         paths: { type: 'array', items: { type: 'string', minLength: 1 }, maxItems: MAX_FILES, description: 'The files to upload (absolute, starting with ~/, or relative to the working directory).' },
         directory: { type: 'string', minLength: 1, description: 'A folder whose files to upload, instead of or with paths.' },
-        pattern: { type: 'string', minLength: 1, description: 'Which file names of the directory: * and ? wildcards, {a,b} alternatives, case-insensitive. All the known types when absent.' },
+        pattern: { type: 'string', minLength: 1, description: 'Which file names of the directory: * and ? wildcards, {a,b} alternatives, case-insensitive. All the types the door takes when absent.' },
         recursive: { type: 'boolean', description: 'Also the files of the directory\'s subfolders.' },
-        folderId: { type: ['string', 'null'], description: 'A media folder id (media.list answers folders); null or absent for the root.' },
+        folderId: { type: ['string', 'null'], description: 'A media folder id (the media resource lists the folders; mediaFolder.create makes one); null or absent for the top of the library.' },
         skipExisting: { type: 'boolean', description: 'Skip a file whose name and size match one in the library; true when absent.' },
-        dryRun: { type: 'boolean', description: 'Check everything without storing anything.' },
-        siteId: { type: 'string', minLength: 1, description: 'The site to upload to, one of the ids libretto\'s site_context lists: needed with a token of several sites, left out with a one-site token.' },
+        dryRun: DRY_RUN,
+        siteId: SITE_ID,
       },
       additionalProperties: false,
     },
@@ -107,7 +105,7 @@ const TOOLS = [
   },
   {
     name: 'upload_font_file',
-    description: 'Upload a font face from a WOFF2, WOFF, TTF or OTF file on this computer into the Libretto site\'s font library through font.upload, without putting its bytes in the conversation. One file is one face: give the family name, weight and style. A variable file draws a range of weights: give weight as [min, max] (for example [200, 800]), or leave weight out and Libretto reads the range from the file; then a type style may use any weight inside it, such as 370. Check the licence first and record it in `licence` (the foundry\'s terms or the licence file\'s name): the library shows it with the face. A WOFF, TTF or OTF file is converted to WOFF2 by Libretto (the stored face is WOFF2); convert nothing yourself, and check the licence allows it first. A face the library already holds is refused (409 font_face_exists) unless replace is true. dryRun: true runs every check and stores nothing. Then point a font-family token at the family (designSystem.setToken, type fontFamily). Needs a Libretto with font.upload: an older one answers unknown_operation.',
+    description: 'Upload one font face from a WOFF2, WOFF, TTF or OTF file on this computer into the core Libretto site\'s fonts through the font.uploadFace door (an Administrator\'s), without putting its bytes in the conversation. One file is one face: give the family name, and its weight and style. A variable file draws a range of weights: give weight as [min, max] (for example [200, 800]), or leave weight out and Libretto reads the range from the file. Check the licence with the person first and record it in `licence`. Libretto stores the face as WOFF2; convert nothing yourself. At most 20 MB in one call; a face the library already holds is refused. The upload is one step in History; the answer holds Libretto\'s answer (`id`, the face\'s font id, and `undo`). Then point a fontFamily token at the family (token.set). A face\'s settings later: the font.setFace door; a Google Fonts family: the font.addGoogle door, through apply_ops.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -120,29 +118,33 @@ const TOOLS = [
           ],
           description: 'The face\'s weight, 400 for regular, 700 for bold; for a variable file its range, [200, 800]. Left out: the variable file\'s own range, or 400 for a static file.',
         },
-        style: { type: 'string', enum: ['normal', 'italic'] },
+        style: { type: 'string', enum: ['normal', 'italic'], description: 'normal when absent.' },
         display: { type: 'string', enum: ['swap', 'block', 'fallback', 'optional'], description: 'font-display; swap when absent.' },
         fallbackStack: { type: ['string', 'null'], maxLength: 255, description: 'The fonts used until it loads, for example "system-ui, sans-serif".' },
-        licence: { type: ['string', 'null'], minLength: 1, maxLength: 2000, description: 'The licence the face is used under.' },
-        replace: { type: 'boolean', description: 'Replace a face the library already holds with this name, weight and style.' },
-        dryRun: { type: 'boolean', description: 'Check the upload without storing it.' },
-        siteId: { type: 'string', minLength: 1, description: 'The site to upload to, one of the ids libretto\'s site_context lists: needed with a token of several sites, left out with a one-site token.' },
+        fallback: { type: 'string', enum: ['arial', 'times', 'georgia', 'courier', 'menlo', 'none'], description: 'The system face its fallback is measured against, so the text does not jump when it loads.' },
+        load: { type: 'string', enum: ['auto', 'critical', 'deferred'], description: 'How it loads; auto when absent.' },
+        variation: { type: ['object', 'null'], additionalProperties: { type: 'number' }, description: 'Axes a variable file is pinned at, by their four-letter tag, such as { "wdth": 100 }.' },
+        licence: { type: ['string', 'null'], maxLength: 2000, description: 'The licence the face is used under (the foundry\'s terms or the licence file\'s name).' },
+        dryRun: DRY_RUN,
+        siteId: SITE_ID,
       },
-      required: ['path', 'name', 'style'],
+      required: ['path', 'name'],
       additionalProperties: false,
     },
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
   },
 ]
 
+const NEW_TOKEN = 'make a new token in the admin, in Account › Agents, set it with /plugin configure libretto@libretti and start a new session.'
+
 function endpoint() {
   const base = (process.env.LIBRETTO_URL || 'https://librettocms.com').replace(/\/+$/, '')
   const token = process.env.LIBRETTO_MCP_TOKEN
-  if (!token) throw new LibrettoError('No Libretto token: set it with /plugin configure libretto@libretti (Token del sito Libretto) or in LIBRETTO_MCP_TOKEN, then restart Claude Code.')
+  if (!token) throw new LibrettoError('No Libretto token: set it with /plugin configure libretto@libretti (Libretto site token) or in LIBRETTO_MCP_TOKEN, then restart Claude Code.')
   return { url: `${base}/api/mcp`, token }
 }
 
-/** A short JSON-RPC session with the remote Libretto MCP server; every tool call names `siteId` when one is given (a token of several sites needs it). */
+/** A short JSON-RPC session with the remote Libretto MCP server; the calls that take `siteId` name it when one is given. */
 async function remoteSession(siteId) {
   const { url, token } = endpoint()
   const headers = new Headers({
@@ -156,24 +158,24 @@ async function remoteSession(siteId) {
     const session = response.headers.get('mcp-session-id')
     if (session) headers.set('mcp-session-id', session)
     const text = await response.text()
-    if (response.status === 401) throw new TokenRefusal('Libretto refused the token (401): it is wrong, expired, revoked, or made before the Libretto was reset. Make a new one in the admin (Persone e accessi > Agenti e accessi MCP), set it with /plugin configure libretto@libretti and start a new session.', text.slice(0, 500))
-    if (response.status === 403) throw new TokenRefusal('Libretto accepted the token, but the person who made it can no longer work on its sites (403: site or workspace access, role or password). The workspace owner restores the access first; then make a new token in the admin (Persone e accessi > Agenti e accessi MCP), set it with /plugin configure libretto@libretti and start a new session.', text.slice(0, 500))
+    if (response.status === 401) throw new TokenRefusal(`Libretto refused the token (401): it is wrong, expired or revoked. To go on, ${NEW_TOKEN}`, text.slice(0, 500))
+    if (response.status === 403) throw new TokenRefusal(`Libretto accepted the token, but the person who made it can no longer work on its sites (403). The workspace owner gives the access back first; then ${NEW_TOKEN}`, text.slice(0, 500))
     if (!response.ok) throw new LibrettoError(`Libretto answered ${response.status} at ${url}`, text.slice(0, 500))
     if (!text) return null
     const type = response.headers.get('content-type') ?? ''
-    const json = type.includes('text/event-stream')
+    const body = type.includes('text/event-stream')
       ? text.split('\n').filter(line => line.startsWith('data:')).map(line => line.slice(5)).join('')
       : text
-    if (!json.trim().startsWith('{')) throw new LibrettoError(`Libretto answered something that is not JSON-RPC at ${url} (content-type ${type || 'none'})`, text.slice(0, 300))
-    return JSON.parse(json)
+    if (!body.trim().startsWith('{')) throw new LibrettoError(`Libretto answered something that is not JSON-RPC at ${url} (content-type ${type || 'none'})`, text.slice(0, 300))
+    return JSON.parse(body)
   }
   const call = async (name, args) => {
-    const answer = await send({ jsonrpc: '2.0', id: nextId++, method: 'tools/call', params: { name, arguments: siteId === undefined ? args : { siteId, ...args } } })
+    const params = { name, arguments: siteId !== undefined && TAKES_SITE.has(name) ? { siteId, ...args } : args }
+    const answer = await send({ jsonrpc: '2.0', id: nextId++, method: 'tools/call', params })
     if (answer?.error) throw new LibrettoError(`Libretto refused ${name}: ${answer.error.message}`, answer.error)
     const result = answer?.result
-    // Libretto answers tools as JSON text; older servers also sent structuredContent.
     const value = parseText(result) ?? result?.structuredContent
-    if (result?.isError) throw new LibrettoError(`Libretto refused ${name}`, value)
+    if (result?.isError) throw new LibrettoError(value?.message ?? `Libretto refused ${name}`, value)
     return value
   }
   await send({ jsonrpc: '2.0', id: nextId++, method: 'initialize', params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: SERVER } })
@@ -191,6 +193,20 @@ function parseText(result) {
   }
 }
 
+/** The site the session works on, as site_context answers it: refused for a token of several sites without siteId, and for a site not on the core engine. */
+async function coreSite(remote) {
+  const context = await remote.call('site_context', {})
+  if (Array.isArray(context?.sites)) {
+    throw new LibrettoError(`This token reaches several sites: give siteId, one of ${context.sites.map(site => `${site.id} (${site.name})`).join(', ')}.`)
+  }
+  if (context?.engine !== 'core') {
+    throw new LibrettoError('This site runs on Libretto\'s old engine. This plugin (1.0) works with core sites only: the Libretto plugin 0.5 serves the old engine.')
+  }
+  const resources = Array.isArray(context.resources) ? context.resources.map(each => (typeof each === 'string' ? each : each?.uri)).filter(Boolean) : []
+  const uriOf = path => resources.find(uri => uri.endsWith(`/${path}`))
+  return { context, mediaUri: uriOf('media'), spaceUri: uriOf('media-space') }
+}
+
 /** `~` and `~/...` start at the home directory, as in a shell; any other relative path is under the working directory. */
 function absolutePath(path) {
   if (path === '~' || path.startsWith('~/') || path.startsWith(`~${sep}`)) return join(homedir(), path.slice(1))
@@ -206,54 +222,67 @@ async function localFile(path) {
   return { file, bytes: info.size }
 }
 
-/** One operation alone in a batch on `remote`, at `revision` of the document it writes, dry-run or applied. */
-async function sendBatch(remote, name, input, revisionKey, revision, dryRun) {
-  const requestId = randomUUID()
-  const batch = {
-    format: 'libretto.batch',
-    v: 1,
-    requestId,
-    baseRevisions: { [revisionKey]: revision },
-    operations: [{ name, input }],
+const mb = bytes => `${(bytes / MiB).toFixed(1)} MB`
+
+/** A refusal for a file one door call cannot carry: an archive, or more than 20 MB. Undefined when the call can carry it. */
+function callRefusal(file, bytes, where) {
+  if (ARCHIVES.has(extname(file).toLowerCase())) {
+    return where === 'media'
+      ? `${basename(file)} is a ZIP archive: an agent uploads one file per call. Upload the archive in Admin › Media, which makes a folder of it, or unzip it and upload the folder's files.`
+      : `${basename(file)} is a ZIP archive: upload each font file on its own, or the archive in ${PERSON_PLACE.font}.`
   }
-  const answer = await remote.call(dryRun ? 'dry_run_ops' : 'apply_ops', batch)
-  return { requestId, answer }
+  if (bytes > MAX_CALL_BYTES) return `${basename(file)} is ${mb(bytes)}: an agent sends at most ${mb(MAX_CALL_BYTES)} in one call. A person uploads it in ${PERSON_PLACE[where]}.`
+  return undefined
 }
 
-/** One operation alone in a batch, on the current revision of the document it writes, dry-run or applied. */
-async function sendOperation(name, input, revisionKey, dryRun, siteId) {
-  const remote = await remoteSession(siteId)
-  const context = await remote.call('site_context', {})
-  return sendBatch(remote, name, input, revisionKey, context.baseRevisions[revisionKey], dryRun)
-}
-
-/** The content type media.upload takes for `file` of `bytes`, or a refusal saying how to fix it. */
+/** The content type media.uploadFile takes for `file` of `bytes`, or a refusal saying how to go on. */
 function mediaTypeOf(file, bytes) {
+  const refusal = callRefusal(file, bytes, 'media')
+  if (refusal) throw new LibrettoError(refusal)
   const contentType = CONTENT_TYPES.get(extname(file).toLowerCase())
-  if (!contentType) throw new LibrettoError(`Unknown file type ${extname(file) || '(none)'}; Libretto takes ${[...CONTENT_TYPES.keys()].join(' ')}`)
-  const kind = sizeKindOf(contentType)
-  const ceiling = MAX_BYTES[kind]
-  if (bytes > ceiling) {
-    const what = { image: 'images', document: 'PDF documents', video: 'videos through this tool' }[kind]
-    throw new LibrettoError(`${basename(file)} is ${(bytes / MiB).toFixed(1)} MB; Libretto takes ${what} up to ${ceiling / MiB} MB. ${TOO_LARGE_HINT[kind](file)}`)
-  }
+  if (!contentType) throw new LibrettoError(`Unknown file type ${extname(file) || '(none)'}: the media library takes ${[...CONTENT_TYPES.keys()].join(' ')}`)
   return contentType
 }
 
-/** The `svgRoles` of media.upload from the tool's colours; a refusal for colours on a file that is not an SVG. */
+/** One door alone in a batch, dry-run or applied; on the doors' upload limit, one more try after a minute. */
+async function sendDoor(remote, name, input, dryRun, message) {
+  const batch = () => ({ requestId: randomUUID(), baseRevisions: {}, ...(message ? { message } : {}), operations: [{ name, input }] })
+  const tool = dryRun ? 'dry_run_ops' : 'apply_ops'
+  try {
+    return await remote.call(tool, batch())
+  } catch (error) {
+    if (!(error instanceof LibrettoError) || error.details?.code !== 'rate_limited') throw error
+    await sleep(RATE_WAIT_MS)
+    return remote.call(tool, batch())
+  }
+}
+
+/** The `svgRoles` of media.uploadFile from the tool's colours; a refusal for colours on a file that is not an SVG. */
 function svgRolesOf(contentType, svgTextColor, svgAccentColor) {
   if (svgTextColor === undefined && svgAccentColor === undefined) return {}
   if (contentType !== 'image/svg+xml') throw new LibrettoError('svgTextColor and svgAccentColor are for an SVG file only')
   return { svgRoles: { ...(svgTextColor === undefined ? {} : { text: svgTextColor }), ...(svgAccentColor === undefined ? {} : { accent: svgAccentColor }) } }
 }
 
-async function uploadMediaFile({ path, folderId = null, svgTextColor, svgAccentColor, dryRun = false, siteId }) {
+/** What the entry of a new file says of it; a refusal when it comes with `replaces`, whose entry keeps its own. */
+function entryFieldsOf({ replaces, folderId, alt, caption, credit }) {
+  const fields = { ...(folderId === undefined ? {} : { folderId }), ...(alt === undefined ? {} : { alt }), ...(caption === undefined ? {} : { caption }), ...(credit === undefined ? {} : { credit }) }
+  if (replaces === undefined) return fields
+  if (Object.keys(fields).length > 0) throw new LibrettoError('A replaced file keeps its entry\'s folder, alt text, caption and credit: send replaces alone, then change the words with media.setMeta.')
+  return { replaces }
+}
+
+async function uploadMediaFile({ path, folderId, alt, caption, credit, replaces, svgTextColor, svgAccentColor, dryRun = false, siteId }) {
   const { file, bytes } = await localFile(path)
   const contentType = mediaTypeOf(file, bytes)
-  const roles = svgRolesOf(contentType, svgTextColor, svgAccentColor)
-  const data = (await readFile(file)).toString('base64')
-  const { requestId, answer } = await sendOperation('media.upload', { filename: basename(file), contentType, data, folderId, ...roles }, 'media', dryRun, siteId)
-  return { dryRun, requestId, file, bytes, contentType, answer }
+  const input = {
+    filename: basename(file), contentType, data: (await readFile(file)).toString('base64'),
+    ...entryFieldsOf({ replaces, folderId, alt, caption, credit }), ...svgRolesOf(contentType, svgTextColor, svgAccentColor),
+  }
+  const remote = await remoteSession(siteId)
+  await coreSite(remote)
+  const answer = await sendDoor(remote, 'media.uploadFile', input, dryRun, `${replaces === undefined ? 'Uploaded' : 'Replaced the file with'} ${basename(file)}`)
+  return { dryRun, file, bytes, contentType, answer }
 }
 
 /** A case-insensitive test of a file name against `pattern`: `*`, `?` and `{a,b}`. */
@@ -278,26 +307,35 @@ async function filesIn(directory, matches, recursive) {
   return files
 }
 
-/** Each library file's name and size, mapped to its media id; null when the library is larger than a bulk upload reads. */
-async function libraryIndex(remote, revision) {
-  const index = new Map()
-  let quota = null
-  for (let page = 1; page <= MAX_LIBRARY_PAGES; page++) {
-    const { answer } = await sendBatch(remote, 'media.list', { page, perPage: 100 }, 'media', revision, true)
-    const list = answer?.results?.[0]?.output
-    if (!list) throw new LibrettoError('Libretto answered media.list without a list', answer)
-    quota ??= { usedBytes: list.usedBytes, quotaBytes: list.quotaBytes }
-    for (const item of list.items) index.set(`${item.filename}\u0000${item.size}`, item.id)
-    if (page * list.perPage >= list.total) return { index, quota }
-  }
-  return { index: null, quota }
+/** The value of the resource at uri, read through read_resources. */
+async function readResource(remote, uri) {
+  const answer = await remote.call('read_resources', { uris: [uri] })
+  const value = answer?.resources?.[uri]
+  if (value === undefined) throw new LibrettoError(`Libretto answered no ${uri}`, answer)
+  return value
 }
 
-async function uploadMediaFiles({ paths = [], directory, pattern, recursive = false, folderId = null, skipExisting = true, dryRun = false, siteId }) {
+/**
+ * Each library file's name and size, mapped to its media id, read from the media resource a page at a time (its
+ * `bounded` entry for `items` names the URI that reads on); null when the library is longer than a bulk upload reads.
+ */
+async function libraryIndex(remote, mediaUri) {
+  const index = new Map()
+  let uri = mediaUri
+  for (let page = 0; page < MAX_LIBRARY_PAGES && uri; page++) {
+    const read = await readResource(remote, uri)
+    for (const item of read.items ?? []) index.set(`${item.name}\u0000${item.size}`, item.id)
+    uri = (read.bounded ?? []).find(cut => cut.list === 'items')?.next
+  }
+  return uri ? null : index
+}
+
+async function uploadMediaFiles({ paths = [], directory, pattern, recursive = false, folderId, skipExisting = true, dryRun = false, siteId }) {
   const base = directory === undefined ? null : absolutePath(directory)
-  const listed = base === null ? [] : await filesIn(base, pattern ? nameMatcher(pattern) : name => CONTENT_TYPES.has(extname(name).toLowerCase()), recursive)
+  const takes = name => CONTENT_TYPES.has(extname(name).toLowerCase()) || ARCHIVES.has(extname(name).toLowerCase())
+  const listed = base === null ? [] : await filesIn(base, pattern ? nameMatcher(pattern) : takes, recursive)
   const files = [...new Set([...paths.map(absolutePath), ...listed])]
-  if (files.length === 0) throw new LibrettoError(base === null ? 'Give paths or a directory' : `No file in ${base} matches ${pattern ?? 'a known type'}`)
+  if (files.length === 0) throw new LibrettoError(base === null ? 'Give paths or a directory' : `No file in ${base} matches ${pattern ?? 'a type the media library takes'}`)
   if (files.length > MAX_FILES) throw new LibrettoError(`${files.length} files: at most ${MAX_FILES} a call. Give the first ${MAX_FILES} (a narrower pattern or a list of paths), then call again with the rest.`)
   const nameOf = file => (base !== null && file.startsWith(base + sep) ? relative(base, file) : file)
 
@@ -314,37 +352,28 @@ async function uploadMediaFiles({ paths = [], directory, pattern, recursive = fa
   }
 
   const remote = await remoteSession(siteId)
-  let revision = (await remote.call('site_context', {})).baseRevisions.media
+  const { mediaUri, spaceUri } = await coreSite(remote)
+  const library = skipExisting && mediaUri ? await libraryIndex(remote, mediaUri) : new Map()
   const skipped = {}
-  const library = await libraryIndex(remote, revision)
   const toUpload = []
   for (const entry of ready) {
-    const existing = skipExisting ? library.index?.get(`${basename(entry.file)}\u0000${entry.bytes}`) : undefined
+    const existing = library?.get(`${basename(entry.file)}\u0000${entry.bytes}`)
     if (existing) skipped[nameOf(entry.file)] = existing
     else toUpload.push(entry)
   }
   const totalBytes = toUpload.reduce((sum, entry) => sum + entry.bytes, 0)
-  const { usedBytes, quotaBytes } = library.quota ?? {}
-  if (typeof quotaBytes === 'number' && typeof usedBytes === 'number' && usedBytes + totalBytes > quotaBytes) {
-    throw new LibrettoError(`These ${toUpload.length} files take ${(totalBytes / 1048576).toFixed(1)} MB and the media library has ${((quotaBytes - usedBytes) / 1048576).toFixed(1)} MB left: upload fewer, or free space in the admin (Media) first.`)
+  const space = spaceUri ? await readResource(remote, spaceUri) : null
+  if (typeof space?.quotaBytes === 'number' && typeof space?.usedBytes === 'number' && space.usedBytes + totalBytes > space.quotaBytes) {
+    throw new LibrettoError(`These ${toUpload.length} files take ${mb(totalBytes)} and the media library has ${mb(Math.max(0, space.quotaBytes - space.usedBytes))} left: upload fewer, or free space in Admin › Media first.`)
   }
 
   const uploaded = {}
   for (const [position, entry] of toUpload.entries()) {
     if (dryRun && position > 0) break
-    const input = { filename: basename(entry.file), contentType: entry.contentType, data: (await readFile(entry.file)).toString('base64'), folderId }
+    const input = { filename: basename(entry.file), contentType: entry.contentType, data: (await readFile(entry.file)).toString('base64'), ...(folderId === undefined ? {} : { folderId }) }
     try {
-      let result
-      try {
-        result = await sendBatch(remote, 'media.upload', input, 'media', revision, dryRun)
-      } catch (error) {
-        // Someone else changed the library meanwhile: take its revision and try once more.
-        if (!(error instanceof LibrettoError) || error.details?.status !== 409) throw error
-        revision = (await remote.call('site_context', {})).baseRevisions.media
-        result = await sendBatch(remote, 'media.upload', input, 'media', revision, dryRun)
-      }
-      if (!dryRun) revision = result.answer?.revisions?.media ?? revision
-      uploaded[nameOf(entry.file)] = result.answer?.results?.[0]?.output?.id ?? null
+      const answer = await sendDoor(remote, 'media.uploadFile', input, dryRun, `Uploaded ${basename(entry.file)}`)
+      uploaded[nameOf(entry.file)] = answer?.id ?? null
     } catch (error) {
       if (error instanceof TokenRefusal || !(error instanceof LibrettoError)) throw error
       refused[nameOf(entry.file)] = error.details?.message ?? error.message
@@ -357,25 +386,25 @@ async function uploadMediaFiles({ paths = [], directory, pattern, recursive = fa
     ...(dryRun ? { checkedOnServer: Object.keys(uploaded) } : { uploaded }),
     skipped,
     refused,
-    ...(library.index === null ? { note: `The library has more than ${MAX_LIBRARY_PAGES * 100} files: only the first ${MAX_LIBRARY_PAGES * 100} were checked for duplicates.` } : {}),
+    ...(library === null ? { note: `The library is longer than ${MAX_LIBRARY_PAGES} reads: only its first files were checked for duplicates.` } : {}),
   }
 }
 
-async function uploadFontFile({ path, name, weight, style, display, fallbackStack, licence, replace, dryRun = false, siteId }) {
+async function uploadFontFile({ path, name, weight, style, display, fallbackStack, fallback, load, variation, licence, dryRun = false, siteId }) {
   const { file, bytes } = await localFile(path)
-  if (!FONT_EXTENSIONS.has(extname(file).toLowerCase())) throw new LibrettoError(`${basename(file)} is not a font file (.woff2, .woff, .ttf or .otf).`)
-  const data = (await readFile(file)).toString('base64')
-  if (data.length > MAX_FONT_BASE64) throw new LibrettoError(`${basename(file)} is ${(bytes / 1048576).toFixed(1)} MB, more than font.upload carries.`)
+  const refusal = callRefusal(file, bytes, 'font')
+  if (refusal) throw new LibrettoError(refusal)
+  const contentType = FONT_TYPES.get(extname(file).toLowerCase())
+  if (!contentType) throw new LibrettoError(`${basename(file)} is not a font file (.woff2, .woff, .ttf or .otf).`)
+  const given = { weight, style, display, fallbackStack, fallback, load, variation, licence }
   const input = {
-    fileName: basename(file), name, style, data,
-    ...(weight === undefined ? {} : { weight }),
-    ...(display === undefined ? {} : { display }),
-    ...(fallbackStack === undefined ? {} : { fallbackStack }),
-    ...(licence === undefined ? {} : { licence }),
-    ...(replace === undefined ? {} : { replace }),
+    fileName: basename(file), contentType, data: (await readFile(file)).toString('base64'), name,
+    ...Object.fromEntries(Object.entries(given).filter(([, value]) => value !== undefined)),
   }
-  const { requestId, answer } = await sendOperation('font.upload', input, 'fonts', dryRun, siteId)
-  return { dryRun, requestId, file, bytes, answer }
+  const remote = await remoteSession(siteId)
+  await coreSite(remote)
+  const answer = await sendDoor(remote, 'font.uploadFace', input, dryRun, `Uploaded the font ${name}`)
+  return { dryRun, file, bytes, answer }
 }
 
 const TOOL_HANDLERS = { upload_media_file: uploadMediaFile, upload_media_files: uploadMediaFiles, upload_font_file: uploadFontFile }
