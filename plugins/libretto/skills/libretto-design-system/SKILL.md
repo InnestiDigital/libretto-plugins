@@ -1,107 +1,85 @@
 ---
 name: libretto-design-system
-description: Read and change a Libretto site's design system through the libretto MCP server - tokens (colours, type, space, radius), component variants and cells, mixins and themes, under the AA contrast gate. Use when the user wants to change how something looks across the site, add or edit a token, a button or card variant, a theme or a mixin.
+description: Read and change a core Libretto site's design system through the libretto MCP server - tokens (colours, type, space, radius), themes and token sets, component variants and cells, mixins, breakpoints and fonts, with the contrast check that corrects or refuses unreadable text. Use when the user wants to change how something looks across the site, add or edit a token, a button or card variant, a theme, a mixin or a font.
 ---
 
 # The Libretto design system
 
-The design system is where a site's appearance lives. Pages point at it (tokens in node styles, a component's variant, a mixin, a theme), so one change here updates every page that uses it. Prefer a change here to a local style on a node whenever the user means "everywhere".
+The design system is where a site's appearance lives. Pages point at it (a token in a part's style, a component's variant, a mixin, a theme), so one change here reaches every page that uses it. Prefer a change here to a local style whenever the user means "everywhere".
 
-Use the editing loop of the `libretto-editing` skill (with its "Which site" rules on a token of several sites): `site_context`, read, `apply_ops` (`dry_run_ops` first only for a probe, an import or a batch that needs a confirmation: rule 5 there), verify, `history.undo` to go back. The contrast gate judges `apply_ops` the same way: a refused write changes nothing. Every operation below goes in a `libretto.batch`; its input is in the table below and in the [design-system reference](../../reference/operations/design-system.md) (`Grep` `^## designSystem.setTokens` with about 40 lines after it). Call `discover_operations` only for a shape you still lack, one name at a time: four names with `schemas: true` answered 31,000 characters in a real session.
-
-## One user-visible change per batch
-
-A batch is the unit of undo, and a brief usually names several changes. Give each its own batch: a new accent colour, larger section titles, another look for the primary button and tighter spacing are four batches, even when the user asked for all of them in one message. Inside one change, keep together what it needs: the palette steps and the roles on them (so the contrast gate judges the end state), a new token and the nodes re-pointed at it. Never put a component's look in the batch of a token change. Apply them in order, each on the `revisions` of the previous answer, and tell the user the result per change; when the user asked to see them first, dry-run each, report, then apply. Then "annulla solo il pulsante" is one undo of one batch, not a hand-made edit. Rule 6 of `libretto-editing` has the rest.
-
-## Talking about the design system
-
-The person sees the admin's design system pages, not token files. Name what a change does, never its path or key: "il colore d'accento", "la dimensione dei titoli di sezione", "la scala degli spazi tra le sezioni", "lo stile Contorno del pulsante" (a variant's **label**), not `color.text.accent`, `font.size.display`, `space.section-y.4`, `sm` / `md` / `lg` or `secondary`. Give values in their units (#1F5C99, 48 px, 96 px), and contrast as a ratio with its threshold ("4,9:1, il minimo è 4,5:1"), never a warning count or a reason code.
-
-A whole design update (a brief, a reference, a Figma file) has its own step-by-step recipe: [design update](../../reference/recipes/design-update.md). Contrast and accessibility: [contrast and a11y](../../reference/recipes/contrast-and-a11y.md). Every design-system operation: [design-system reference](../../reference/operations/design-system.md); brand-wide setup: [brand](../../reference/operations/brand.md).
+Use the loop of the `libretto-editing` skill (its "Which site" rules on a token of several sites): `site_context`, read, `apply_ops`, verify, undo with the answer's `undo`. Each op below goes in a batch with its `baseRevisions`, `requestId` and `message`; its whole input is in the [design-system reference](../../reference/operations/design-system.md) and [components reference](../../reference/operations/components.md) (`Grep` `^## token.set` with about 40 lines after it).
 
 ## Read first, small
 
-Read only what the change needs, through resource queries (each is a registry read you could also run through `dry_run_ops`). One narrow group per URI: a whole family (`?tokens=color`) or three groups in one call answered 55,000 characters in a real session.
+- `tokens`: the design tokens of the default theme, by set (`core`, `semantic-light`, ...), each with its `$type`, its `$value` (a literal, or an alias such as `{color.palette.brand.600}`) and its description. `tokens/<theme>`: the tokens as one theme sets them.
+- `design`: the design system as Editor › Design lists it: themes, token sets, fonts with what uses each, site styles (mixins), breakpoints.
+- `definition/<key>`: one component (its props, variant axes, cells, slots and parts). The keys are in `site_context`'s definitions.
+- `contrast/<pageId>`: a page's text and ground pairs and how readable each is. `site-findings`: how many findings each page has.
+- `design-export`: the whole design system as DTCG files, for a person who wants it as a file.
 
-- `libretto://site/<siteId>/brand`: the brand brief. Read it before you pick colours, write copy or compose a brand canvas, and follow its concept and do and don't rules. Each brand preset, the default first, names its palette roles as tokens with their values (`brandPrimary`: `color.bg.accent`, `#e8336d`) and its headline and body type roles with their fonts: a colour for the brand is one of those tokens.
-- `libretto://site/<siteId>/design-system` (`designSystem.read`): the index, with the revision, sets, themes, every component's variant keys and each token group's size. Read it once; then ask only the part you need, which answers that part alone (add `index=true` to get the index again with it): the narrowest token groups the change touches, one or two at a time (`?tokens=color.text`, `?tokens=color.palette.brand`, `?tokens=space.section-y`). Broad groups are large: `?tokens=color,space,font,type` answered 32 KB on one site; `?components=true` gives each component's sizes, states and parts (the segments of a cell key). Never ask for `css=true` unless you need the stylesheet.
-  Each token answers its `path`, `type` and `sets` (its raw value in each set that defines it: what you copy, change and write back), then its resolved value: `value` once when every theme resolves it the same way, or `values` by theme (`values.light`, `values.dark`) only when the themes differ, as for a role the dark set overrides. A token with `values` changes per theme: write the set of the theme the user means.
-- `libretto://site/<siteId>/component/<key>?variant=primary&state=hover&own=true` (`designSystem.readComponent`): only the cells you mean. `own=true` keeps the cells actually set; filter by `size`, `part`, `breakpoint`, `property` too. Answers page by `limit` (100) with `total` and `nextCursor`: a large component has thousands of cells, so filter first.
-- `designSystem.lint` and `designSystem.diff` (read-only, through `dry_run_ops`) answer a summary: `findingCount`, `findingsBySeverity`, `findingsByReason`, the `worst` 20 findings (errors first, then the contrast pairs furthest below what they need), `overrideCount` and the first 100 `overrides`. `full: true` gives the whole answer, stylesheet included: avoid it.
-- `access.read` answers your own level in each design-system area on this site: read it before a design update to know what you may change.
+Read only the groups the change needs, and never compute what a token resolves to yourself: the `tokens` read and `render_preview` say it.
 
-## Check the answer of a write
+## Who may change what
 
-A design-system write (in `dry_run_ops` or `apply_ops`) answers its change, not the whole system. By default the batch answers a receipt; in each result:
+`discover_operations` says it per op (`allowed`, with `reason` when not), and the refusal names who can:
 
-- `dryRun` is `true` in a dry run; `changed` says whether anything would move; `revision` is the design-system revision it reaches.
-- `overrides`: each override it adds, changes or removes, by name (`added token:core:space.section-y.scale`, `changed cell:button:primary.all.default.container.base.background`). Check they are exactly what you meant (no extra token, the right set and theme). `"answer": "full"` on the batch gives each change in full (`changes`, with the value before and after).
-- `errors`: must be empty before you apply (an AA refusal comes back as a `422` instead).
-- `warnings`: at most 5 in the receipt (20 with `"answer": "full"`), about what you changed (an AAA pair of the cell you touched, a lint note on your token). Tell the user about them in plain words; the counts are for you.
-- `warningCount` and `warningsByReason`: the whole system's warnings by reason (`below-aaa`, `decorative`, `asset-missing`...). Compare the counts before and after: a jump means your change hurt pairs elsewhere.
+- A **Designer** sets a palette colour to a value of its own (`token.set` on a `color.palette.*` token with a literal `$value`), picks a part's or a page's theme (`tree.set_theme`), styles parts (`tree.set_style`) and picks variants (`instance.setVariant`).
+- An **Administrator** also sets aliases and every other token (roles, type, space, radius), themes and token sets, components and their cells, mixins, breakpoints, guidelines and fonts.
+- **Accepting a hard-to-read colour pair** is a person's decision, the site administrator's, whatever an agent's role: hand them Editor › Checks (`urls.places["editor.checks"]`).
 
-## How it is built
+A refusal is not the token's fault: a new token gets the same answer. Tell the user which change needs whom, and wait; never route around it (no raw value on the parts instead of the token).
 
-- **Sets** hold token values: `core` (palette and raw scales), `semantic-light` and `semantic-dark` (roles such as `color.text.accent`, usually aliases of palette steps like `{color.palette.brand.500}`).
-- **Page and link roles.** `color.bg.page` paints the whole page, to its end, behind sections that have no background of their own. `color.text.link` and `color.text.link-hover` are optional: add them to `semantic-light` and `semantic-dark` and every link with no variant of its own (a link node, the wordmark, a form's consent link) takes them; each is checked as body text on `color.bg.section` and `color.bg.page`. Without them such links take `color.bg.accent`.
-- **Themes** stack sets: `light` = `core` + `semantic-light`; `dark` adds `semantic-dark`. A node or section takes a theme with `set_theme` or `designSystem.setScheme`.
-- **Components** (`button`, `card`, `navbar`, ...) have variants, sizes and states. A **cell** is one property of one part, named `<variant>.<size or all>.<state>.<part>.base.<property>`, for example `primary.all.hover.container.base.background`. Copy cell names from the component resource. Every part with a `typography` cell also takes a `text-wrap` keyword cell (`wrap`, `balance`, `pretty`, `nowrap`, a bare string, no token): `"section-heading"`, `{ "cell": "default.all.default.title.base.text-wrap", "value": "balance" }`. Without one the part wraps as the text around it.
-- **Text styles** (`type.*`, type `typography`) hold `fontFamily`, `fontWeight`, `fontSize` (one value or one per breakpoint), `lineHeight`, `letterSpacing`, `textCase` and `textWrap` (`wrap`, `balance`, `pretty`, `nowrap`: how its lines break; without it the text wraps as the text around it). `"textWrap": "balance"` on the heading styles and `"pretty"` on the body style set every rich text's headings and paragraphs at once; a part's own `text-wrap` cell wins over it. Each of the first five is a literal or an alias to its token group: `font.family.*`, `font.weight.*`, `font.size.*`, `font.line-height.*` (a unitless `number` above 0) and `font.letter-spacing.*` (a `dimension`, such as `-0.02em`). When several styles share a leading or a tracking ("the text styles use one line height for reading"), create the token once and alias it from each style, in one `designSystem.setTokens`: `{ "set": "core", "path": "font.line-height.prose", "type": "number", "value": 1.6 }`, then each style's `"lineHeight": "{font.line-height.prose}"`. A style keeps its own number when nothing shares it. A node style or a mixin may name the tokens too (`"line-height": "{font.line-height.prose}"`). Removing a line height or letter spacing token while a style uses it is refused (`409`, `in-use`, with the cells): point the styles at another value first.
-- **Mixins** are named style sheets a node can carry (`set_mixins`), built from tokens.
-- **Space scale factors.** A `number` token named `scale` in the `space` group or a subgroup (`space.scale`, `space.section-y.scale`) multiplies every dimension of that group and its subgroups, aliases included, and everything downstream (component cells, the stylesheet, the contrast gate) reads the scaled values. "Section spacing 25 % tighter" is one write: `{ "set": "core", "path": "space.section-y.scale", "type": "number", "value": 0.75 }`. The factor must be above 0. Undo it, or set it back to 1, to return. It scales tokens only: spaces written by hand on nodes do not follow until they point at a token; and a node style or mixin cannot use the factor as a length.
+## One user-visible change per batch
 
-## Operations
+A batch is the unit of undo. A new accent colour, larger section titles, another look for the primary button and tighter spacing are four batches, even when they came in one message. Inside one change keep together what it needs: the palette step and the roles on it (the contrast check judges the end state), a new token and the parts re-pointed at it. Apply them in order, each on the `revisions` of the previous answer, and tell the user the result per change.
 
-| Goal | Operation | Input (see `discover_operations`) |
+The exception is the guide's **brand setup** (three colours, a type pairing, a type scale, spacing and corners): one batch of `token.set` on the tokens the site already has, so one undo takes the whole setup back.
+
+## Talking about the design system
+
+The person sees Editor › Design, not token files. Name what a change does, never its path or key: "il colore d'accento", "la dimensione dei titoli di sezione", "la scala degli spazi tra le sezioni", "lo stile Contorno del pulsante" (a variant's label, not its key). Give values in their units (#1F5C99, 48 px), and contrast as a ratio with its threshold ("4,9:1, il minimo è 4,5:1").
+
+## The ops
+
+| Goal | Op | Input |
 |---|---|---|
-| Change one token | `designSystem.setToken` | `{ "set": "semantic-light", "path": "color.text.accent", "type": "color", "value": "{color.palette.brand.500}" }` |
-| Change several together | `designSystem.setTokens` | `{ "writes": [ {set, path, type, value}, ... ] }` |
-| Share a line height or letter spacing across text styles | `designSystem.setTokens` | the `font.line-height.*` / `font.letter-spacing.*` token and each `type.*` style that aliases it, in one batch |
-| Scale a space group ("25 % tighter") | `designSystem.setToken` | `{ "set": "core", "path": "space.section-y.scale", "type": "number", "value": 0.75 }` |
-| Change a variant's look | `designSystem.setComponentCell` | `{ "component": "button", "cells": [{ "cell": "primary.all.hover.container.base.background", "value": "{color.bg.accent-strong}" }] }` |
-| New variant | `designSystem.createVariant` | `{ "component": "button", "variant": "ghost", "label": "Ghost", "from": "primary" }` |
-| Rename / remove a variant | `designSystem.updateVariant` / `designSystem.deleteVariant` | delete needs `"confirmed": ["destructive"]` |
-| Turn a node's local overrides into a variant | `designSystem.promoteVariant` | `{ "pageId", "nodeId", "variant", "label" }` |
-| Theme | `designSystem.createTheme`, `designSystem.updateTheme`, `designSystem.activateSet`, `designSystem.createSet` | |
-| Theme of a node | `designSystem.setScheme` | `{ "pageId", "nodeId", "theme": "dark" }` |
-| Mixin | `designSystem.setMixin` / `designSystem.deleteMixin` | `{ "key": "band", "label": "Band", "sheet": { "padding-block": "{space.4}" } }` |
-| Import tokens (a Tokens Studio / W3C file) | `designSystem.importTokens` | dry run first: it can touch many tokens |
-| What differs from the blueprint; problems | `designSystem.diff`, `designSystem.lint` | read-only, through `dry_run_ops` |
-| Back to the blueprint | `designSystem.resetToBlueprint` | destructive: the user's explicit yes |
-| Breakpoints | `breakpoints.update` | the whole list; as the access settings allow |
-| Google font | `font.importGoogle` | `{ "family": "DM Sans", "weights": [400, 700], "styles": ["normal"] }` (`display` defaults to `swap`; every subset Google serves, each with its `unicode-range`) |
-| Font file (WOFF2) | `upload_font_file` of `libretto-files` (it sends `font.upload`) | licence first; one face per call: `{ "path", "name", "weight", "style", "licence" }`; a variable file is one face for its whole range: `"weight": [200, 800]`, or no `weight` and the file's own range is read, and then any weight inside it (370) is a valid `fontWeight`; a variable file the library holds at one weight (`axesJson` null, text drawn at that weight only) is fixed by uploading it again with no `weight` and `replace: true` (on the user's word), then a publish; then a `fontFamily` token. A text style whose new weight no face of its family draws is refused (`422`, `font-weight`, with the faces' ranges), and so is `fontStyle: "italic"` or `"oblique"` where the family has neither an italic face nor a `slnt` axis (`italic: true`); a variable file with a `slnt` axis is uploaded as `"style": "normal"` and draws the slant itself. Without `font.upload` (`unknown_operation`) or without the file tool: the Typography page in the admin, `libretto-admin-browser` |
+| A token: a colour, a size, a font family, a shadow, an alias | `token.set` | `{ "set": "core", "path": "color.palette.brand.500", "token": { "$type": "color", "$value": "#2f6f8f" } }`; a role: `{ "set": "semantic-light", "path": "color.text.accent", "token": { "$type": "color", "$value": "{color.palette.brand.600}" } }`; `"token": null` clears it |
+| A theme: its label, the sets it reads, a draft, where it applies by itself | `theme.set` | `{ "key": "dark", "theme": { "label": "Scuro", "sets": ["core", "semantic-light", "semantic-dark"], "activation": { "prefersColorScheme": "dark" } } }`: the theme whole |
+| A token set a non-default theme reads | `themeSet.set` | `{ "key": "semantic-dark", "tokens": { ... } }`: the set whole, as a DTCG tree |
+| A part or a section in another theme | `tree.set_theme` | `{ "at": { "page": "<pageId>" }, "node": "<nodeId>", "theme": "dark" }` |
+| One look of a component: a variant, a size, a state, a part | `cell.set` | `{ "key": "component.section-head", "cell": "dark.*.*.root.*.background-color", "value": { "$token": "color.bg.inverse" } }`: the cell is `<variant>.<size>.<state>.<part>.<breakpoint>.<property>`, `*` for any |
+| A component's variants | `component.setVariantAxes` | `{ "key": "...", "axes": { "tone": ["light", "dark"] } }`, the axes whole; `hidden` stops offering a value |
+| A shared named style | `mixin.set`, then `tree.set_mixins` on the parts | `{ "key": "didascalia", "mixin": { "label": "Didascalia", "style": { "base": { "font-size": { "$token": "font.size.small" } } } } }` |
+| A breakpoint | `breakpoint.set`, `breakpoint.rename` | `{ "name": "md", "query": "(min-width: 768px)" }`; rename rewrites every style that names it |
+| A Google Fonts family | the `font.addGoogle` door | `{ "family": "Inter", "weights": [400, 700], "italic": false }`, alone in its batch |
+| A font file on this computer | `upload_font_file` of `libretto-files` (the `font.uploadFace` door) | `{ "path", "name", "weight", "style", "licence" }`; a variable file: `"weight": [200, 800]` or no weight |
+| A face's settings (how it loads, pinned axes, fallback) | the `font.setFace` door | `{ "id": "<fontId>", "load": "swap" }` |
+| Then the family on the text styles | `token.set` | the `fontFamily` tokens the styles read |
+| A rule for what a role may change | `guideline.set` | `fixed`, `free` or a `choice` of tokens, with the note people read |
 
-## Who may change what (access settings)
+Every op's refusals and the rest of its input are in its description (`discover_operations` with `names`). Removing a token, a mixin or a breakpoint that parts still use is refused with where it is used: point them elsewhere first.
 
-Each site decides which design-system areas an editor may change: `palette`, `semantic-colours`, `font-families`, `type-presets`, `space`, `radius`, `borders`, `shadow`, `motion`, `grid`, `assets`, `components`, `variants` (`pick` = only choose a variant on a node), `themes` (`switch-default`), `import-export`, `reset`. A platform admin, and the workspace owner on the sites of their own workspace, may edit every area. Any other editor gets what the site's access settings give editors: by default only the palette, and only view the rest.
+## The contrast check
 
-A refusal names the area: `403 {"message": "Design system semantic-colours: edit permission required; role has view", "data": {"kind": "access", "area": "semantic-colours", "granted": "view", "needed": "edit"}}`. It is not the token: a new token gets the same answer. Tell the user which areas the job needs: the workspace owner can make the change (or ask their own Claude), and only a platform admin changes what editors may do. Then wait; do not route around it (no hard-coded values on the nodes instead of the token). A workspace owner refused on a site of their own workspace is a bug: open a ticket (`libretto-report-issue`, category `refusal`). `access.read` answers your levels before you try.
+Every write is checked on its end state, in every theme. When a text colour falls below WCAG AA on its ground (4.5:1 for body text; each pair's answer says the ratio it measures and the one it needs), Libretto either:
 
-## The AA contrast gate
+- **corrects it in the same step**: the answer's `corrections` names each text whose colour it changed, with the ratios before and after. Tell the person what was changed and why ("ho scurito il grigio delle didascalie: era 2,8:1, ora 6,7:1"); one undo takes back the change and its corrections together; or
+- **refuses the batch** (`contrast.uncorrectable`, with the pair): no colour of the site keeps that text readable there. Pick another palette step, or change the palette step and the role on it together in one batch (the check reads only the end state).
 
-Every design-system change is checked in every theme, on the end state of the batch. A text or icon colour that falls below WCAG AA on its background (4.5:1 for text, 3:1 for icons and other non-text parts) refuses the whole batch with `422` and lists each failing pair, such as `theme light components/accordion.json ...: {color.text.accent} on {color.bg.section} is 1.10:1, below 4.5:1`. AAA shortfalls come back as `warning` findings and do not block.
+To try a colour without keeping it, `dry_run_ops` the `token.set` and read its `corrections` and refusals: nothing is stored. `contrast/<pageId>` lists a page's pairs with their ratios. Never compute a ratio with code.
 
-### Measure contrast with the gate
+Keeping an unreadable pair on purpose is a person's decision: `contrast.bypass` (one page) and `component.acceptContrast` (every instance of a component) are the site administrator's, in Editor › Checks. An agent is refused them; hand the person `urls.places["editor.checks"]`. See [contrast and accessibility](../../reference/recipes/contrast-and-a11y.md).
 
-Never compute WCAG ratios yourself with Bash, Python or Node: the person's Claude may not be allowed to run code, and the gate's number is the one Libretto enforces. To know whether a colour is readable, dry-run it:
+## A whole design update
 
-1. `dry_run_ops` a `designSystem.setTokens` with the candidate (the palette step and the roles on it). Nothing is saved.
-2. Read the answer:
-   - **refused** (`422`): the `detail` lists each failing pair with its ratio and threshold (`... on {color.bg.section} is 4.1:1, below 4.5:1`), at most 20 lines, the rest counted in `omitted`;
-   - **accepted**: the result's `warnings` lists the pairs below AAA that name what you changed, each with `foreground`, `background`, `ratio` and `required` (`warningCount` is the total): at most 5 in the default receipt, so add `"answer": "full"` to this dry run for up to 20. A pair missing from the list has no number: say it passes AA (at least 4.5:1 for text, 3:1 for icons) rather than guess one.
-3. To find the nearest readable shade, dry-run one candidate at a time, a step darker or lighter, until it is accepted, and give the user the ratio the gate gave.
-
-`designSystem.lint` (through `dry_run_ops`) answers the same for the whole system: its `worst` list carries the ratio of each pair.
-
-When the gate refuses: pick another palette step, or change the palette step and the role on it together in one `designSystem.setTokens` (the gate reads only the end state). Tell the user which pairs failed in plain words ("il testo d'accento sullo sfondo delle sezioni ha un contrasto 3,9:1, serve almeno 4,5:1"), not token paths. `brand.setup` accepts `acknowledgeContrast: true`; set it only when the user explicitly says to save anyway.
+A brief, a reference or a Figma file has its own recipe: [design update](../../reference/recipes/design-update.md). Importing a whole token file (Tokens Studio, DTCG, Figma variables) is done by a person in Editor › Design (Import and export); an agent writes tokens one `token.set` at a time, or a non-default theme's set whole with `themeSet.set`.
 
 ## Never
 
-- Never write a raw colour, size or font where a token exists, in a cell, a mixin or a node style.
-- Never invent a token path by accident: `setToken` on a path that does not exist **creates** a new token. Check the path in `design-system?tokens=<its group>` first; add a new token only when the user wants one.
-- Never edit `core` palette values when the user means a role ("the accent text"): change the role in `semantic-light` / `semantic-dark`.
-- Never delete a variant, a mixin or a theme, or run `designSystem.resetToBlueprint`, without the user's explicit yes: they are destructive and pages may use them.
-- Never work around the contrast gate or a `403` (the site's access settings may lock parts of the design system). If the refusal looks wrong, open a ticket (`libretto-report-issue`).
+- Never write a raw colour, size or font where a token exists, in a cell, a mixin or a part's style.
+- Never invent a token path by accident: `token.set` on a path that does not exist **creates** a token. Check the path in `tokens` first; add one only when the user wants it.
+- Never repaint a palette step when the user means a role ("the accent text"): change the role in `semantic-light` (and the dark set when the site has one).
+- Never clear a token, a theme, a mixin or a variant without the user's explicit yes: pages may use them.
+- Never work around the contrast check or a refusal. If it looks wrong, report it (`libretto-report-issue`).
 - Never finish without looking: a token change reaches every page (`libretto-visual-check`, two pages, both widths).
 - Never add a client-specific component or variant name; variants describe a role (`ghost`, `quiet`, `display`), not a page.
