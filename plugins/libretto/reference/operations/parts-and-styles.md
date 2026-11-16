@@ -88,7 +88,7 @@ Set or clear props of a node: its own name, a link's address and target, a pictu
 |---|---|---|---|
 | `at` | { page: uuid } \| { component: string } | yes | Which tree the node is in: `{ page: <pageId> }` for a page's own tree (ids in site_context pages), or `{ component: <key> }` for a definition's own tree (a component, or the header, footer or layout that frames pages; keys in site_context definitions). A part of the header shown on every page is in its definition, not on the page. |
 | `node` | string | yes | A node id: 8 characters of a-z and 0-9, unique in its tree (read them in page/<pageId> and node/<pageId>?node=<nodeId>). A node you add takes an id you make up that its tree does not hold yet. |
-| `props` | Record<string, string \| number \| boolean \| null \| (string \| number \| boolean \| null \| …[] \| Record<string, …>)[] \| Record<string, string \| number \| boolean \| null \| …[] \| Record<string, …>> \| null> | yes | Props by name, null to clear one: `name` (the part's own name in the editor), `href` (`/contatti`, `https://example.org`, `#servizi`), `target` (`_blank`), `src` (`{ $media: <media id> }`) and `alt` on a picture, `poster` on a video, `anchor` (the id a `#` link reaches), `surface` (light, dark, media), `fit` (`{ width: '100%' }`: the font size that makes one line that wide), `viewBox` on a vector, `config` on a widget (its settings whole: a map's markers, route and tiles, a form's, a search's, a QR code's or a document viewer's options). In a repeat's template a value may read the item: `{ $item: 'cover' }`, `{ $bind: 'item.$url' }`. |
+| `props` | Record<string, string \| number \| boolean \| null \| (string \| number \| boolean \| null \| …[] \| Record<string, …>)[] \| Record<string, string \| number \| boolean \| null \| …[] \| Record<string, …>> \| null> | yes | Props by name, null to clear one: `name` (the part's own name in the editor), `href` (`/contatti`, `https://example.org`, `#servizi`), `target` (`_blank`), `src` (`{ $media: <media id> }`) and `alt` on a picture, `poster` on a video, `anchor` (the id a `#` link reaches), `surface` (light, dark, media), `fit` (`{ width: '100%' }`: the font size that makes one line that wide), `viewBox` on a vector, `config` on a widget (its settings whole: a map's markers, route and tiles, a form's, a search's, a QR code's or a document viewer's options; keep each map marker's `id`, one written without gets one, so its translations follow it when markers move and go with it when it goes, undo putting them back). In a repeat's template a value may read the item: `{ $item: 'cover' }`, `{ $bind: 'item.$url' }`. |
 
 Example inputs:
 
@@ -100,6 +100,9 @@ Example inputs:
 ```
 ```json
 {"at":{"page":"87c82653-80cd-4b17-ae54-aca941cbf8a2"},"node":"cardimg1","props":{"src":{"$item":"cover"},"alt":null}}
+```
+```json
+{"at":{"page":"be000742-3ff0-4d5e-a56b-6c728a8851f7"},"node":"map00001","props":{"config":{"title":"Dove siamo","markers":[{"id":"p8m1d4tz","lat":45.0703,"lng":7.6869,"title":"Cantiere di Torino"},{"id":"k3v9x2qa","lat":45.4642,"lng":9.19,"title":"Studio di Milano"}]}}}
 ```
 
 ## tree.derive_anchors
