@@ -10,7 +10,7 @@ The media library: the upload door (a file as base64 in `data`), each file's wor
 
 Put a file in the media library: its stored URL, type and kind, its facts and, optionally, its alt text, caption, credit and folder. It records a file whose bytes are already stored and uploads nothing: the upload route sends it once it has stored them. Refused: `media.exists` (the id is taken), `media.mime` (a type the library does not take: JPEG, PNG, GIF, WebP, AVIF, SVG, MP4, WebM, PDF; a type that is not the kind said; a blob of another type), `mediaFolder.unknown` (no such folder).
 
-- **op**; class `content` (Content author, Designer, Administrator); dry_run_ops judges it; one undo in History takes it back.
+- **not offered to agents**: the `media.uploadFile` door sends it, and a batch that sends it is refused naming that door; class `content`.
 
 | Input | Type | Required | Says |
 |---|---|---|---|
@@ -86,8 +86,7 @@ Example input:
 
 Replace the file of a media entry with another one of the same kind, keeping its id, so every page, component and item that shows it shows the new file. Its alt text, caption, credit, name and folder stay. Use it instead of removing a file that is in use. Refused: `op_target` (no such entry), `media_kind` (a picture is replaced by a picture, a video by a video), `invalid_input` (the blob's type is not the file's), `media_legacy` (an entry whose old file fields could not be put back by its undo).
 
-- **op**; class `content` (Content author, Designer, Administrator); dry_run_ops judges it; one undo in History takes it back.
-- Found by the plain words: "replace".
+- **not offered to agents**: the `media.uploadFile` door sends it, and a batch that sends it is refused naming that door; class `content`.
 
 | Input | Type | Required | Says |
 |---|---|---|---|
@@ -187,7 +186,7 @@ Example input:
 
 Upload a file into the media library (JPEG, PNG, GIF, WebP, SVG, MP4, WebM or PDF) with its folder, alt text, caption and credit; with `replaces` (a media id) the file becomes the new file of that entry, which keeps its words and folder, so every use follows. Alone in a batch. The file travels as base64 in `data`, at most 20 MB per call; an archive or a larger file is refused with where a person uploads it. Every check of the admin's upload holds (type, size, content, the site's quota). A dry run makes the checks with nothing stored. Answers the write with `id`, the file's media id.
 
-- **door**, alone in its batch; class `content` (Content author, Designer, Administrator); no confirmation; dry_run_ops judges it; one undo in History takes it back; limit: 60 uploads a minute per token, dry runs included.
+- **door**, alone in its batch; class `content` (Content author, Designer, Administrator); no confirmation; dry_run_ops judges it; one undo in History takes it back; limit: 60 uploads a minute per token, dry runs included; the only way to send `media.add`, `media.replaceBlob`.
 - Found by the plain words: "upload", "picture", "image", "photo", "video", "replace", "logo", "favicon".
 
 | Input | Type | Required |

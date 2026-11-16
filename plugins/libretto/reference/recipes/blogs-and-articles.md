@@ -12,9 +12,9 @@ Read `pages` (every page with its address, parent, layout and status) to find th
 
 ## Write a new article
 
-As Pages › Articles does it, in this order, one batch each:
+As Pages › New article does it (the server's guide has the recipe), in this order, one batch each:
 
-1. **Copy an article** beside it: `page.duplicate` `{ "pageId": "<fresh UUID>", "from": "<an article's pageId>", "slug": "via-giulia-secondo-lotto", "title": "Via Giulia, secondo lotto", "status": "draft" }`. The copy lands under the same blog page. Keep it `draft` until the person says it is ready.
+1. **A hidden copy of the blog's last article.** In `pages` the blog is the page of kind `blog-index` and its articles the pages of kind `article` under it; take the one with the highest `position`. One batch: `page.duplicate` `{ "pageId": "<fresh UUID>", "from": "<that article's pageId>", "slug": "via-giulia-secondo-lotto", "title": "Via Giulia, secondo lotto", "position": <the highest position among them + 1>, "status": "draft" }`, then `page.setArticle` `{ "pageId": "<the copy>", "excerpt": { "it": null }, "featuredImageId": null, "authorName": null, "authorUserId": null }` with only the fields the source has, so the copy does not show the old article's listing. It stays `draft` until the person says it is ready.
 2. **Its listing**: `page.setArticle` `{ "pageId": "<the copy>", "excerpt": { "it": "..." }, "featuredImageId": "<mediaId>", "authorName": "Archiplan" }`. A field left out is kept; null clears it. The picture comes from the media library ([images](images.md)).
 3. **Its words and pictures**: read `texts/<pageId>` of the copy, then `tree.set_text` on each text and `tree.set_props` on each picture (`src` and `alt`); remove the parts it does not need with `tree.remove`, and add parts with `tree.insert` or `tree.duplicate`.
 4. **Its head**: `page.setHead` `{ "pageId", "head": { "metaTitle", "description", "ogImage", "subject": { "type": "Article" } } }`: what search engines and link previews read.

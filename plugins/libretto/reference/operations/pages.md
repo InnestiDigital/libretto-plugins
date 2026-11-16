@@ -217,7 +217,7 @@ Example input:
 Set what a list of pages shows of a page and who wrote it: its excerpt per language, its listing picture, its author's name and, when the author is a person of the site, their user id. An article's card on its blog's list reads these. A field given is set, null clears it, a field left out is kept. Refused with `page.image` (no such picture in the media library, or a file that is no picture) and `page.locale` (an excerpt language the site does not have).
 
 - **op**; class `pages` (Content author, Designer, Administrator); dry_run_ops judges it; one undo in History takes it back.
-- Found by the plain words: "blog".
+- Found by the plain words: "blog", "article", "post".
 
 | Input | Type | Required | Says |
 |---|---|---|---|
@@ -277,6 +277,7 @@ Example inputs:
 Copy a page (`from`: its record and its tree) as a new page `pageId` with its own address (`slug`) and name (`title`), beside it. The copy is shown unless `status` says draft (it goes live at the next publish like any change); its other-language slugs and the home flag are not copied, and its head title takes the new name. Refused with `duplicate_key` (the new id is taken), `unknown_page` (no source page), `page.slug` (a sibling holds the slug) and `route.taken`.
 
 - **op**; class `pages` (Content author, Designer, Administrator); dry_run_ops judges it; one undo in History takes it back.
+- Found by the plain words: "blog", "article", "post".
 
 | Input | Type | Required | Says |
 |---|---|---|---|
@@ -295,7 +296,7 @@ Example input:
 
 ## page.revert
 
-Bring a page back as an earlier version held it: its record and its tree, whole, in one step that undo takes back. Read `page-restore/<version>?page=<pageId>` (the `versions` read names the versions): its `ops` bring the page back as one step; send them as they are. Who opens the page (members only, roles, password) stays as the draft has it, and the live site changes only at the next publish. The page must be in the draft (a deleted page comes back with page.create and page.init). Refused with `page.revertMissing` (detail: missing, names) when the site no longer has the layout, a component, the parent page or the collection the version named, and `unknown_page`.
+Bring a page back as an earlier version held it: its record and its tree, whole, in one step that undo takes back. Read `page-restore/<version>?page=<pageId>` (the `versions` read names the versions, `version-pages/<version>` the pages each holds): its `ops` bring the page back as one step, so send them as they are. Who opens the page (members only, roles, password) stays as the draft has it, and the live site changes only at the next publish. The page must be in the draft (a deleted page comes back with page.create and page.init). Refused with `page.revertMissing` (detail: missing, names) when the site no longer has the layout, a component, the parent page or the collection the version named, and `unknown_page`.
 
 - **op**; class `pages` (Content author, Designer, Administrator); dry_run_ops judges it; one undo in History takes it back.
 - Found by the plain words: "rollback", "bring", "recover".
@@ -303,7 +304,7 @@ Bring a page back as an earlier version held it: its record and its tree, whole,
 | Input | Type | Required | Says |
 |---|---|---|---|
 | `pageId` | uuid | yes | The page to bring back: it must be in the draft. |
-| `record` | object | yes | The page's record as the version held it: as the `ops` of `page-restore/<version>?page=<pageId>` carry it. |
+| `record` | object | yes | The page's record as the version held it, as the page.revert of `page-restore/<version>?page=<pageId>` carries it. |
 | `record` › `slug` | string (min 1, max 100) |  |  |
 | `record` › `slugs` | Record<string, string (min 1, max 100)> \| null |  |  |
 | `record` › `status` | "draft" \| "published" |  |  |
@@ -314,7 +315,7 @@ Bring a page back as an earlier version held it: its record and its tree, whole,
 | `record` › `requiredRoles` | string (min 1, max 64)[] (≤50) |  |  |
 | `record` › `pageType` | string (max 40) |  |  |
 | `record` › `itemRoute` | "nested" \| "root" |  |  |
-| `content` | object |  | The page's tree as the version held it: as the `ops` of `page-restore/<version>?page=<pageId>` carry it; absent when the page had no tree of its own (a folder). |
+| `content` | object |  | The page's tree as the version held it, as the page.revert of `page-restore/<version>?page=<pageId>` carries it; absent when the page had no tree of its own (a folder). |
 | `content` › `tree` | { format: "splash.tree", v: 4, root: string, nodes: Record<string, { name?: string (min 1, max 80), style?: Record<string, Record<string, …>>, attrs?: Record<string, … \| … \| …>, anchor?: string, hidden?: true, showOn?: "list" \| "item", audience?: { who: …, roles?: … } \| { who: … }, locked?: true, meta?: Record<string, … (the whole schema: discover_operations with names) | yes |  |
 | `content` › `timelines` | Record<string, { label?: string (min 1, max 80), recipe?: { key: string, knobs?: Record<string, number \| string (max 200)> }, trigger: { kind: "load" } \| { kind: "time", after: number ≥0 } \| { kind: "state", source: string, equals?: string \| number \| boolean \| null \| …[] \| Record<string, …> } \| { kind: "scroll", range:… (the whole schema: discover_operations with names) | yes |  |
 | `content` › `states` | Record<string, { kind: "gate", scope: "page", inputs: ("wheel" \| "touchmove" \| "click" \| "pointerdown" \| "keydown" \| { key: … })[], preventDefault: boolean, values: [string, string, string], openWhen?: { timelineEnd: string }, timeoutMs?: number, reducedMotion?: "open", lock?: true, skip?: true, deepLink?: "open", repl… (the whole schema: discover_operations with names) | yes |  |
@@ -332,7 +333,7 @@ Example input:
 
 ## page.add
 
-Add a page as a person does: its record and a first tree a visitor can see (its name as the heading of a first section), in one step; the core draws its id and answers `{ pageId }`. Give its name, its address, where it goes and the layout that frames it. It is shown at once (the next publish puts it live), and a section added later goes beside the first one. Use it rather than page.create and page.init, which a stored log and an import write. Refused with `unknown_page` (no such parent), `unknown_component` (no layout by that key), `page.slug` (a sibling holds the address, or it is reserved) and `route.taken`.
+Add a page as a person does: its record and a first tree a visitor can see (its name as the heading of a first section), in one step; the core draws its id and answers `{ pageId }`. Give its name, its address, where it goes and the layout that frames it. It is shown at once (the next publish puts it live) unless `status` is `draft`, and a section added later goes beside the first one. Use it rather than page.create and page.init, which a stored log and an import write. Refused with `unknown_page` (no such parent), `unknown_component` (no layout by that key), `page.slug` (a sibling holds the address, or it is reserved) and `route.taken`.
 
 - **op**; class `pages` (Content author, Designer, Administrator); dry_run_ops judges it; one undo in History takes it back.
 
@@ -344,6 +345,7 @@ Add a page as a person does: its record and a first tree a visitor can see (its 
 | `parentId` | uuid \| null |  | The page to put it under; absent or null: the top level. |
 | `position` | integer ≥0 |  | Its place among its siblings (lower first); absent: after the last. |
 | `layout` | string \| null |  | The key of a layout of the site that frames it (its header and footer); absent: the home page's layout; null: none. |
+| `status` | "draft" \| "published" |  | `draft`: hidden from visitors until shown (page.setStatus); absent: published (shown at the next publish). |
 | `declares` | false |  | Leave it out: only a step stored before pages said which node holds their sections carries false. |
 
 Example inputs:
@@ -353,6 +355,9 @@ Example inputs:
 ```
 ```json
 {"title":"Via Margutta","slug":"via-margutta","parentId":"3ba4b719-a6fe-4c56-a8a1-ef60cc3586c2","layout":"layout.default"}
+```
+```json
+{"title":"Bozza di progetto","slug":"bozza-progetto","status":"draft"}
 ```
 
 ## page.remove

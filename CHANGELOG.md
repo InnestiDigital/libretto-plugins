@@ -10,9 +10,11 @@ For Libretto sites on the core engine only. Sites on the old engine keep the 0.5
 - **The batch.** `requestId`, `baseRevisions`, `message` and `operations` at the top level. Only the leaf paths the batch writes are judged: copy `site_context.baseRevisions` and lay each write's `revisions` over it. A part of the header, the footer or a layout is written inside `component.edit`; tokens with `token.set`, component looks with `cell.set`; structure with the `tree.*` ops.
 - **Undo.** Each write answers its `undo`, the `history.undo` call for that step; an agent takes back only its own token's newest step, and a person takes back anything else in Admin › History.
 - **Doors.** Publish, roll back, uploads, fonts, members, form messages, mail, domains and sites are doors, each alone in its batch, with its own confirmation, dry-run and limit; publish and roll back only on the human's go.
-- **Contrast.** A write that leaves a text hard to read is corrected in the same step (the answer's `corrections`) or refused with `contrast.uncorrectable`. Keeping a hard-to-read pair is a person's decision in Editor › Checks.
+- **Design system files.** The `design.import` door takes a Tokens Studio zip or file, a DTCG file or a Figma variables export as base64: a dry run answers the plan (added, changed, kept, skipped, new sets and themes), applied it is one step one undo takes back. `design.export` answers the site's own as the same zip.
+- **Upload records.** `media.add`, `media.replaceBlob` and `font.add` are listed `offered: false` with the door that sends them (`media.uploadFile`, `font.uploadFace`), and refused in an agent's batch with words naming it.
+- **Contrast.** Judged at WCAG AA: 4.5:1 for text, 3:1 for large text (at least 24 px, or 18.66 px at weight 700 or more), 3:1 for the graphic of a link or button with no text. A write that leaves a pair short is corrected in the same step (the answer's `corrections`) or refused with `contrast.uncorrectable`. Keeping a hard-to-read pair is a person's decision in Editor › Checks.
 - **Person-only acts.** The site's email settings, deleting a site, packages, people, tokens, downloading messages and triaging reports are refused with `operation_forbidden`, the place and its link: the skills hand the person that link, and `libretto-admin-browser` opens it for them.
-- **Reads.** 39 resources, the admin's own reads; long lists are cut and named in `bounded` with the URI that reads on. `reports` holds the issues the agent reported and the owner's answers.
+- **Reads.** 40 resources, the admin's own reads; long lists are cut and named in `bounded` with the URI that reads on. `reports` holds the issues the agent reported and the owner's answers.
 - **Screenshots.** `render_preview` shows the draft or the live page at a device or a width, in a language, under a theme, as a guest, a member or a role, one item of a collection, the first or the last frame of motion, scrolled; `compare_reference` takes the same view against an image or a public page.
 
 ### Files
@@ -22,9 +24,9 @@ For Libretto sites on the core engine only. Sites on the old engine keep the 0.5
 
 ### Reference
 
-- `reference/operations/` is generated from `data/agent-registry.json`, the registry Libretto writes for agents (`scripts/reference-from-registry.mjs`): 160 ops and 29 doors in 14 domains, the 10 acts only a person does, the 8 tools and the 39 resources, with the server's guide.
+- `reference/operations/` is generated from `data/agent-registry.json`, the registry Libretto writes for agents (`scripts/reference-from-registry.mjs`): 160 ops and 31 doors in 14 domains, the 10 acts only a person does, the 8 tools, the 40 resources and the 25 places of `site_context.urls.places`, with the server's guide.
 - The recipes are rewritten for core. New: blogs and articles, members and private pages. Gone: brand canvases (no core door renders or prints a canvas) and blogs and templates.
-- `scripts/check-names.mjs` fails on any op, door or resource the skills, recipes, server or README name that the registry lacks.
+- `scripts/check-names.mjs` fails on any op, door, resource, tool or `urls.places` key the skills, recipes, server or README name that the registry lacks.
 
 ## 0.5.9
 

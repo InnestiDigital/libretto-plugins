@@ -214,7 +214,7 @@ Example input:
 Add many items to a collection in one step, all of them or none (a file's rows, at most 500). Each row: a new id, its slug, status (draft unless said) and values by field; the rows go after the items there, in order. Each row is checked as item.create checks one, and a value for a field the collection does not have is refused (`item.field`). Refused: `collection.unknown`, `item.exists`, `item.slug` (a slug taken, by an item or an earlier row), `item.value`, `item.field`; each refusal names its row (detail.row, from 1).
 
 - **op**; class `content` (Content author, Designer, Administrator); dry_run_ops judges it; one undo in History takes it back.
-- Found by the plain words: "event", "entry", "csv", "spreadsheet".
+- Found by the plain words: "event", "entry", "csv", "spreadsheet", "import".
 
 | Input | Type | Required | Says |
 |---|---|---|---|
@@ -238,7 +238,7 @@ Bring one item back as an earlier step left it: its record (slug, status, values
 |---|---|---|---|
 | `collection` | uuid | yes | The collection, by its id (the data read lists each collection with its id and key). |
 | `id` | uuid | yes | The item, by its uid (the data read lists each item with it). |
-| `item` | Record<string, string \| number \| boolean \| null \| (string \| number \| boolean \| null \| (… \| … \| … \| … \| … \| …)[] \| Record<string, … \| … \| … \| … \| … \| …>)[] \| Record<string, string \| number \| boolean \| null \| (… \| … \| … \| … \| … \| …)[] \| Record<string, … \| … \| … \| … \| … \| …>>> | yes | The item record as the earlier step left it: { uid, slug, status, values } (its position is not read). document/<version> holds the collections as a version left them. |
+| `item` | Record<string, string \| number \| boolean \| null \| (string \| number \| boolean \| null \| (… \| … \| … \| … \| … \| …)[] \| Record<string, … \| … \| … \| … \| … \| …>)[] \| Record<string, string \| number \| boolean \| null \| (… \| … \| … \| … \| … \| …)[] \| Record<string, … \| … \| … \| … \| … \| …>>> | yes | The item record as the earlier step left it: { uid, slug, status, values } (its position is not read). `item-history/<collectionId>?item=<itemId>` lists the item's steps, each with the item.revert that brings it back as that step left it. |
 
 Example input:
 

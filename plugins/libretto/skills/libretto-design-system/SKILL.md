@@ -14,8 +14,8 @@ Use the loop of the `libretto-editing` skill (its "Which site" rules on a token 
 - `tokens`: the design tokens of the default theme, by set (`core`, `semantic-light`, ...), each with its `$type`, its `$value` (a literal, or an alias such as `{color.palette.brand.600}`) and its description. `tokens/<theme>`: the tokens as one theme sets them.
 - `design`: the design system as Editor › Design lists it: themes, token sets, fonts with what uses each, site styles (mixins), breakpoints.
 - `definition/<key>`: one component (its props, variant axes, cells, slots and parts). The keys are in `site_context`'s definitions.
-- `contrast/<pageId>`: a page's text and ground pairs and how readable each is. `site-findings`: how many findings each page has.
-- `design-export`: the whole design system as DTCG files, for a person who wants it as a file.
+- `contrast/<pageId>`: a page's text and ground pairs, each with its ratio and the one it needs. `site-contrast`: how many texts of each page fall short. `site-findings`: how many findings each page has.
+- `design-export`: the whole design system as DTCG files, as text. The `design.export` door answers the same files as the zip Design › Import and export downloads.
 
 Read only the groups the change needs, and never compute what a token resolves to yourself: the `tokens` read and `render_preview` say it.
 
@@ -56,23 +56,44 @@ The person sees Editor › Design, not token files. Name what a change does, nev
 | A face's settings (how it loads, pinned axes, fallback) | the `font.setFace` door | `{ "id": "<fontId>", "load": "swap" }` |
 | Then the family on the text styles | `token.set` | the `fontFamily` tokens the styles read |
 | A rule for what a role may change | `guideline.set` | `fixed`, `free` or a `choice` of tokens, with the note people read |
+| A whole design system file (Tokens Studio, DTCG, Figma variables) | the `design.import` door | `{ "fileName": "tokens.zip", "data": "<the file as base64>" }`, alone in its batch: see [importing a design system](#importing-a-design-system) |
+| The site's design system as a file | the `design.export` door | `{}`: the zip as base64 in `data`, with its `fileName` and `files` |
 
 Every op's refusals and the rest of its input are in its description (`discover_operations` with `names`). Removing a token, a mixin or a breakpoint that parts still use is refused with where it is used: point them elsewhere first.
 
 ## The contrast check
 
-Every write is checked on its end state, in every theme. When a text colour falls below WCAG AA on its ground (4.5:1 for body text; each pair's answer says the ratio it measures and the one it needs), Libretto either:
+Every write is checked on its end state, in every theme, at WCAG AA:
+
+| What | Needs |
+|---|---|
+| Text | 4.5:1 |
+| Large text: at least 24 px, or at least 18.66 px at weight 700 or more (a size Libretto cannot work out counts as normal text) | 3:1 |
+| The graphic (a shape, a path, an icon) of a link or a button with no text of its own | 3:1 |
+
+Each pair's answer says the ratio it measures and the one it needs (`required`). When a pair falls short, Libretto either:
 
 - **corrects it in the same step**: the answer's `corrections` names each text whose colour it changed, with the ratios before and after. Tell the person what was changed and why ("ho scurito il grigio delle didascalie: era 2,8:1, ora 6,7:1"); one undo takes back the change and its corrections together; or
 - **refuses the batch** (`contrast.uncorrectable`, with the pair): no colour of the site keeps that text readable there. Pick another palette step, or change the palette step and the role on it together in one batch (the check reads only the end state).
 
-To try a colour without keeping it, `dry_run_ops` the `token.set` and read its `corrections` and refusals: nothing is stored. `contrast/<pageId>` lists a page's pairs with their ratios. Never compute a ratio with code.
+To try a colour without keeping it, `dry_run_ops` the `token.set` and read its `corrections` and refusals: nothing is stored. `contrast/<pageId>` lists a page's pairs with their ratios; `site-contrast` says which pages have pairs that fall short. Never compute a ratio with code.
 
 Keeping an unreadable pair on purpose is a person's decision: `contrast.bypass` (one page) and `component.acceptContrast` (every instance of a component) are the site administrator's, in Editor › Checks. An agent is refused them; hand the person `urls.places["editor.checks"]`. See [contrast and accessibility](../../reference/recipes/contrast-and-a11y.md).
 
 ## A whole design update
 
-A brief, a reference or a Figma file has its own recipe: [design update](../../reference/recipes/design-update.md). Importing a whole token file (Tokens Studio, DTCG, Figma variables) is done by a person in Editor › Design (Import and export); an agent writes tokens one `token.set` at a time, or a non-default theme's set whole with `themeSet.set`.
+A brief, a reference or a Figma file has its own recipe: [design update](../../reference/recipes/design-update.md).
+
+## Importing a design system
+
+A design system file the person gives you (a zip of Tokens Studio's layout or of an export, one Tokens Studio file, one plain DTCG file, a Figma variables export) goes in whole through the `design.import` door, as Editor › Design (Import and export) takes it. It is an Administrator's.
+
+1. **Encode it, never by hand.** Put the file's bytes in `data` as base64 with a shell (`base64 < tokens.zip | tr -d '\n'`), unchanged, and its name in `fileName`. A token file is text and small; one too long to carry in a call is the person's to import in Editor › Design (`urls.places["editor.design"]`). At most 20 MB.
+2. **Dry-run it first** (`dry_run_ops`, the door alone in its batch). The answer's `plan` says what the file would do: how many values it adds (`added`), changes (`changed`), keeps (`same`) and skips (`skipped`: a value whose type is not the site's, or a name a value may not have), each in `rows` (the first 200, the rest counted in `more`), the sets it adds (`newSets`) and the themes it makes or changes (`themes`; a new theme comes in as a draft). Nothing is deleted. Tell the person the plan in their words and wait for their yes.
+3. **Apply it** with `apply_ops`: one step, one `undo` takes the whole import back. A design that moved since the dry run is refused as `stale_revision`: dry-run again.
+4. **Look** at two pages, both widths (`libretto-visual-check`), and read the answer's `corrections`.
+
+A file that changes nothing answers `changes: 0` and its plan, nothing written. To change a few values, `token.set` each; a non-default theme's set whole is `themeSet.set`.
 
 ## Never
 
